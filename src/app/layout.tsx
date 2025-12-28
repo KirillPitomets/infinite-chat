@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans } from "next/font/google";
 import "./globals.css";
-import Sidebar from "./Components/Sidebar/Sidebar";
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
