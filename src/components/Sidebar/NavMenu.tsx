@@ -13,7 +13,7 @@ export default function NavMenu() {
         <NavLink
           key={item.href}
           href={item.href}
-          isActive={pathname.startsWith(item.href)}
+          isActive={pathname.split("/")[1] === item.href.split("/")[1]}
         >
           <item.icon />
         </NavLink>
