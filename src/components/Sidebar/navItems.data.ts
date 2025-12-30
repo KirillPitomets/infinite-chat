@@ -6,7 +6,7 @@ export const navItems = [
   {
     icon: NetworkIcon,
     alt: "Network",
-    href: PAGES.NETWORK
+    href: PAGES.HOME
   },
   {
     icon: MessageIcon,

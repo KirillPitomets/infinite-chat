@@ -3,12 +3,13 @@ import Image from "next/image"
 import Link from "next/link"
 
 import NavMenu from "./NavMenu"
+import {PAGES} from "@/config/pages.config"
 
 export default function Sidebar() {
   return (
     <aside className="min-h-screen flex flex-col justify-between px-2.75 py-7.5 bg-stone-400/20 ">
       <div className="flex flex-col align-center gap-3">
-        <Link href="/">
+        <Link href={PAGES.HOME}>
           <Image
             width={32}
             height={32}
@@ -16,11 +17,12 @@ export default function Sidebar() {
             alt="Infinite chat - logo"
           />
         </Link>
+
+        {/* TODO: LINK TO USER PROFILE PAGE */}
         <Link
           href=""
           className="w-8 h-8 overflow-hidden flex items-center justify-center"
         >
-          {/* TODO: update here user data */}
           <Image
             className="rounded-full w-8 h-8"
             width={32}
