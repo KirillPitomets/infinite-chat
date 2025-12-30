@@ -41,11 +41,11 @@ export default function Sidebar() {
       <NavMenu />
 
       <div className="flex flex-col ">
-        <IconButtonBase styles={"text-zinc-600/45"}>
+        <IconButtonBase tone="muted">
           <SettingsIcon />
         </IconButtonBase>
 
-        <IconButtonBase styles={"text-zinc-600/45"}>
+        <IconButtonBase tone="muted">
           <LogoutIcon />
         </IconButtonBase>
       </div>
