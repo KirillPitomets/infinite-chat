@@ -4,7 +4,7 @@ interface Props {
   styles?: string
 }
 
-export default function IconButton({children, styles, isActive}: Props) {
+export function IconButtonBase({children, styles, isActive}: Props) {
   return (
     <div
       className={`

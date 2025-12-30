@@ -1,4 +1,4 @@
-import IconButton from "@/components/ui/IconButton/IconButton"
+import {IconButtonBase} from "@/components/ui/IconButtonBase"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -41,13 +41,13 @@ export default function Sidebar() {
       <NavMenu />
 
       <div className="flex flex-col ">
-        <IconButton styles={"text-zinc-600/45"}>
+        <IconButtonBase styles={"text-zinc-600/45"}>
           <SettingsIcon />
-        </IconButton>
+        </IconButtonBase>
 
-        <IconButton styles={"text-zinc-600/45"}>
+        <IconButtonBase styles={"text-zinc-600/45"}>
           <LogoutIcon />
-        </IconButton>
+        </IconButtonBase>
       </div>
     </aside>
   )
