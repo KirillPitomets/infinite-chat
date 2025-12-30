@@ -1,9 +1,11 @@
-import IconButton from "@/components/IconButton/IconButton"
+import IconButton from "@/components/ui/IconButton/IconButton"
 import Image from "next/image"
 import Link from "next/link"
 
 import NavMenu from "./NavMenu"
 import {PAGES} from "@/config/pages.config"
+import {SettingsIcon} from "../ui/icons/SettingsIcon"
+import {LogoutIcon} from "../ui/icons/LogoutIcon"
 
 export default function Sidebar() {
   return (
@@ -38,9 +40,14 @@ export default function Sidebar() {
       {/* navbar */}
       <NavMenu />
 
-      <div className="flex flex-col gap-5">
-        <IconButton iconSrc="/Settings.svg" />
-        <IconButton iconSrc="/logout.svg" />
+      <div className="flex flex-col ">
+        <IconButton styles={"text-zinc-600/45"}>
+          <SettingsIcon />
+        </IconButton>
+
+        <IconButton styles={"text-zinc-600/45"}>
+          <LogoutIcon />
+        </IconButton>
       </div>
     </aside>
   )
