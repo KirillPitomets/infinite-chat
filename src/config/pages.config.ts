@@ -1,7 +1,6 @@
 class PagesConfig {
-  HOME = "/"
+  NETWORK = "/"
   MUSIC = "/music"
-  NETWORK = "/netWork"
   EVENTS = "/events"
   MEETINGS = "/meetings"
   CHAT = "/chat"
