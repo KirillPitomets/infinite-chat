@@ -1,6 +1,6 @@
 import {SVGProps} from "react"
 
-export function CameraIcon(props: SVGProps<SVGSVGElement>) {
+export function InformationIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg
       width="18"
