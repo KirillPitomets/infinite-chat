@@ -1,4 +1,4 @@
-import SearchInput from "@/components/SearchInput/SearchInput"
+import SearchInput from "@/components/ui/SearchInput/SearchInput"
 import ChatItem from "./ChatItem"
 import {chats} from "../../../data/chats.data"
 
