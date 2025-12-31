@@ -10,6 +10,9 @@
 !.yarn/releases
 !.yarn/versions
 
+# Type for DB
+src/generated
+
 # testing
 /coverage
 

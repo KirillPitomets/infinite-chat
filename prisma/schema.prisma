@@ -6,9 +6,66 @@
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model User {
+  id          String      @id @default(cuid())
+  tag         String      @unique
+  email       String      @unique
+  name        String
+  password    String
+  // Last date when user was online
+  lastSeen    DateTime    @default(now())
+  createdAt   DateTime    @default(now())
+
+  memberships ChatUser[]
+  messages    Message[]
+}
+
+model ChatUser {
+  @@id([userId, chatId])
+  userId     String
+  chatId     String
+
+  lastReadAt DateTime?
+
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chat       Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  role       Role       @default(USER)
+}
+
+model Chat {
+  id          String      @id @default(cuid())
+  createdAt   DateTime    @default(now())
+
+  memberships ChatUser[]
+  messages    Message[]
+}
+
+model Message {
+  id        String    @id @default(cuid())
+  senderId  String
+  chatId    String
+  content   String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@index([senderId])
+
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  USER
 }
