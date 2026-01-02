@@ -11,7 +11,7 @@
 !.yarn/versions
 
 # Type for DB
-src/generated
+src/prisma
 
 # testing
 /coverage
