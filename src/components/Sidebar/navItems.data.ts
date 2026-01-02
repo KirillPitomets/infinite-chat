@@ -1,4 +1,4 @@
-import {PAGES} from "@/config/pages.config"
+import {ACOOUNT_PAGES} from "@/config/accountPages.config"
 import {CameraIcon, MessageIcon, NetworkIcon, NoteIcon} from "../ui/icons"
 import {CalendarIcon} from "../ui/icons/CalendarIcon"
 
@@ -6,26 +6,26 @@ export const navItems = [
   {
     icon: NetworkIcon,
     alt: "Network",
-    href: PAGES.HOME
+    href: ACOOUNT_PAGES.HOME
   },
   {
     icon: MessageIcon,
     alt: "Chats",
-    href: PAGES.CHAT
+    href: ACOOUNT_PAGES.CHAT
   },
   {
     icon: CameraIcon,
     alt: "Events",
-    href: PAGES.MEETINGS
+    href: ACOOUNT_PAGES.MEETINGS
   },
   {
     icon: NoteIcon,
     alt: "Music",
-    href: PAGES.MUSIC
+    href: ACOOUNT_PAGES.MUSIC
   },
   {
     icon: CalendarIcon,
     alt: "date",
-    href: PAGES.EVENTS
+    href: ACOOUNT_PAGES.EVENTS
   }
 ]

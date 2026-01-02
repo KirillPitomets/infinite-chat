@@ -6,7 +6,6 @@ export default function ChatLayot({children}: {children: React.ReactNode}) {
       <Sidebar />
 
       {children}
-      
     </main>
   )
 }

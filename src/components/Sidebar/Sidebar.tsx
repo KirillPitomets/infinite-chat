@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import NavMenu from "./NavMenu"
-import {PAGES} from "@/config/pages.config"
+import {ACOOUNT_PAGES} from "@/config/accountPages.config"
 import {SettingsIcon} from "../ui/icons/SettingsIcon"
 import {LogoutIcon} from "../ui/icons/LogoutIcon"
 
@@ -11,7 +11,7 @@ export default function Sidebar() {
   return (
     <aside className="min-h-screen flex flex-col justify-between px-2.75 py-7.5 bg-stone-400/20 ">
       <div className="flex flex-col align-center gap-3">
-        <Link href={PAGES.HOME}>
+        <Link href={ACOOUNT_PAGES.HOME}>
           <Image
             width={32}
             height={32}
