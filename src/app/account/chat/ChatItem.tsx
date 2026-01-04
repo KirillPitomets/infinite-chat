@@ -2,6 +2,7 @@ import Image from "next/image"
 import {IChatItem} from "../../../data/chats.data"
 import Link from "next/link"
 import {format} from "date-fns"
+import { ACOOUNT_PAGES } from "@/config/accountPages.config"
 
 export default function ChatItem({
   id,
@@ -13,7 +14,7 @@ export default function ChatItem({
 }: IChatItem) {
   return (
     <Link
-      href={`/chat/${id}`}
+      href={ACOOUNT_PAGES.CHAT_ID(id)}
       key={id}
       className="flex gap-2 py-1 px-5 transition-colors hover:bg-zinc-300"
     >
