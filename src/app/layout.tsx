@@ -1,7 +1,5 @@
 import {authClient} from "@/lib/auth/client"
-import {NeonAuthUIProvider, UserButton} from "@neondatabase/auth/react"
-
-import { ACOOUNT_PAGES } from '@/config/accountPages.config'
+import {NeonAuthUIProvider} from "@neondatabase/auth/react"
 
 import type {Metadata} from "next"
 import {Noto_Sans} from "next/font/google"
@@ -22,15 +20,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  // TODO: make redirect after auth
   return (
     <html lang="en">
       <body className={`${notoSans.variable} antialiased`}>
-        <NeonAuthUIProvider
-          authClient={authClient}
-          redirectTo={"/acoount"}
-          emailOTP
-        >
+        <NeonAuthUIProvider authClient={authClient} emailOTP>
           {children}
         </NeonAuthUIProvider>
       </body>

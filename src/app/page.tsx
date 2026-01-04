@@ -1,20 +1,16 @@
+import {ACOOUNT_PAGES} from "@/config/accountPages.config"
+import {AUTH_PAGES} from "@/config/authPages.config"
 import {authServer} from "@/lib/auth/server"
 import Link from "next/link"
-import {AUTH_PAGES} from "@/config/authPages.config"
+import {redirect} from "next/navigation"
 
 export default async function Home() {
   const {data} = await authServer.getSession()
 
-  if (data && data.user) {
-    return (
-      <div className="flex flex-col gap-2 min-h-screen items-center justify-center bg-gray-900">
-        <h1 className="mb-4 text-4xl">
-          Logged in as{" "}
-          <span className="font-bold underline">{data.user.name}</span>
-        </h1>
-      </div>
-    )
+  if (data && data?.user) {
+    redirect(ACOOUNT_PAGES.CHAT)
   }
+
   return (
     <div className="flex flex-col gap-2 min-h-screen items-center justify-center bg-gray-900">
       <h1 className="mb-4 text-4xl font-bold">Not logged in</h1>
