@@ -13,12 +13,22 @@ datasource db {
   provider = "postgresql"
 }
 
+generator prismabox { 
+  provider = "prismabox"
+  typeboxImportDependencyName = "elysia"
+  typeboxImportVariableName = "t"
+  inputModel = true
+  output   = "../src/prisma/generated/prismabox"
+} 
+
 model User {
   id          String      @id @default(cuid())
+  authId      String      @unique
+
   tag         String      @unique
   email       String      @unique
   name        String
-  password    String
+
   // Last date when user was online
   lastSeen    DateTime    @default(now())
   createdAt   DateTime    @default(now())
@@ -28,7 +38,7 @@ model User {
 }
 
 model ChatUser {
-  @@id([userId, chatId])
+  id         String     @id @default(cuid())
   userId     String
   chatId     String
 
@@ -38,6 +48,7 @@ model ChatUser {
   chat       Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
   role       Role       @default(USER)
+  @@unique([userId, chatId])
 }
 
 model Chat {
