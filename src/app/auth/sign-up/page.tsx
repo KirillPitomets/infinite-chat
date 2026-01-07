@@ -1,7 +1,7 @@
 "use client"
 
 import {useActionState} from "react"
-import {signUpWithEmail} from "@/server-actions/auth/sign-up"
+import {signUpWithEmail} from "@/actions/auth/sign-up"
 
 export default function SignUpForm() {
   const [state, formAction, isPending] = useActionState(signUpWithEmail, null)
