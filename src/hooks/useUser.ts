@@ -1,7 +1,7 @@
 "use client"
 import {useEffect, useState} from "react"
 import {edenClient} from "@/lib/eden"
-import {User} from "@neondatabase/auth/types"
+import type {User} from "@/prisma/generated/client"
 
 export function useUser() {
   const [user, setUser] = useState<User | null>()
@@ -18,7 +18,7 @@ export function useUser() {
         const res = await edenClient.user.sync.get()
         if (!isMounted) return
 
-        setUser(res.data?.user ?? null)
+        setUser(res.data)
       } catch (err) {
         if (!isMounted) return
         setErr(err as Error)
