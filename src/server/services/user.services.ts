@@ -1,8 +1,9 @@
 import {prisma} from "@/server/db/prisma"
 import {authServer} from "@/lib/auth/server"
+import type {User} from "@/prisma/generated/client"
 
-export const syncUser = async () => {
-  try {
+class UserService {
+  async syncCurrentUser(): Promise<User | null> {
     const {data} = await authServer.getSession()
 
     if (!data) {
@@ -17,7 +18,7 @@ export const syncUser = async () => {
       return existUser
     }
 
-    const createdUser = await prisma.user.create({
+    const dbUser = await prisma.user.create({
       data: {
         authId: data.user.id,
         email: data.user.email,
@@ -26,13 +27,25 @@ export const syncUser = async () => {
       }
     })
 
-    if (!createdUser) {
+    return dbUser
+  }
+
+  async getDbUserId(): Promise<string | null> {
+    const {data} = await authServer.accountInfo()
+    if (!data) {
       return null
     }
 
-    return createdUser
-  } catch (error) {
-    console.log("Error in SyncUser", error)
-    throw new Error("Unauthorized")
+    const userId = await prisma.user.findUnique({
+      where: {authId: `${data.user.id}`}
+    })
+
+    if (!userId) {
+      throw new Error("User not found")
+    }
+
+    return userId.id
   }
 }
+
+export const userService = new UserService()
