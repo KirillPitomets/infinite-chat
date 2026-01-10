@@ -1,8 +1,6 @@
-import {authClient} from "@/lib/auth/client"
-import {NeonAuthUIProvider} from "@neondatabase/auth/react"
-
-import type {Metadata} from "next"
-import {Noto_Sans} from "next/font/google"
+import { Providers } from "@/components/providers"
+import type { Metadata } from "next"
+import { Noto_Sans } from "next/font/google"
 import "./globals.css"
 
 const notoSans = Noto_Sans({
@@ -20,12 +18,13 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
   return (
     <html lang="en">
       <body className={`${notoSans.variable} antialiased`}>
-        <NeonAuthUIProvider authClient={authClient} emailOTP>
+        <Providers>
           {children}
-        </NeonAuthUIProvider>
+        </Providers>
       </body>
     </html>
   )
