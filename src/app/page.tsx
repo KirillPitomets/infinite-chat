@@ -2,14 +2,22 @@
 
 import {ACOOUNT_PAGES} from "@/config/accountPages.config"
 import {AUTH_PAGES} from "@/config/authPages.config"
-import {useUser} from "@/hooks/useUser"
+import {edenClient} from "@/lib/eden"
+import {useQuery} from "@tanstack/react-query"
 import Link from "next/link"
 import {redirect} from "next/navigation"
 
 export default function Home() {
-  const {user} = useUser()
+  const {data, error} = useQuery({
+    queryKey: ["syncUser"],
+    queryFn: async () => {
+      const res = await edenClient.user.sync.get()
 
-  if (user) {
+      if (res) return res.data
+    }
+  })
+
+  if (data) {
     redirect(ACOOUNT_PAGES.CHAT)
   }
 
