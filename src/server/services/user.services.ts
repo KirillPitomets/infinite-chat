@@ -31,7 +31,7 @@ class UserService {
   }
 
   async getDbUserId(): Promise<string | null> {
-    const {data} = await authServer.accountInfo()
+    const {data} = await authServer.getSession()
     if (!data) {
       return null
     }
@@ -45,6 +45,24 @@ class UserService {
     }
 
     return userId.id
+  }
+
+  async getById(id: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: {id}
+    })
+    if (!user) return null
+    return user
+  }
+
+  async getByTag(tag: string): Promise<User | null> {
+    const user = await prisma.user.findUnique({
+      where: {
+        tag
+      }
+    })
+    if (!user) return null
+    return user
   }
 }
 
