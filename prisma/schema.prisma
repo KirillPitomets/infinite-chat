@@ -54,6 +54,7 @@ model ChatUser {
 model Chat {
   id          String      @id @default(cuid())
   createdAt   DateTime    @default(now())
+  type        ChatTpye
 
   memberships ChatUser[]
   messages    Message[]
@@ -79,4 +80,9 @@ enum Role {
   OWNER
   ADMIN
   USER
+}
+
+enum ChatTpye {
+  DIRECT 
+  GROUP 
 }
