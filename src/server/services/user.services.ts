@@ -1,68 +1,66 @@
 import {prisma} from "@/server/db/prisma"
-import {authServer} from "@/lib/auth/server"
 import type {User} from "@/prisma/generated/client"
+import {NotFoundError} from "@/server/errors/domain.error"
+
+type SyncUserType = {
+  id: string
+  name: string
+  email: string
+}
 
 class UserService {
-  async syncCurrentUser(): Promise<User | null> {
-    const {data} = await authServer.getSession()
-
-    if (!data) {
-      return null
-    }
-
-    const existUser = await prisma.user.findUnique({
-      where: {authId: data.user.id}
-    })
-
-    if (existUser) {
-      return existUser
-    }
-
-    const dbUser = await prisma.user.create({
-      data: {
-        authId: data.user.id,
-        email: data.user.email,
-        name: data.user.name,
-        tag: `@${data.user.email.split("@")[0]}`
+  async syncCurrentUser(user: SyncUserType): Promise<User> {
+    return prisma.user.upsert({
+      where: {authId: user.id},
+      update: {
+        name: user.name,
+        email: user.email
+      },
+      create: {
+        authId: user.id,
+        email: user.email,
+        name: user.name,
+        tag: `@${user.email.split("@")[0]}`
       }
     })
-
-    return dbUser
   }
 
-  async getDbUserId(): Promise<string | null> {
-    const {data} = await authServer.getSession()
-    if (!data) {
-      return null
-    }
-
+  async getDbUserId(authId: string): Promise<string> {
     const userId = await prisma.user.findUnique({
-      where: {authId: `${data.user.id}`}
+      where: {authId}
     })
 
     if (!userId) {
-      throw new Error("User not found")
+      throw new NotFoundError("User DataBase Id")
     }
 
     return userId.id
   }
 
-  async getById(id: string): Promise<User | null> {
+  async getById(id: string): Promise<User> {
     const user = await prisma.user.findUnique({
       where: {id}
     })
-    if (!user) return null
+    if (!user) {
+      throw new NotFoundError("User by id")
+    }
     return user
   }
 
-  async getByTag(tag: string): Promise<User | null> {
+  async getByTag(tag: string): Promise<User> {
     const user = await prisma.user.findUnique({
       where: {
         tag
       }
     })
-    if (!user) return null
+    if (!user) {
+      throw new NotFoundError("User by tag")
+    }
     return user
+  }
+
+  async getAllUsers() {
+    return prisma.user.findMany()
   }
 }
 

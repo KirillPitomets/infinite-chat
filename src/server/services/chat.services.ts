@@ -1,42 +1,29 @@
+import type {Chat} from "@/prisma/generated/client"
 import {prisma} from "@/server/db/prisma"
 import {userService} from "@/server/services/user.services"
-import type {Chat} from "@/prisma/generated/client"
+import {ConflictError, NotFoundError} from "@/server/errors/domain.error"
 
 type createChatBodyType = {
-  body: {
-    memberTag: string
-  }
+  memberTag: string
 }
 
 class ChatService {
-  async create({body}: createChatBodyType) {
-    const currentUserId = await userService.getDbUserId()
-
-    if (!currentUserId || !body.memberTag) {
-      throw new Error("No user or member tag")
-    }
-
+  async create(userId: string, body: createChatBodyType): Promise<Chat> {
     const member = await userService.getByTag(body.memberTag)
 
     if (!member) {
-      throw new Error("Member not found")
+      throw new NotFoundError("Member")
     }
 
-    if (currentUserId === member.id) {
-      throw new Error("Cannot create chat with yourself")
-    }
-
-    const memberExists = await userService.getById(member.id)
-
-    if (!memberExists) {
-      throw new Error("User not found")
+    if (userId === member.id) {
+      throw new ConflictError("Cannot create chat with yourself")
     }
 
     const existsChat = await prisma.chat.findFirst({
       where: {
         type: "DIRECT",
         AND: [
-          {memberships: {some: {userId: currentUserId }}},
+          {memberships: {some: {userId: userId}}},
           {memberships: {some: {userId: member.id}}}
         ]
       }
@@ -48,7 +35,7 @@ class ChatService {
       data: {
         type: "DIRECT",
         memberships: {
-          create: [{userId: currentUserId}, {userId: member.id}]
+          create: [{userId}, {userId: member.id}]
         }
       }
     })
@@ -56,15 +43,9 @@ class ChatService {
     return chat
   }
 
-  async getAll(): Promise<Chat[] | null> {
-    const currentUserId = await userService.getDbUserId()
-
-    if (!currentUserId) {
-      return null
-    }
-
+  async getAll(userId: string): Promise<Chat[]> {
     const chats = await prisma.chat.findMany({
-      where: {memberships: {some: {userId: currentUserId}}},
+      where: {memberships: {some: {userId}}},
       include: {
         messages: {
           take: 1,
@@ -75,34 +56,23 @@ class ChatService {
       }
     })
 
-    console.log()
-
     if (!chats) {
-      throw new Error("No chats")
+      throw new NotFoundError("Chats")
     }
-
-
-    
 
     return []
   }
 
-  async getById(id: string): Promise<Chat | null> {
-    const userId = await userService.getDbUserId()
-
-    if (!userId) {
-      return null
-    }
-
+  async getById(userId: string): Promise<Chat> {
     const chat = await prisma.chat.findUnique({
       where: {
-        id,
+        id: userId,
         memberships: {some: {userId}}
       }
     })
 
     if (!chat) {
-      return null
+      throw new NotFoundError("Chat by id")
     }
 
     return chat
