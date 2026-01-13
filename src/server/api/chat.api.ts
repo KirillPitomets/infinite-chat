@@ -2,7 +2,7 @@ import Elysia, {t} from "elysia"
 import {chatService} from "@/server/services/chat.services"
 import {authMiddleware} from "@/server/middlewares/authMiddleware"
 import {BadRequest} from "@/server/errors/domain.error"
-import {UserChatPreviewSchema} from "../types/chat.types"
+import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(authMiddleware)

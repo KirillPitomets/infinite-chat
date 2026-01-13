@@ -2,7 +2,11 @@ import type {Chat} from "@/prisma/generated/client"
 import {prisma} from "@/server/db/prisma"
 import {userService} from "@/server/services/user.services"
 import {ConflictError, NotFoundError} from "@/server/errors/domain.error"
-import {UserChatPreviewType} from "../types/chat.types"
+import {
+  ChatPreviewPrismaType,
+  UserChatPreviewDTO
+} from "@/shared/chatPreview.schema"
+import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 
 type createChatBodyType = {
   memberTag: string
@@ -20,7 +24,7 @@ class ChatService {
       throw new ConflictError("Cannot create chat with yourself")
     }
 
-    const existsChat = await prisma.chat.findFirst({
+    const existsChat: Chat | null = await prisma.chat.findFirst({
       where: {
         type: "DIRECT",
         AND: [
@@ -44,17 +48,26 @@ class ChatService {
     return chat
   }
 
-  async getUserChatsPreview(userId: string): Promise<UserChatPreviewType[]> {
-    return await prisma.chat.findMany({
+  async getUserChatsPreview(userId: string): Promise<UserChatPreviewDTO[]> {
+    const chats: ChatPreviewPrismaType[] = await prisma.chat.findMany({
       where: {memberships: {some: {userId}}},
       select: {
         id: true,
         type: true,
         createdAt: true,
         memberships: {
+          where: {userId: {not: userId}},
           select: {
-            user: {select: {id: true, name: true, tag: true, lastSeen: true}}
-          }
+            user: {
+              select: {
+                id: true,
+                name: true,
+                tag: true,
+                lastSeen: true
+              }
+            }
+          },
+          take: 1
         },
         messages: {
           take: 1,
@@ -64,19 +77,14 @@ class ChatService {
           select: {
             id: true,
             senderId: true,
-            content: true
+            content: true,
+            createdAt: true
           }
         }
       }
     })
 
-    /*
-    id: "chat-1",
-    name: "John Doe",
-    photo: "https://randomuser.me/api/portraits/men/11.jpg",
-    lastMessage: "How are you?",
-    messageCreatedAt: 1640881380,
-  */
+    return toUserChatPreviewDTO(chats)
   }
 
   async getById(userId: string): Promise<Chat> {
