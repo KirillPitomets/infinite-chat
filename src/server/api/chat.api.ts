@@ -1,18 +1,18 @@
 import Elysia, {t} from "elysia"
 import {chatService} from "@/server/services/chat.services"
-import {ChatPlain} from "@/prisma/generated/prismabox/Chat"
 import {authMiddleware} from "@/server/middlewares/authMiddleware"
 import {BadRequest} from "@/server/errors/domain.error"
+import {UserChatPreviewSchema} from "../types/chat.types"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(authMiddleware)
   .get(
-    "/all",
+    "/preview",
     async ({userId}) => {
-      return await chatService.getAll(userId)
+      return await chatService.getUserChatsPreview(userId)
     },
     {
-      response: {200: t.Array(ChatPlain), 401: t.Null()}
+      response: {200: t.Array(UserChatPreviewSchema), 401: t.Null()}
     }
   )
   .post(

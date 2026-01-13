@@ -2,6 +2,7 @@ import type {Chat} from "@/prisma/generated/client"
 import {prisma} from "@/server/db/prisma"
 import {userService} from "@/server/services/user.services"
 import {ConflictError, NotFoundError} from "@/server/errors/domain.error"
+import {UserChatPreviewType} from "../types/chat.types"
 
 type createChatBodyType = {
   memberTag: string
@@ -43,24 +44,39 @@ class ChatService {
     return chat
   }
 
-  async getAll(userId: string): Promise<Chat[]> {
-    const chats = await prisma.chat.findMany({
+  async getUserChatsPreview(userId: string): Promise<UserChatPreviewType[]> {
+    return await prisma.chat.findMany({
       where: {memberships: {some: {userId}}},
-      include: {
+      select: {
+        id: true,
+        type: true,
+        createdAt: true,
+        memberships: {
+          select: {
+            user: {select: {id: true, name: true, tag: true, lastSeen: true}}
+          }
+        },
         messages: {
           take: 1,
           orderBy: {
             createdAt: "desc"
+          },
+          select: {
+            id: true,
+            senderId: true,
+            content: true
           }
         }
       }
     })
 
-    if (!chats) {
-      throw new NotFoundError("Chats")
-    }
-
-    return []
+    /*
+    id: "chat-1",
+    name: "John Doe",
+    photo: "https://randomuser.me/api/portraits/men/11.jpg",
+    lastMessage: "How are you?",
+    messageCreatedAt: 1640881380,
+  */
   }
 
   async getById(userId: string): Promise<Chat> {
@@ -84,11 +100,3 @@ class ChatService {
 }
 
 export const chatService = new ChatService()
-
-/*
-id: "chat-1",
-name: "John Doe",
-photo: "https://randomuser.me/api/portraits/men/11.jpg",
-lastMessage: "How are you?",
-messageCreatedAt: 1640881380,
-*/
