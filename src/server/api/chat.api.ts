@@ -16,12 +16,12 @@ export const chatApi = new Elysia({prefix: "/chat"})
     }
   )
   .post(
-    "/create",
+    "/createDirect",
     async ({userId, body}) => {
       if (!body.memberTag) {
         throw new BadRequest("Expected - member tag")
       }
-      return await chatService.create(userId, body)
+      return await chatService.createDirectChat(userId, body)
     },
     {
       body: t.Object({
