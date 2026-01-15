@@ -8,12 +8,16 @@ import {
 } from "@/shared/chatPreview.schema"
 import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 
-type createChatBodyType = {
+type createDirectChatBodyType = {
   memberTag: string
 }
 
+// todo: make two services direct / group
 class ChatService {
-  async create(userId: string, body: createChatBodyType): Promise<Chat> {
+  async createDirectChat(
+    userId: string,
+    body: createDirectChatBodyType
+  ): Promise<Chat> {
     const member = await userService.getByTag(body.memberTag)
 
     if (!member) {
@@ -55,8 +59,8 @@ class ChatService {
         id: true,
         type: true,
         createdAt: true,
+        name: true,
         memberships: {
-          where: {userId: {not: userId}},
           select: {
             user: {
               select: {
@@ -66,8 +70,7 @@ class ChatService {
                 lastSeen: true
               }
             }
-          },
-          take: 1
+          }
         },
         messages: {
           take: 1,
@@ -84,7 +87,7 @@ class ChatService {
       }
     })
 
-    return toUserChatPreviewDTO(chats)
+    return toUserChatPreviewDTO(chats, userId)
   }
 
   async getById(userId: string): Promise<Chat> {

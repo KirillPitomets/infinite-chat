@@ -2,28 +2,48 @@ import {
   UserChatPreviewDTO,
   ChatPreviewPrismaType
 } from "@/shared/chatPreview.schema"
+import {ConflictError} from "../errors/domain.error"
 
 export const toUserChatPreviewDTO = (
-  chats: ChatPreviewPrismaType[]
+  chats: ChatPreviewPrismaType[],
+  currentUserId: string
 ): UserChatPreviewDTO[] => {
   return chats.map(chat => {
-    const message = chat.messages[0]
-    const otherUser = chat.memberships[0].user
+    const message = chat.messages.at(0)
+    const lastMessage = message
+      ? {
+          isMine: message.senderId === currentUserId,
+          content: message.content,
+          createdAt: message.createdAt.toString()
+        }
+      : null
 
-    return {
-      id: chat.id,
-      createdAt: chat.createdAt,
+    switch (chat.type) {
+      case "DIRECT":
+        const otherUser = chat.memberships.find(
+          ({user: member}) => member.id !== currentUserId
+        )
 
-      lastMessage: message
-        ? {
-            id: message.id,
-            content: message.content,
-            createdAt: message.createdAt,
-            senderId: message.senderId
-          }
-        : null,
-      otherUser,
-      type: chat.type
+        if (!otherUser) {
+          throw new ConflictError("Invalid DIRECT chat")
+        }
+
+        return {
+          id: chat.id,
+          type: chat.type,
+          createdAt: chat.createdAt.toString(),
+          otherUser: otherUser.user,
+          lastMessage: lastMessage
+        } satisfies UserChatPreviewDTO
+      case "GROUP":
+        return {
+          id: chat.id,
+          type: chat.type,
+          createdAt: chat.createdAt.toString(),
+          lastMessage: lastMessage,
+          membersCount: chat.memberships.length,
+          nameOfGroup: chat.name
+        } satisfies UserChatPreviewDTO
     }
   })
 }
