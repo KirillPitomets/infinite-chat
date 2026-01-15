@@ -55,6 +55,7 @@ model Chat {
   id          String      @id @default(cuid())
   createdAt   DateTime    @default(now())
   type        ChatTpye
+  name        String      @default("Group Chat")
 
   memberships ChatUser[]
   messages    Message[]
