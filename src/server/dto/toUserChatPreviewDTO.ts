@@ -42,8 +42,10 @@ export const toUserChatPreviewDTO = (
           createdAt: chat.createdAt.toString(),
           lastMessage: lastMessage,
           membersCount: chat.memberships.length,
-          nameOfGroup: chat.name
+          name: chat.name
         } satisfies UserChatPreviewDTO
+      default:
+        throw new ConflictError("Unsupported chat type")
     }
   })
 }
