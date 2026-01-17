@@ -1,11 +1,21 @@
 import Elysia, {t} from "elysia"
 import {chatService} from "@/server/services/chat.services"
 import {authMiddleware} from "@/server/middlewares/authMiddleware"
-import {BadRequest} from "@/server/errors/domain.error"
 import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
+import {ChatDetailsSchema} from "@/shared/chat.schema"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(authMiddleware)
+  .get(
+    "/:chatId",
+    async ({userId, params}) => {
+      return await chatService.getChatDetailsForUser(userId, params.chatId)
+    },
+    {
+      params: t.Object({chatId: t.String()}),
+      response: {200: ChatDetailsSchema, 401: t.Null()}
+    }
+  )
   .get(
     "/preview",
     async ({userId}) => {
@@ -16,11 +26,8 @@ export const chatApi = new Elysia({prefix: "/chat"})
     }
   )
   .post(
-    "/createDirect",
+    "/create",
     async ({userId, body}) => {
-      if (!body.memberTag) {
-        throw new BadRequest("Expected - member tag")
-      }
       return await chatService.createDirectChat(userId, body)
     },
     {
@@ -32,9 +39,6 @@ export const chatApi = new Elysia({prefix: "/chat"})
   .delete(
     "/delete",
     async ({body}) => {
-      if (!body.chatId) {
-        throw new BadRequest("Expected - chat Id")
-      }
       return await chatService.delete(body.chatId)
     },
     {
