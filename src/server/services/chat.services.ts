@@ -1,18 +1,23 @@
 import type {Chat} from "@/prisma/generated/client"
 import {prisma} from "@/server/db/prisma"
 import {userService} from "@/server/services/user.services"
-import {ConflictError, NotFoundError} from "@/server/errors/domain.error"
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError
+} from "@/server/errors/domain.error"
 import {
   ChatPreviewPrismaType,
   UserChatPreviewDTO
 } from "@/shared/chatPreview.schema"
 import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
+import {ChatDetailsPrismaType} from "@/shared/chat.schema"
+import {toChatDetailsDTO} from "../dto/toChatDetails"
 
 type createDirectChatBodyType = {
   memberTag: string
 }
 
-// todo: make two services direct / group
 class ChatService {
   async createDirectChat(
     userId: string,
@@ -50,6 +55,56 @@ class ChatService {
     })
 
     return chat
+  }
+
+  async getChatDetailsForUser(userId: string, chatId: string) {
+    const chat: ChatDetailsPrismaType | null = await prisma.chat.findUnique({
+      where: {
+        id: chatId,
+        memberships: {
+          some: {userId}
+        }
+      },
+      select: {
+        id: true,
+        type: true,
+        name: true,
+        createdAt: true,
+        messages: {
+          orderBy: {createdAt: "asc"},
+          select: {
+            id: true,
+            createdAt: true,
+            content: true,
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                tag: true
+              }
+            }
+          }
+        },
+        memberships: {
+          select: {
+            role: true,
+            user: {
+              select: {
+                id: true,
+                name: true,
+                tag: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!chat) {
+      throw new NotFoundError(`Chat with id: ${chatId} not found`)
+    }
+
+    return toChatDetailsDTO(chat, userId)
   }
 
   async getUserChatsPreview(userId: string): Promise<UserChatPreviewDTO[]> {
@@ -90,16 +145,22 @@ class ChatService {
     return toUserChatPreviewDTO(chats, userId)
   }
 
-  async getById(userId: string): Promise<Chat> {
+  async assertUserInChat(
+    chatId: string,
+    userId: string
+  ): Promise<Pick<Chat, "id">> {
     const chat = await prisma.chat.findUnique({
       where: {
-        id: userId,
+        id: chatId,
         memberships: {some: {userId}}
+      },
+      select: {
+        id: true
       }
     })
 
     if (!chat) {
-      throw new NotFoundError("Chat by id")
+      throw new ForbiddenError("Your are not a chat member")
     }
 
     return chat
