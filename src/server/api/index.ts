@@ -1,9 +1,12 @@
-import {Elysia} from "elysia"
+import {Elysia, t} from "elysia"
 import {userApi} from "./user.api"
 import {chatApi} from "./chat.api"
 import {DomainError, errorStatusMap} from "@/server/errors/domain.error"
+import {messagesApi} from "./messages.api"
+import node from "@elysiajs/node"
 
-export const app = new Elysia({prefix: "/api"})
+export const app = new Elysia({prefix: "/api", adapter: node()})
+
   .onError(({error, set}) => {
     console.log(error)
     if (typeof error === "object" && error && "code" in error) {
@@ -18,3 +21,4 @@ export const app = new Elysia({prefix: "/api"})
   })
   .use(userApi)
   .use(chatApi)
+  .use(messagesApi)
