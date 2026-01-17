@@ -31,7 +31,7 @@ const GroupUserChatPreviewSchema = t.Intersect([
   baseUserChatPreviewSchema,
   t.Object({
     type: t.Literal("GROUP"),
-    nameOfGroup: t.String(),
+    name: t.String(),
     membersCount: t.Number()
   })
 ])
