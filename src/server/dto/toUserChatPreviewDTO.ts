@@ -14,7 +14,7 @@ export const toUserChatPreviewDTO = (
       ? {
           isMine: message.senderId === currentUserId,
           content: message.content,
-          createdAt: message.createdAt.toString()
+          createdAt: message.createdAt.toISOString()
         }
       : null
 
@@ -31,7 +31,7 @@ export const toUserChatPreviewDTO = (
         return {
           id: chat.id,
           type: chat.type,
-          createdAt: chat.createdAt.toString(),
+          createdAt: chat.createdAt.toISOString(),
           otherUser: otherUser.user,
           lastMessage: lastMessage
         } satisfies UserChatPreviewDTO
@@ -39,7 +39,7 @@ export const toUserChatPreviewDTO = (
         return {
           id: chat.id,
           type: chat.type,
-          createdAt: chat.createdAt.toString(),
+          createdAt: chat.createdAt.toISOString(),
           lastMessage: lastMessage,
           membersCount: chat.memberships.length,
           name: chat.name
