@@ -1,38 +1,63 @@
-import {Message} from "@/prisma/generated/client"
 import {prisma} from "../db/prisma"
 import {chatService} from "./chat.services"
+import {ChatMessagePrismaType} from "@/shared/message.schema"
 
 class MessageService {
   /*
-    - get 
-    - post
-    - update 
-    - delete
-
     **
     - mark as read
   */
 
-  async create({
-    authorId,
+  async createChatMessage({
+    senderId,
     chatId,
     content
   }: {
-    authorId: string
+    senderId: string
     chatId: string
     content: string
-  }) {
-    const chat = await chatService.assertUserInChat(chatId, authorId)
+  }): Promise<ChatMessagePrismaType> {
+    const chat = await chatService.assertUserInChat(chatId, senderId)
 
-    const message: Message = await prisma.message.create({
+    return await prisma.message.create({
       data: {
         chatId: chat.id,
-        senderId: authorId,
+        senderId: senderId,
         content
+      },
+      select: {
+        id: true,
+        content: true,
+        updatedAt: true,
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            tag: true
+          }
+        }
       }
     })
+  }
 
-    return message
+  async getChatMessages(chatId: string): Promise<ChatMessagePrismaType[]> {
+    return await prisma.message.findMany({
+      where: {
+        chatId
+      },
+      select: {
+        id: true,
+        content: true,
+        updatedAt: true,
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            tag: true
+          }
+        }
+      }
+    })
   }
 
   async delete(messageId: string, userId: string) {}
