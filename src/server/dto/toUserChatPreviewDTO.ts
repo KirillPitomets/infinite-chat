@@ -3,25 +3,19 @@ import {
   ChatPreviewPrismaType
 } from "@/shared/chatPreview.schema"
 import {ConflictError} from "../errors/domain.error"
+import {toLastMessageDTO} from "./toLastMessageDTO"
 
 export const toUserChatPreviewDTO = (
   chats: ChatPreviewPrismaType[],
-  currentUserId: string
+  userId: string
 ): UserChatPreviewDTO[] => {
   return chats.map(chat => {
     const message = chat.messages.at(0)
-    const lastMessage = message
-      ? {
-          isMine: message.senderId === currentUserId,
-          content: message.content,
-          createdAt: message.createdAt.toISOString()
-        }
-      : null
 
     switch (chat.type) {
       case "DIRECT":
         const otherUser = chat.memberships.find(
-          ({user: member}) => member.id !== currentUserId
+          ({user: member}) => member.id !== userId
         )
 
         if (!otherUser) {
@@ -33,14 +27,14 @@ export const toUserChatPreviewDTO = (
           type: chat.type,
           createdAt: chat.createdAt.toISOString(),
           otherUser: otherUser.user,
-          lastMessage: lastMessage
+          lastMessage: toLastMessageDTO(message, userId)
         } satisfies UserChatPreviewDTO
       case "GROUP":
         return {
           id: chat.id,
           type: chat.type,
           createdAt: chat.createdAt.toISOString(),
-          lastMessage: lastMessage,
+          lastMessage: toLastMessageDTO(message, userId),
           membersCount: chat.memberships.length,
           name: chat.name
         } satisfies UserChatPreviewDTO
