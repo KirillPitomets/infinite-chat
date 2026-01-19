@@ -63,6 +63,7 @@ export type ChatPreviewPrismaType = Prisma.ChatGetPayload<{
       }
     }
     messages: {
+      take: 1,
       select: {
         id: true
         senderId: true
