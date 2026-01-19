@@ -4,18 +4,7 @@ import {Static, t} from "elysia"
 const BaseChatDetailsSchema = t.Object({
   id: t.String(),
   createdAt: t.String({format: "date-time"}),
-  messages: t.Array(
-    t.Object({
-      id: t.String(),
-      createdAt: t.String({format: "date-time"}),
-      content: t.String(),
-      sender: t.Object({
-        id: t.String(),
-        name: t.String(),
-        tag: t.String()
-      })
-    })
-  )
+
 })
 
 const DirectChatDetailsSchema = t.Intersect([
@@ -52,20 +41,6 @@ export type ChatDetailsPrismaType = Prisma.ChatGetPayload<{
     type: true
     name: true
     createdAt: true
-    messages: {
-      select: {
-        id: true
-        createdAt: true
-        content: true
-        sender: {
-          select: {
-            id: true
-            name: true
-            tag: true
-          }
-        }
-      }
-    }
     memberships: {
       select: {
         role: true
