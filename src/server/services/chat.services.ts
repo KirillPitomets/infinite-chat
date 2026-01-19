@@ -6,13 +6,8 @@ import {
   ForbiddenError,
   NotFoundError
 } from "@/server/errors/domain.error"
-import {
-  ChatPreviewPrismaType,
-  UserChatPreviewDTO
-} from "@/shared/chatPreview.schema"
-import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
+import {ChatPreviewPrismaType} from "@/shared/chatPreview.schema"
 import {ChatDetailsPrismaType} from "@/shared/chat.schema"
-import {toChatDetailsDTO} from "../dto/toChatDetails"
 
 type createDirectChatBodyType = {
   memberTag: string
@@ -57,7 +52,10 @@ class ChatService {
     return chat
   }
 
-  async getChatDetailsForUser(userId: string, chatId: string) {
+  async getChatDetailsForUser(
+    userId: string,
+    chatId: string
+  ): Promise<ChatDetailsPrismaType> {
     const chat: ChatDetailsPrismaType | null = await prisma.chat.findUnique({
       where: {
         id: chatId,
@@ -70,21 +68,6 @@ class ChatService {
         type: true,
         name: true,
         createdAt: true,
-        messages: {
-          orderBy: {createdAt: "asc"},
-          select: {
-            id: true,
-            createdAt: true,
-            content: true,
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                tag: true
-              }
-            }
-          }
-        },
         memberships: {
           select: {
             role: true,
@@ -104,11 +87,11 @@ class ChatService {
       throw new NotFoundError(`Chat with id: ${chatId} not found`)
     }
 
-    return toChatDetailsDTO(chat, userId)
+    return chat
   }
 
-  async getUserChatsPreview(userId: string): Promise<UserChatPreviewDTO[]> {
-    const chats: ChatPreviewPrismaType[] = await prisma.chat.findMany({
+  async getUserChatsPreview(userId: string): Promise<ChatPreviewPrismaType[]> {
+    return await prisma.chat.findMany({
       where: {memberships: {some: {userId}}},
       select: {
         id: true,
@@ -141,8 +124,6 @@ class ChatService {
         }
       }
     })
-
-    return toUserChatPreviewDTO(chats, userId)
   }
 
   async assertUserInChat(
