@@ -3,13 +3,20 @@ import {chatService} from "@/server/services/chat.services"
 import {authMiddleware} from "@/server/middlewares/authMiddleware"
 import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 import {ChatDetailsSchema} from "@/shared/chat.schema"
+import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
+import {toChatDetailsDTO} from "../dto/toChatDetailsDTO"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(authMiddleware)
   .get(
     "/:chatId",
     async ({userId, params}) => {
-      return await chatService.getChatDetailsForUser(userId, params.chatId)
+      const chat = await chatService.getChatDetailsForUser(
+        userId,
+        params.chatId
+      )
+
+      return toChatDetailsDTO(chat, userId)
     },
     {
       params: t.Object({chatId: t.String()}),
@@ -19,7 +26,9 @@ export const chatApi = new Elysia({prefix: "/chat"})
   .get(
     "/preview",
     async ({userId}) => {
-      return await chatService.getUserChatsPreview(userId)
+      const previewChats = await chatService.getUserChatsPreview(userId)
+
+      return toUserChatPreviewDTO(previewChats, userId)
     },
     {
       response: {200: t.Array(UserChatPreviewSchema), 401: t.Null()}
