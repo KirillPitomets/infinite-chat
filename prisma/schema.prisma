@@ -28,6 +28,7 @@ model User {
   tag         String      @unique
   email       String      @unique
   name        String
+  imageUrl    String
 
   // Last date when user was online
   lastSeen    DateTime    @default(now())
