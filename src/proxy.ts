@@ -1,14 +1,18 @@
-import {neonAuthMiddleware} from "@neondatabase/auth/next/server"
-import {AUTH_PAGES} from "./config/authPages.config"
+import {clerkMiddleware, createRouteMatcher} from "@clerk/nextjs/server"
 
-export default neonAuthMiddleware({
-  // Redirects unauthenticated users to sign-in page
-  loginUrl: AUTH_PAGES.SIGN_IN
+const isProtectedRoute = createRouteMatcher([
+  "/account(.*)"
+])
+
+export default clerkMiddleware(async (auth, req) => {
+  if (isProtectedRoute(req)) await auth.protect()
 })
 
 export const config = {
   matcher: [
-    // Protected routes requiring authentication
-    "/account/:path*"
+    // Skip Next.js internals and all static files, unless found in search params
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    // Always run for API routes
+    "/(api|trpc)(.*)"
   ]
 }
