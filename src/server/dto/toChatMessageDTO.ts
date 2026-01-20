@@ -1,14 +1,19 @@
 import {ChatMessageDTO, ChatMessagePrismaType} from "@/shared/message.schema"
 
-export const toChatMessageDTO = (message: ChatMessagePrismaType): ChatMessageDTO => {
+export const toChatMessageDTO = (
+  message: ChatMessagePrismaType,
+  userId: string
+): ChatMessageDTO => {
   return {
     id: message.id,
     content: message.content,
     sender: {
       id: message.sender.id,
       name: message.sender.name,
-      tag: message.sender.tag
+      tag: message.sender.tag,
+      imageUrl: message.sender.imageUrl
     },
+    isMine: userId === message.sender.id,
     updatedAt: message.updatedAt.toISOString()
   }
 }

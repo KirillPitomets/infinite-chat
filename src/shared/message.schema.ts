@@ -7,8 +7,10 @@ export const ChatMessageSchema = t.Object({
   sender: t.Object({
     id: t.String(),
     name: t.String(),
-    tag: t.String()
+    tag: t.String(),
+    imageUrl: t.String()
   }),
+  isMine: t.Boolean(),
   updatedAt: t.String({format: "date-time"})
 })
 
@@ -24,6 +26,7 @@ export type ChatMessagePrismaType = Prisma.MessageGetPayload<{
         id: true
         name: true
         tag: true
+        imageUrl: true
       }
     }
   }

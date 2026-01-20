@@ -2,25 +2,22 @@ import {prisma} from "@/server/db/prisma"
 import type {User} from "@/prisma/generated/client"
 import {NotFoundError} from "@/server/errors/domain.error"
 
-type SyncUserType = {
-  id: string
-  name: string
-  email: string
-}
+type SyncUserType = Pick<User, "authId" | "email" | "imageUrl" | "name">
 
 class UserService {
   async syncCurrentUser(user: SyncUserType): Promise<User> {
     return prisma.user.upsert({
-      where: {authId: user.id},
+      where: {authId: user.authId},
       update: {
         name: user.name,
         email: user.email
       },
       create: {
-        authId: user.id,
+        authId: user.authId,
         email: user.email,
         name: user.name,
-        tag: `@${user.email.split("@")[0]}`
+        tag: `@${user.email.split("@")[0]}`,
+        imageUrl: user.imageUrl
       }
     })
   }
@@ -41,9 +38,11 @@ class UserService {
     const user = await prisma.user.findUnique({
       where: {id}
     })
+
     if (!user) {
       throw new NotFoundError("User by id")
     }
+
     return user
   }
 

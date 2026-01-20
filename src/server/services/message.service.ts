@@ -33,7 +33,8 @@ class MessageService {
           select: {
             id: true,
             name: true,
-            tag: true
+            tag: true,
+            imageUrl: true
           }
         }
       }
@@ -53,7 +54,8 @@ class MessageService {
           select: {
             id: true,
             name: true,
-            tag: true
+            tag: true,
+            imageUrl: true
           }
         }
       }
