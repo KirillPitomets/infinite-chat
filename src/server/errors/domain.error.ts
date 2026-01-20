@@ -3,7 +3,8 @@ export enum DomainErrorCode {
   NOT_FOUND = "NOT_FOUND",
   CONFLICT = "CONFLICT",
   BAD_REQUEST = "BAD_REQUEST",
-  FORBIDDEN = "FORBIDDEN"
+  FORBIDDEN = "FORBIDDEN",
+  INTERNAL_SERVER = "INTERNAL_SERVER"
 }
 
 export const errorStatusMap: Record<DomainErrorCode, number> = {
@@ -11,7 +12,8 @@ export const errorStatusMap: Record<DomainErrorCode, number> = {
   NOT_FOUND: 404,
   BAD_REQUEST: 400,
   FORBIDDEN: 403,
-  CONFLICT: 409
+  CONFLICT: 409,
+  INTERNAL_SERVER: 500
 }
 
 export abstract class DomainError extends Error {
@@ -52,6 +54,13 @@ export class BadRequest extends DomainError {
 
 export class ForbiddenError extends DomainError {
   readonly code = DomainErrorCode.FORBIDDEN
+  constructor(msg: string) {
+    super(msg)
+  }
+}
+
+export class InternalServerError extends DomainError {
+  readonly code = DomainErrorCode.INTERNAL_SERVER
   constructor(msg: string) {
     super(msg)
   }

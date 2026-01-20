@@ -1,11 +1,11 @@
 import Elysia, {t} from "elysia"
-import {authMiddleware} from "../middlewares/authMiddleware"
 import {messageService} from "../services/message.service"
 import {ChatMessageDTO, ChatMessageSchema} from "@/shared/message.schema"
 import {toChatMessageDTO} from "../dto/toChatMessageDTO"
+import {userMiddleware} from "../middlewares/userMiddleware"
 
 export const messagesApi = new Elysia({prefix: "/message"})
-  .use(authMiddleware)
+  .use(userMiddleware)
   .post(
     "/",
     async ({userId, body}) => {
@@ -14,7 +14,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
         chatId: body.chatId,
         content: body.content
       })
-      return toChatMessageDTO(chatMessage)
+      return toChatMessageDTO(chatMessage, userId)
     },
     {
       body: t.Object({
@@ -26,10 +26,12 @@ export const messagesApi = new Elysia({prefix: "/message"})
   )
   .get(
     "/",
-    async ({query}) => {
+    async ({query, userId}) => {
       const messages = await messageService.getChatMessages(query.chatId)
 
-      const messagesDTO: ChatMessageDTO[] = messages.map(msg => toChatMessageDTO(msg))
+      const messagesDTO: ChatMessageDTO[] = messages.map(msg =>
+        toChatMessageDTO(msg, userId)
+      )
 
       return messagesDTO
     },

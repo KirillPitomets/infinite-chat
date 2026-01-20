@@ -1,13 +1,13 @@
 import Elysia, {t} from "elysia"
 import {chatService} from "@/server/services/chat.services"
-import {authMiddleware} from "@/server/middlewares/authMiddleware"
 import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 import {ChatDetailsSchema} from "@/shared/chat.schema"
 import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 import {toChatDetailsDTO} from "../dto/toChatDetailsDTO"
+import { userMiddleware } from "../middlewares/userMiddleware"
 
 export const chatApi = new Elysia({prefix: "/chat"})
-  .use(authMiddleware)
+  .use(userMiddleware)
   .get(
     "/:chatId",
     async ({userId, params}) => {

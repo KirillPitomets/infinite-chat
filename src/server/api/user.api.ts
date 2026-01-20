@@ -1,12 +1,12 @@
 import Elysia, {t} from "elysia"
 
 import {userService} from "@/server/services/user.services"
-import {authMiddleware} from "@/server/middlewares/authMiddleware"
 import {UserDTO, UserSchema} from "@/shared/user.schema"
 import {toUserDTO} from "../dto/toUserDTO"
+import {userMiddleware} from "../middlewares/userMiddleware"
 
 export const userApi = new Elysia({prefix: "/user"})
-  .use(authMiddleware)
+  .use(userMiddleware)
   .get(
     "/",
     async ({userId}) => {
