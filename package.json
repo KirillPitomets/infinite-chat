@@ -9,9 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.36.8",
     "@elysiajs/eden": "^1.4.6",
     "@elysiajs/node": "^1.4.3",
-    "@neondatabase/auth": "^0.1.0-beta.20",
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@tanstack/react-query": "^5.90.16",
@@ -22,7 +22,8 @@
     "pg": "^8.16.3",
     "prismabox": "^1.1.26",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "ws": "^8.19.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
