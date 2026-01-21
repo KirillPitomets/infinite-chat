@@ -3,26 +3,23 @@ import ChatItem from "./ChatItem"
 
 type InboxMessageListProps = {
   chats: UserChatPreviewDTO[]
-  currentUserId: string
 }
 
-export function InboxMessagesList({
-  chats,
-  currentUserId
-}: InboxMessageListProps) {
+export function InboxMessagesList({chats}: InboxMessageListProps) {
   return (
     <ul>
       {chats.map(chat => (
         <li key={chat.id}>
           <ChatItem
             id={chat.id}
-            name={chat.otherUser.name}
+            name={chat.type === "DIRECT" ? chat.otherUser.name : chat.name}
             lastMessage={
               chat.lastMessage
                 ? {
                     content: chat.lastMessage.content,
-                    createdAt: chat.lastMessage.createdAt.toString(),
-                    isYourMessage: currentUserId === chat.lastMessage.senderId
+                    createdAt: chat.lastMessage.createdAt,
+                    isMine: chat.lastMessage.isMine,
+                    senderName: chat.lastMessage.senderName
                   }
                 : undefined
             }

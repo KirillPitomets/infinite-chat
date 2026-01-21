@@ -2,14 +2,11 @@ import Image from "next/image"
 import Link from "next/link"
 import {format} from "date-fns"
 import {ACOOUNT_PAGES} from "@/config/accountPages.config"
+import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
 
 type ChatItemProps = {
   id: string
-  lastMessage?: {
-    content: string
-    createdAt: string
-    isYourMessage: boolean
-  }
+  lastMessage?: UserChatPreviewDTO["lastMessage"]
   name: string
   photo: string
   status: "online" | "offline"
@@ -50,7 +47,7 @@ export default function ChatItem({
         <p className="text-zinc-500 truncate">
           {lastMessage ? (
             <>
-              {lastMessage.isYourMessage ? "you: " : ""}
+              {lastMessage.isMine ? "you: " : `${lastMessage.senderName}: `}
               {lastMessage.content}
             </>
           ) : (

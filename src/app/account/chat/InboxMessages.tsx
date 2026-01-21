@@ -3,11 +3,9 @@
 import SearchInput from "@/components/ui/SearchInput/SearchInput"
 import {useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
-import {useUser} from "@/hooks/useUser"
 import {InboxMessagesList} from "./InboxMessagesList"
 
 export function InboxMessages() {
-  const {user} = useUser()
   const {data: chats, isLoading} = useQuery({
     queryKey: ["getUserChatsPreviewList"],
     queryFn: async () => {
@@ -31,14 +29,10 @@ export function InboxMessages() {
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        {!isLoading ? (
-          chats ? (
-            <InboxMessagesList chats={chats} currentUserId={user!.id} />
-          ) : (
-            <p className="text-2xl font-semibold text-center">No chats 😢</p>
-          )
+        {chats && chats.length ? (
+          <InboxMessagesList chats={chats} />
         ) : (
-          <p className="text-2xl font-semibold text-center"> Loading... </p>
+          <p className="text-2xl font-semibold text-center">No chats 😢</p>
         )}
       </div>
     </div>
