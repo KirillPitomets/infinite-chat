@@ -23,7 +23,8 @@ export const toChatDetailsDTO = (
         otherUser: {
           id: otherUser.id,
           name: otherUser.name,
-          tag: otherUser.tag
+          tag: otherUser.tag,
+          imageUrl: otherUser.imageUrl
         }
       }
     case "GROUP":
@@ -32,7 +33,8 @@ export const toChatDetailsDTO = (
         type: chat.type,
         createdAt: chat.createdAt.toISOString(),
         name: chat.name,
-        membersCount: chat.memberships.length
+        membersCount: chat.memberships.length,
+        imageUrl: chat.imageUrl,
       }
     default:
       throw new ConflictError("Unsupported chat type")

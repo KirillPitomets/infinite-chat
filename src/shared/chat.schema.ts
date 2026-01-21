@@ -3,8 +3,7 @@ import {Static, t} from "elysia"
 
 const BaseChatDetailsSchema = t.Object({
   id: t.String(),
-  createdAt: t.String({format: "date-time"}),
-
+  createdAt: t.String({format: "date-time"})
 })
 
 const DirectChatDetailsSchema = t.Intersect([
@@ -14,7 +13,8 @@ const DirectChatDetailsSchema = t.Intersect([
     otherUser: t.Object({
       id: t.String(),
       name: t.String(),
-      tag: t.String()
+      tag: t.String(),
+      imageUrl: t.String()
     })
   })
 ])
@@ -24,7 +24,8 @@ const GroupChatDetailsSchema = t.Intersect([
   t.Object({
     type: t.Literal("GROUP"),
     name: t.String(),
-    membersCount: t.Number()
+    membersCount: t.Number(),
+    imageUrl: t.String()
   })
 ])
 
@@ -41,6 +42,7 @@ export type ChatDetailsPrismaType = Prisma.ChatGetPayload<{
     type: true
     name: true
     createdAt: true
+    imageUrl: true
     memberships: {
       select: {
         role: true
@@ -49,6 +51,7 @@ export type ChatDetailsPrismaType = Prisma.ChatGetPayload<{
             id: true
             name: true
             tag: true
+            imageUrl: true
           }
         }
       }

@@ -7,6 +7,7 @@ const baseUserChatPreviewSchema = t.Object({
   lastMessage: t.Union([
     t.Object({
       isMine: t.Boolean(),
+      senderName: t.String(),
       content: t.String(),
       createdAt: t.String({format: "date-time"})
     }),
@@ -41,7 +42,6 @@ export const UserChatPreviewSchema = t.Union([
   GroupUserChatPreviewSchema
 ])
 
-
 export type UserChatPreviewDTO = Static<typeof UserChatPreviewSchema>
 
 export type ChatPreviewPrismaType = Prisma.ChatGetPayload<{
@@ -63,12 +63,17 @@ export type ChatPreviewPrismaType = Prisma.ChatGetPayload<{
       }
     }
     messages: {
-      take: 1,
+      take: 1
       select: {
         id: true
         senderId: true
         content: true
         createdAt: true
+        sender: {
+          select: {
+            name: true
+          }
+        }
       }
     }
   }

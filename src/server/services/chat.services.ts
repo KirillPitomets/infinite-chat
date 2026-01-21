@@ -68,6 +68,8 @@ class ChatService {
         type: true,
         name: true,
         createdAt: true,
+        imageUrl: true,
+
         memberships: {
           select: {
             role: true,
@@ -75,7 +77,8 @@ class ChatService {
               select: {
                 id: true,
                 name: true,
-                tag: true
+                tag: true,
+                imageUrl: true
               }
             }
           }
@@ -119,7 +122,12 @@ class ChatService {
             id: true,
             senderId: true,
             content: true,
-            createdAt: true
+            createdAt: true,
+            sender: {
+              select: {
+                name: true
+              }
+            }
           }
         }
       }

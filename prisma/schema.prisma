@@ -57,6 +57,7 @@ model Chat {
   createdAt   DateTime    @default(now())
   type        ChatTpye
   name        String      @default("Group Chat")
+  imageUrl    String      @default("")
 
   memberships ChatUser[]
   messages    Message[]
