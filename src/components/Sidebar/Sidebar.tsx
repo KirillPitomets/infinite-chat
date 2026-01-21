@@ -6,11 +6,12 @@ import NavMenu from "./NavMenu"
 import {ACOOUNT_PAGES} from "@/config/accountPages.config"
 import {SettingsIcon} from "../ui/icons/SettingsIcon"
 import {LogoutIcon} from "../ui/icons/LogoutIcon"
+import {SignOutButton, UserButton} from "@clerk/nextjs"
 
-export default function Sidebar() {
+export default async function Sidebar() {
   return (
     <aside className="min-h-screen flex flex-col justify-between px-2.75 py-7.5 bg-stone-400/20 ">
-      <div className="flex flex-col align-center gap-3">
+      <div className="flex flex-col justify-center items-center gap-3">
         <Link href={ACOOUNT_PAGES.HOME}>
           <Image
             width={32}
@@ -20,19 +21,9 @@ export default function Sidebar() {
           />
         </Link>
 
-        {/* TODO: LINK TO USER PROFILE PAGE */}
-        <Link
-          href=""
-          className="w-8 h-8 overflow-hidden flex items-center justify-center"
-        >
-          <Image
-            className="rounded-full w-8 h-8"
-            width={32}
-            height={32}
-            src="https://randomuser.me/api/portraits/men/6.jpg"
-            alt="photo"
-          />
-        </Link>
+        <UserButton
+          fallback={<div className="bg-gray-400 w-7 h-7 rounded-2xl" />}
+        />
 
         <div className="w-9 h-px bg-stone-400/50 rounded-2xl"></div>
       </div>
@@ -45,9 +36,11 @@ export default function Sidebar() {
           <SettingsIcon />
         </IconButtonBase>
 
-        <IconButtonBase tone="muted">
-          <LogoutIcon />
-        </IconButtonBase>
+        <SignOutButton>
+          <IconButtonBase tone="muted">
+            <LogoutIcon />
+          </IconButtonBase>
+        </SignOutButton>
       </div>
     </aside>
   )
