@@ -28,7 +28,7 @@ class MessageService {
       select: {
         id: true,
         content: true,
-        updatedAt: true,
+        createdAt: true,
         sender: {
           select: {
             id: true,
@@ -49,7 +49,7 @@ class MessageService {
       select: {
         id: true,
         content: true,
-        updatedAt: true,
+        createdAt: true,
         sender: {
           select: {
             id: true,

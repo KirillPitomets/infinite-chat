@@ -11,6 +11,7 @@ export const toLastMessageDTO = (
 
   return {
     isMine: message.senderId === userId,
+    senderName: message.sender.name,
     content: message.content,
     createdAt: message.createdAt.toISOString()
   }

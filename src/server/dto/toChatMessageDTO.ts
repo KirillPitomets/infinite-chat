@@ -14,6 +14,6 @@ export const toChatMessageDTO = (
       imageUrl: message.sender.imageUrl
     },
     isMine: userId === message.sender.id,
-    updatedAt: message.updatedAt.toISOString()
+    createdAt: message.createdAt.toISOString()
   }
 }

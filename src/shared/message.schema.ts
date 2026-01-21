@@ -11,7 +11,7 @@ export const ChatMessageSchema = t.Object({
     imageUrl: t.String()
   }),
   isMine: t.Boolean(),
-  updatedAt: t.String({format: "date-time"})
+  createdAt: t.String({format: "date-time"})
 })
 
 export type ChatMessageDTO = Static<typeof ChatMessageSchema>
@@ -20,7 +20,7 @@ export type ChatMessagePrismaType = Prisma.MessageGetPayload<{
   select: {
     id: true
     content: true
-    updatedAt: true
+    createdAt: true
     sender: {
       select: {
         id: true
