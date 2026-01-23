@@ -1,31 +1,25 @@
 import Elysia from "elysia"
-import {clerkClient} from "@clerk/nextjs/server"
-import {InternalServerError, UnauthorizedError} from "../errors/domain.error"
 import {userService} from "../services/user.services"
-import {authMiddleware} from "./authMiddleware"
+import {InternalServerError, UnauthorizedError} from "../errors/domain.error"
+import {auth, clerkClient} from "@clerk/nextjs/server"
 
-export const userMiddleware = new Elysia({name: "sync-user"})
-  .derive({as: "scoped"}, authMiddleware)
-  .derive({as: "scoped"}, async ({clerkId}) => {
-    if (!clerkId) {
-      console.log(clerkId)
-      throw new InternalServerError("userMIddleware required clerkId")
+export const userContextMiddleware = new Elysia({name: "user-context"})
+  // .use(authMiddleware)
+  .derive({as: "scoped"}, async () => {
+    const {userId: clerkId, isAuthenticated} = await auth()
+    if (!isAuthenticated || !clerkId) {
+      throw new UnauthorizedError()
     }
 
     const client = await clerkClient()
     const clerkUser = await client.users.getUser(clerkId)
 
-    if (!clerkUser) {
-      throw new UnauthorizedError()
-    }
     /*
       Note: To make sure "username" and "primaryEmailAddress" are set as Required in your Clerk Dashboard: 
       see: https://dashboard.clerk.com/apps
     */
     if (!clerkUser.username || !clerkUser.primaryEmailAddress?.emailAddress) {
-      throw new InternalServerError(
-        "Clerk user misconfigured: username or email missed"
-      )
+      throw new InternalServerError("Clerk misconfigured")
     }
 
     const user = await userService.syncCurrentUser({

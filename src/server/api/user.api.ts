@@ -3,10 +3,10 @@ import Elysia, {t} from "elysia"
 import {userService} from "@/server/services/user.services"
 import {UserDTO, UserSchema} from "@/shared/user.schema"
 import {toUserDTO} from "../dto/toUserDTO"
-import {userMiddleware} from "../middlewares/userMiddleware"
+import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 
 export const userApi = new Elysia({prefix: "/user"})
-  .use(userMiddleware)
+  .use(userContextMiddleware)
   .get(
     "/",
     async ({userId}) => {
