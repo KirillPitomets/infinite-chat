@@ -22,16 +22,16 @@ class UserService {
     })
   }
 
-  async getDbUserId(authId: string): Promise<string> {
-    const userId = await prisma.user.findUnique({
+  async getDbUserByAuthId(authId: string): Promise<User> {
+    const user = await prisma.user.findUnique({
       where: {authId}
     })
 
-    if (!userId) {
-      throw new NotFoundError("User DataBase Id")
+    if (!user) {
+      throw new NotFoundError("User in data base by Auth ID")
     }
 
-    return userId.id
+    return user
   }
 
   async getById(id: string): Promise<User> {
