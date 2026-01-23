@@ -23,15 +23,13 @@ export default function Page() {
     queryKey: ["getChatData"],
     queryFn: async () => {
       if (params.chatId) {
-        const res = await edenClient
-          .chat({chatId: params.chatId.toString()})
-          .get()
+        const res = await edenClient.chat({chatId: params.chatId.toString()}).get()
         return res.data
       }
     }
   })
 
-  const {data: messages} = useQuery({
+  const {data: messages, refetch} = useQuery({
     queryKey: ["getChatMessages"],
     queryFn: async () => {
       if (params.chatId) {
@@ -43,7 +41,6 @@ export default function Page() {
       }
     }
   })
-
 
   return (
     <div className="w-full flex-1 flex flex-col justify-beetwen">
@@ -67,7 +64,7 @@ export default function Page() {
         />
       )}
 
-      <div className="flex-1 space-y-5 p-5.25">
+      <div className="flex-1 space-y-5 p-5.25 overflow-y-scroll">
         {messages &&
           messages.map(msg => (
             <div

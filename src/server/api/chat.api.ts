@@ -4,10 +4,10 @@ import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 import {ChatDetailsSchema} from "@/shared/chat.schema"
 import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 import {toChatDetailsDTO} from "../dto/toChatDetailsDTO"
-import { userMiddleware } from "../middlewares/userMiddleware"
+import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 
 export const chatApi = new Elysia({prefix: "/chat"})
-  .use(userMiddleware)
+  .use(userContextMiddleware)
   .get(
     "/:chatId",
     async ({userId, params}) => {

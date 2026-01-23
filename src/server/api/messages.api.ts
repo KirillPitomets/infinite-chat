@@ -2,10 +2,10 @@ import Elysia, {t} from "elysia"
 import {messageService} from "../services/message.service"
 import {ChatMessageDTO, ChatMessageSchema} from "@/shared/message.schema"
 import {toChatMessageDTO} from "../dto/toChatMessageDTO"
-import {userMiddleware} from "../middlewares/userMiddleware"
+import { userContextMiddleware } from "../middlewares/userContextMiddleware"
 
 export const messagesApi = new Elysia({prefix: "/message"})
-  .use(userMiddleware)
+  .use(userContextMiddleware)
   .post(
     "/",
     async ({userId, body}) => {

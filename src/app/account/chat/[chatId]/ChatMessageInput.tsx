@@ -3,7 +3,7 @@
 import {edenClient} from "@/lib/eden"
 import {useMutation, useQuery} from "@tanstack/react-query"
 import {useParams} from "next/navigation"
-import {useState} from "react"
+import {useEffect, useState} from "react"
 
 export function ChatMessageInput() {
   const params = useParams()
