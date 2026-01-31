@@ -41,9 +41,9 @@ export const messagesApi = new Elysia({prefix: "/message"})
     }
   )
   .get(
-    "/lastMessage",
+    "/latest",
     async ({query, userId}) => {
-      const message = await messageService.getLastMessageFromChat(query.chatId)
+      const message = await messageService.getLatestMessage(query.chatId)
       if (!message) {
         return null
       }
