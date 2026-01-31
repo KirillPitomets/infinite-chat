@@ -8,6 +8,17 @@ import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(userContextMiddleware)
+  .post(
+    "/create",
+    async ({userId, body}) => {
+      return await chatService.createDirectChat(userId, body)
+    },
+    {
+      body: t.Object({
+        memberTag: t.String()
+      })
+    }
+  )
   .get(
     "/:chatId",
     async ({userId, params}) => {
@@ -15,6 +26,10 @@ export const chatApi = new Elysia({prefix: "/chat"})
         userId,
         params.chatId
       )
+
+      if (!chat) {
+        return null
+      }
 
       return toChatDetailsDTO(chat, userId)
     },
@@ -28,25 +43,16 @@ export const chatApi = new Elysia({prefix: "/chat"})
     async ({userId}) => {
       const previewChats = await chatService.getUserChatsPreview(userId)
 
-      return toUserChatPreviewDTO(previewChats, userId)
+      const chatsDTO = toUserChatPreviewDTO(previewChats, userId)
+
+      return chatsDTO
     },
     {
-      response: {200: t.Array(UserChatPreviewSchema), 401: t.Null()}
-    }
-  )
-  .post(
-    "/create",
-    async ({userId, body}) => {
-      return await chatService.createDirectChat(userId, body)
-    },
-    {
-      body: t.Object({
-        memberTag: t.String()
-      })
+      response: {200: t.Array(UserChatPreviewSchema)}
     }
   )
   .delete(
-    "/delete",
+    "/",
     async ({body}) => {
       return await chatService.delete(body.chatId)
     },

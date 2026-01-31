@@ -1,18 +1,11 @@
 import {Prisma} from "@/prisma/generated/client"
 import {Static, t} from "elysia"
+import {ChatMessageSchema} from "./message.schema"
 
 const baseUserChatPreviewSchema = t.Object({
   id: t.String(),
   createdAt: t.String({format: "date-time"}),
-  lastMessage: t.Union([
-    t.Object({
-      isMine: t.Boolean(),
-      senderName: t.String(),
-      content: t.String(),
-      createdAt: t.String({format: "date-time"})
-    }),
-    t.Null()
-  ])
+  lastMessage: t.Union([ChatMessageSchema, t.Null()])
 })
 
 const DirectUserChatPreviewSchema = t.Intersect([
@@ -23,7 +16,8 @@ const DirectUserChatPreviewSchema = t.Intersect([
       id: t.String(),
       name: t.String(),
       tag: t.String(),
-      lastSeen: t.Date()
+      lastSeen: t.String({format: "date-time"}),
+      imageUrl: t.String()
     })
   })
 ])
@@ -58,20 +52,21 @@ export type ChatPreviewPrismaType = Prisma.ChatGetPayload<{
             name: true
             tag: true
             lastSeen: true
+            imageUrl: true
           }
         }
       }
     }
     messages: {
       take: 1
-      select: {
-        id: true
-        senderId: true
-        content: true
-        createdAt: true
+      orderBy: {createdAt: "desc"}
+      include: {
         sender: {
           select: {
+            id: true
             name: true
+            tag: true
+            imageUrl: true
           }
         }
       }
