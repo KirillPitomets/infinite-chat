@@ -2,7 +2,7 @@
 
 import {ACOOUNT_PAGES} from "@/config/accountPages.config"
 import {edenClient} from "@/lib/eden"
-import { useUser } from "@clerk/nextjs"
+import {useUser} from "@clerk/nextjs"
 import {useMutation, useQuery} from "@tanstack/react-query"
 import {useRouter} from "next/navigation"
 import {ChangeEvent, useState} from "react"
@@ -14,12 +14,18 @@ export default function ChatPage() {
   const router = useRouter()
 
   const handleMemberTag = (e: ChangeEvent<HTMLInputElement>) => {
-    setMemberTag(e.target.value)
+    const tag = e.target.value
+
+    if (tag.startsWith("@")) {
+      return setMemberTag(tag.split("").slice(1, -1).join(""))
+    }
+    setMemberTag(tag)
   }
 
   const {mutate: createChat} = useMutation({
     mutationFn: async () => {
-      const res = await edenClient.chat.create.post({memberTag})
+
+      const res = await edenClient.chat.create.post({memberTag: `@${memberTag}`})
 
       if (res.status === 200 && res.data) {
         router.push(ACOOUNT_PAGES.CHAT_ID(res.data.id))
@@ -30,7 +36,7 @@ export default function ChatPage() {
   const {data: usersList, isLoading} = useQuery({
     queryKey: ["getAllUsers"],
     queryFn: async () => {
-      const res = await edenClient.user.all.get();
+      const res = await edenClient.user.all.get()
 
       if (res.status === 200) {
         return res.data
@@ -40,9 +46,9 @@ export default function ChatPage() {
   })
 
   return (
-    <div className="w-full flex-1 flex flex-col items-center justify-center space-y-10">
+    <div className="flex flex-col items-center justify-center flex-1 w-full space-y-10">
       <h1 className="text-4xl">Welcome, {user?.fullName}❤️😉</h1>
-      <label className="border border-zinc-600 rounded-2xl p-2 flex items-center">
+      <label className="flex items-center p-2 border border-zinc-600 rounded-2xl">
         <span>@</span>
         <input
           type="text"
@@ -50,7 +56,7 @@ export default function ChatPage() {
           value={memberTag}
           onChange={handleMemberTag}
         />
-        <button className="" onClick={() => createChat()}>
+        <button onClick={() => createChat()}>
           Create
         </button>
       </label>
@@ -58,7 +64,10 @@ export default function ChatPage() {
       {usersList ? (
         <ul>
           {usersList.map(user => (
-            <li key={user.tag}>{user.tag}</li>
+            <li key={user.tag}>
+              <span className="font-semibold">{user.name}: </span>
+              <span className="text-zinc-500">{user.tag}</span>
+            </li>
           ))}
         </ul>
       ) : (
