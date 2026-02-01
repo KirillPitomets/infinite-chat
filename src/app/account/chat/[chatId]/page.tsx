@@ -3,9 +3,10 @@
 import {useParams} from "next/navigation"
 import {ChatHeader} from "./ChatHeader"
 import {ChatMessageInput} from "./ChatMessageInput"
-import {useQuery} from "@tanstack/react-query"
+import {useMutation, useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import Image from "next/image"
+import {useRealtime} from "@/lib/realtime-client"
 
 const formatDate = (unix: string) => {
   // todo: add yersterday, if date is later then DD/MM | HH/MM
@@ -23,14 +24,16 @@ export default function Page() {
     queryKey: ["getChatData"],
     queryFn: async () => {
       if (params.chatId) {
-        const res = await edenClient.chat({chatId: params.chatId.toString()}).get()
+        const res = await edenClient
+          .chat({chatId: params.chatId.toString()})
+          .get()
         return res.data
       }
     }
   })
 
-  const {data: messages, refetch} = useQuery({
-    queryKey: ["getChatMessages"],
+  const {data: messages, refetch: refetchMessage} = useQuery({
+    queryKey: ["getChatMessages", params.chatId],
     queryFn: async () => {
       if (params.chatId) {
         const res = await edenClient.message.get({
@@ -38,6 +41,36 @@ export default function Page() {
         })
 
         return res.data
+      }
+    }
+  })
+
+  const {mutate: sendMessage, isPending} = useMutation({
+    mutationKey: ["sendMessage"],
+    mutationFn: async (msg: string) => {
+      if (!params.chatId) {
+        return
+      }
+
+      const res = await edenClient.message.post({
+        content: msg,
+        chatId: params.chatId
+      })
+
+      if (res.error) {
+        throw new Error(res.error.value.message)
+      }
+
+      return res.data
+    }
+  })
+
+  useRealtime({
+    channels: [params.chatId],
+    events: ["chat.message"],
+    onData: ({event}) => {
+      if (event === "chat.message") {
+        refetchMessage()
       }
     }
   })
@@ -63,7 +96,6 @@ export default function Page() {
           membersCount={chat.membersCount}
         />
       )}
-
       <div className="flex-1 space-y-5 p-5.25 overflow-y-scroll">
         {messages &&
           messages.map(msg => (
@@ -85,7 +117,7 @@ export default function Page() {
                   </div>
                 )}
                 <div className="inline-block p-4 rounded-2xl bg-zinc-100">
-                  <p>{msg.content}</p>
+                  <p className="text-zinc-800">{msg.content}</p>
                   <p className={`text-zinc-500 ${msg.isMine && "text-end"}`}>
                     {formatDate(msg.createdAt)}
                   </p>
@@ -94,8 +126,7 @@ export default function Page() {
             </div>
           ))}
       </div>
-
-      <ChatMessageInput />
+      <ChatMessageInput handleMessage={sendMessage} isPending={isPending} />
     </div>
   )
 }
