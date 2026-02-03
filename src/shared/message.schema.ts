@@ -1,4 +1,3 @@
-import {Prisma} from "@/prisma/generated/client"
 import {Static, t} from "elysia"
 
 export const ChatMessageSchema = t.Object({
@@ -15,19 +14,3 @@ export const ChatMessageSchema = t.Object({
 })
 
 export type ChatMessageDTO = Static<typeof ChatMessageSchema>
-
-export type ChatMessagePrismaType = Prisma.MessageGetPayload<{
-  select: {
-    id: true
-    content: true
-    createdAt: true
-    sender: {
-      select: {
-        id: true
-        name: true
-        tag: true
-        imageUrl: true
-      }
-    }
-  }
-}>
