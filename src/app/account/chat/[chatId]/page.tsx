@@ -2,20 +2,10 @@
 
 import {useParams} from "next/navigation"
 import {ChatHeader} from "./ChatHeader"
-import {ChatMessageInput} from "./ChatMessageInput"
-import {useMutation, useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
-import Image from "next/image"
-import {useRealtime} from "@/lib/realtime-client"
+import ChatMessageList from "./ChatMessageList"
+import { useQuery } from "@tanstack/react-query"
 
-const formatDate = (unix: string) => {
-  // todo: add yersterday, if date is later then DD/MM | HH/MM
-  const date = new Date(unix)
-  const hours = date.getHours()
-  const minutes = date.getMinutes()
-
-  return `${hours >= 10 ? hours : "0" + hours}:${minutes >= 10 ? minutes : "0" + minutes}`
-}
 
 export default function Page() {
   const params = useParams<{chatId: string}>()
@@ -32,51 +22,8 @@ export default function Page() {
     }
   })
 
-  const {data: messages, refetch: refetchMessage} = useQuery({
-    queryKey: ["getChatMessages", params.chatId],
-    queryFn: async () => {
-      if (params.chatId) {
-        const res = await edenClient.message.get({
-          query: {chatId: params.chatId}
-        })
-
-        return res.data
-      }
-    }
-  })
-
-  const {mutate: sendMessage, isPending} = useMutation({
-    mutationKey: ["sendMessage"],
-    mutationFn: async (msg: string) => {
-      if (!params.chatId) {
-        return
-      }
-
-      const res = await edenClient.message.post({
-        content: msg,
-        chatId: params.chatId
-      })
-
-      if (res.error) {
-        throw new Error(res.error.value.message)
-      }
-
-      return res.data
-    }
-  })
-
-  useRealtime({
-    channels: [params.chatId],
-    events: ["chat.message"],
-    onData: ({event}) => {
-      if (event === "chat.message") {
-        refetchMessage()
-      }
-    }
-  })
-
   return (
-    <div className="w-full flex-1 flex flex-col justify-beetwen">
+    <div className="flex flex-col flex-1 w-full justify-beetwen">
       {chat?.type === "DIRECT" && (
         <ChatHeader
           name={chat.otherUser.name}
@@ -96,37 +43,8 @@ export default function Page() {
           membersCount={chat.membersCount}
         />
       )}
-      <div className="flex-1 space-y-5 p-5.25 overflow-y-scroll">
-        {messages &&
-          messages.map(msg => (
-            <div
-              key={msg.id}
-              className={`w-full flex ${msg.isMine && "justify-end"}`}
-            >
-              <div className="max-w-[80%] space-y-2">
-                {!msg.isMine && (
-                  <div className="flex space-x-2.5">
-                    <Image
-                      width={25}
-                      height={25}
-                      src={msg.sender.imageUrl}
-                      alt={msg.sender.name}
-                      className="rounded-2xl"
-                    />
-                    <p>{msg.sender.name}</p>
-                  </div>
-                )}
-                <div className="inline-block p-4 rounded-2xl bg-zinc-100">
-                  <p className="text-zinc-800">{msg.content}</p>
-                  <p className={`text-zinc-500 ${msg.isMine && "text-end"}`}>
-                    {formatDate(msg.createdAt)}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))}
-      </div>
-      <ChatMessageInput handleMessage={sendMessage} isPending={isPending} />
+
+      <ChatMessageList />
     </div>
   )
 }

@@ -37,11 +37,7 @@ export default function ChatPage() {
     queryKey: ["getAllUsers"],
     queryFn: async () => {
       const res = await edenClient.user.all.get()
-
-      if (res.status === 200) {
-        return res.data
-      }
-      return null
+      return res.data
     }
   })
 
