@@ -8,7 +8,7 @@ import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 export const userApi = new Elysia({prefix: "/user"})
   .use(userContextMiddleware)
   .get(
-    "/",
+    "/current",
     async ({userId}) => {
       const user = await userService.getById(userId)
       return toUserDTO(user)

@@ -5,6 +5,7 @@ export const UserSchema = t.Object({
   tag: t.String(),
   email: t.String(),
   name: t.String(),
+  imageUrl: t.String(),
   createdAt: t.String({format: "date-time"}),
 })
 
