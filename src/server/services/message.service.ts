@@ -1,13 +1,10 @@
+import {realtime} from "@/lib/realtime"
 import {prisma} from "../db/prisma"
 import {chatService} from "./chat.services"
 import {ChatMessagePrismaType} from "@/shared/message.schema"
+import {NotFoundError} from "../errors/domain.error"
 
 class MessageService {
-  /*
-    **
-    - mark as read
-  */
-
   async createChatMessage({
     senderId,
     chatId,
@@ -19,7 +16,7 @@ class MessageService {
   }): Promise<ChatMessagePrismaType> {
     const chat = await chatService.assertUserInChat(chatId, senderId)
 
-    return await prisma.message.create({
+    const msg = await prisma.message.create({
       data: {
         chatId: chat.id,
         senderId: senderId,
@@ -39,6 +36,10 @@ class MessageService {
         }
       }
     })
+
+    await realtime.channel(chatId).emit("chat.message", null)
+
+    return msg
   }
 
   async getChatMessages(chatId: string): Promise<ChatMessagePrismaType[]> {
@@ -60,6 +61,39 @@ class MessageService {
         }
       }
     })
+  }
+
+  async getLatestMessage(
+    chatId: string
+  ): Promise<ChatMessagePrismaType | null> {
+    const chat = await prisma.chat.findUnique({
+      where: {id: chatId},
+      select: {
+        messages: {
+          take: 1,
+          orderBy: {createdAt: "desc"},
+          select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            sender: {
+              select: {
+                id: true,
+                name: true,
+                tag: true,
+                imageUrl: true
+              }
+            }
+          }
+        }
+      }
+    })
+
+    if (!chat) {
+      throw new NotFoundError("Chat")
+    }
+
+    return chat.messages[0] || null
   }
 
   async delete(messageId: string, userId: string) {}

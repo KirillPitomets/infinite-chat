@@ -2,7 +2,7 @@ import Elysia, {t} from "elysia"
 import {messageService} from "../services/message.service"
 import {ChatMessageDTO, ChatMessageSchema} from "@/shared/message.schema"
 import {toChatMessageDTO} from "../dto/toChatMessageDTO"
-import { userContextMiddleware } from "../middlewares/userContextMiddleware"
+import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 
 export const messagesApi = new Elysia({prefix: "/message"})
   .use(userContextMiddleware)
@@ -38,5 +38,19 @@ export const messagesApi = new Elysia({prefix: "/message"})
     {
       query: t.Object({chatId: t.String()}),
       response: t.Array(ChatMessageSchema)
+    }
+  )
+  .get(
+    "/latest",
+    async ({query, userId}) => {
+      const message = await messageService.getLatestMessage(query.chatId)
+      if (!message) {
+        return null
+      }
+      return toChatMessageDTO(message, userId)
+    },
+    {
+      query: t.Object({chatId: t.String()}),
+      response: t.Union([ChatMessageSchema, t.Null()])
     }
   )

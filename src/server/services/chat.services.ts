@@ -94,7 +94,7 @@ class ChatService {
   }
 
   async getUserChatsPreview(userId: string): Promise<ChatPreviewPrismaType[]> {
-    return await prisma.chat.findMany({
+    const chats = await prisma.chat.findMany({
       where: {memberships: {some: {userId}}},
       select: {
         id: true,
@@ -108,30 +108,30 @@ class ChatService {
                 id: true,
                 name: true,
                 tag: true,
-                lastSeen: true
+                lastSeen: true,
+                imageUrl: true
               }
             }
           }
         },
         messages: {
           take: 1,
-          orderBy: {
-            createdAt: "desc"
-          },
-          select: {
-            id: true,
-            senderId: true,
-            content: true,
-            createdAt: true,
+          orderBy: {createdAt: "desc"},
+          include: {
             sender: {
               select: {
-                name: true
+                id: true,
+                name: true,
+                tag: true,
+                imageUrl: true
               }
             }
           }
         }
       }
     })
+
+    return chats
   }
 
   async assertUserInChat(

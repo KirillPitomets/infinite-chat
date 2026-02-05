@@ -15,6 +15,8 @@
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@tanstack/react-query": "^5.90.16",
+    "@upstash/realtime": "^1.0.2",
+    "@upstash/redis": "^1.36.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
     "elysia": "^1.4.21",
@@ -23,7 +25,7 @@
     "prismabox": "^1.1.26",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "ws": "^8.19.0"
+    "zod": "^4.3.6"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

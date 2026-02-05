@@ -7,6 +7,7 @@ export const toUserDTO = (user: User): UserDTO => {
     email: user.email,
     name: user.name,
     tag: user.tag,
+    imageUrl: user.imageUrl,
     createdAt: user.createdAt.toISOString(),
   }
 }
