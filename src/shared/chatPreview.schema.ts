@@ -1,11 +1,8 @@
-import {Prisma} from "@/prisma/generated/client"
 import {Static, t} from "elysia"
-import {ChatMessageSchema} from "./message.schema"
 
 const baseUserChatPreviewSchema = t.Object({
   id: t.String(),
-  createdAt: t.String({format: "date-time"}),
-  lastMessage: t.Union([ChatMessageSchema, t.Null()])
+  createdAt: t.String({format: "date-time"})
 })
 
 const DirectUserChatPreviewSchema = t.Intersect([
@@ -37,4 +34,3 @@ export const UserChatPreviewSchema = t.Union([
 ])
 
 export type UserChatPreviewDTO = Static<typeof UserChatPreviewSchema>
-
