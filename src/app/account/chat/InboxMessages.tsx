@@ -4,22 +4,18 @@ import SearchInput from "@/components/ui/SearchInput/SearchInput"
 import {useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import {InboxMessagesList} from "./InboxMessagesList"
+import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
+import {InboxMessagesListSkeleton} from "./InboxMessagesListSkeleton"
 
 export function InboxMessages() {
-  const {data: chats, isLoading} = useQuery({
+  const {data: chats = [], isLoading} = useQuery<UserChatPreviewDTO[]>({
     queryKey: ["getUserChatsPreviewList"],
     queryFn: async () => {
-      const data = await edenClient.chat.preview.get()
-      if (data.status === 200) {
-        return data.data
-      }
-      return null
+      const res = await edenClient.chat.preview.get()
+
+      return res.data ?? []
     }
   })
-
-  // TODO
-  // if (isLoading) return <ChatsSkeleton />
-  // if (error) return <ErrorState />
 
   return (
     <div className="py-7.5 h-screen flex flex-col border-r border-zinc-300">
@@ -29,10 +25,10 @@ export function InboxMessages() {
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        {chats && chats.length ? (
-          <InboxMessagesList chats={chats} />
+        {isLoading ? (
+          <InboxMessagesListSkeleton skeletonItems={10} />
         ) : (
-          <p className="text-2xl font-semibold text-center">No chats 😢</p>
+          <InboxMessagesList chats={chats} />
         )}
       </div>
     </div>
