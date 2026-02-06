@@ -41,7 +41,7 @@ const ChatMessage = ({
 
         <div className="flex gap-4 flex-wrap p-4 rounded-2xl bg-zinc-100">
           <p className="text-zinc-800">{content}</p>
-          <div className="w-full flex justify-end space-x-2">
+          <div className="flex justify-end space-x-2">
             <p className={`text-zinc-500 ${isMine && "text-end"}`}>
               {formatDate(createdAt)}
             </p>
