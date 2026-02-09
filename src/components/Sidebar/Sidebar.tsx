@@ -8,7 +8,7 @@ import {SettingsIcon} from "../ui/icons/SettingsIcon"
 import {LogoutIcon} from "../ui/icons/LogoutIcon"
 import {SignOutButton, UserButton} from "@clerk/nextjs"
 
-export default async function Sidebar() {
+export default function Sidebar() {
   return (
     <aside className="min-h-screen flex flex-col justify-between px-2.75 py-7.5 bg-stone-400/20 ">
       <div className="flex flex-col justify-center items-center gap-3">

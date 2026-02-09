@@ -12,11 +12,7 @@ type CurrentUserContextType = {
 const CurrentUserContext = createContext<CurrentUserContextType | null>(null)
 
 const CurrentUserProvider = ({children}: {children: ReactNode}) => {
-  const {
-    data: user,
-    isLoading,
-    isError
-  } = useQuery({
+  const {data: user} = useQuery({
     queryKey: ["currentUser"],
     queryFn: async () => {
       const res = await edenClient.user.current.get()
@@ -25,18 +21,14 @@ const CurrentUserProvider = ({children}: {children: ReactNode}) => {
     }
   })
 
-  if (isLoading) return null
-
-  if (isError || !user) {
-    return /*TODO: redirect or render AuthErrorPage */
-  }
-
-  const currentUser: CurrentUserContextType = {
-    id: user.id,
-    imageUrl: user.imageUrl,
-    name: user.name,
-    tag: user.tag
-  }
+  const currentUser: CurrentUserContextType | null = user
+    ? {
+        id: user.id,
+        imageUrl: user.imageUrl,
+        name: user.name,
+        tag: user.tag
+      }
+    : null
 
   return (
     <CurrentUserContext.Provider value={currentUser}>
@@ -49,9 +41,5 @@ export default CurrentUserProvider
 
 export const useCurrentUser = () => {
   const ctx = useContext(CurrentUserContext)
-  if (!ctx) {
-    throw new Error("useCurrentUser must be used within CurrentUserProvider")
-  }
-
   return ctx
 }
