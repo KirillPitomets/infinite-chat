@@ -3,16 +3,17 @@ import {useMutation, useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import {useParams} from "next/navigation"
 import {useRealtime} from "@upstash/realtime/client"
-import ChatMessage from "./ChatMessage"
+import ChatMessage from "./ChatMessage/ChatMessage"
 import {useEffect, useMemo, useRef, useState} from "react"
 import {ChatUIMessage} from "@/types/ChatUiMessage"
 import {useCurrentUser} from "@/context/CurrentUserContext"
+import ChatMessageSkeleton from "./ChatMessage/ChatMessageSkeleton"
 
 const ChatMessageList = () => {
   const params = useParams<{chatId: string}>()
   const [uiMessages, setUiMessages] = useState<ChatUIMessage[]>([])
   const currentUser = useCurrentUser()
-  const containerRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const {mutate: sendMessage} = useMutation({
     mutationKey: ["sendMessage"],
@@ -70,7 +71,11 @@ const ChatMessageList = () => {
     }
   })
 
-  const {data: messages, refetch: refetchMessages} = useQuery({
+  const {
+    data: messages,
+    refetch: refetchMessages,
+    isLoading
+  } = useQuery({
     queryKey: ["getChatMessages", params.chatId],
     queryFn: async () => {
       if (!params.chatId) return []
@@ -106,22 +111,27 @@ const ChatMessageList = () => {
   })
 
   useEffect(() => {
-    if (!containerRef.current) {
-      return
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
     }
-
-    containerRef.current.scrollTop = containerRef.current.scrollHeight
   }, [uiMessages.length])
 
   return (
     <>
       <div
-        ref={containerRef}
+        ref={messagesEndRef}
         className="flex-1 space-y-5 p-5.25 overflow-y-auto scrollbar-thin"
       >
-        {mergedMessages.map(msg => (
-          <ChatMessage key={msg.id} {...msg} />
-        ))}
+        {isLoading
+          ? Array.from({length: 10}).map((_, indx) => (
+              <ChatMessageSkeleton
+                key={` ChatMessageSkeleton-${indx}`}
+                isMine={!!!(indx % 2)}
+              />
+            ))
+          : mergedMessages.map(msg => <ChatMessage key={msg.id} {...msg} />)}
+
+        <div ref={messagesEndRef}></div>
       </div>
 
       <ChatMessageInput sendFn={sendMessage} />

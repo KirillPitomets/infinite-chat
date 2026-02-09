@@ -3,9 +3,9 @@
 import SearchInput from "@/components/ui/SearchInput/SearchInput"
 import {useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
-import {InboxMessagesList} from "./InboxMessagesList"
+import {InboxMessagesList} from "./List/InboxMessagesList"
 import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
-import {InboxMessagesListSkeleton} from "./InboxMessagesListSkeleton"
+import {InboxMessagesListSkeleton} from "./List/InboxMessagesListSkeleton"
 
 export function InboxMessages() {
   const {data: chats = [], isLoading} = useQuery<UserChatPreviewDTO[]>({

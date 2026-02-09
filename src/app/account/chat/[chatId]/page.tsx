@@ -1,9 +1,9 @@
 "use client"
 
 import {useParams} from "next/navigation"
-import {ChatHeader} from "./ChatHeader"
+import {ChatHeader} from "./components/ChatHeader"
 import {edenClient} from "@/lib/eden"
-import ChatMessageList from "./ChatMessageList"
+import ChatMessageList from "./components/ChatMessageList"
 import { useQuery } from "@tanstack/react-query"
 
 

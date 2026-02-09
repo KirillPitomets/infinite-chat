@@ -1,5 +1,5 @@
 import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
-import ChatItem from "./ChatItem"
+import {InboxMessagesItem} from "./Item/InboxMessagesItem"
 
 type InboxMessageListProps = {
   chats: UserChatPreviewDTO[]
@@ -10,7 +10,7 @@ export function InboxMessagesList({chats}: InboxMessageListProps) {
     <ul>
       {chats.map(chat => (
         <li key={chat.id}>
-          <ChatItem
+          <InboxMessagesItem
             chatId={chat.id}
             name={chat.type === "DIRECT" ? chat.otherUser.name : chat.name}
             photo={chat.type === "DIRECT" ? chat.otherUser.imageUrl : ""}

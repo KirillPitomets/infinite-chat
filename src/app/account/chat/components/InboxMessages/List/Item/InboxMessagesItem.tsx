@@ -2,29 +2,29 @@ import Image from "next/image"
 import Link from "next/link"
 import {format} from "date-fns"
 import {ACOOUNT_PAGES} from "@/config/accountPages.config"
-import {useMutation, useQuery} from "@tanstack/react-query"
+import {useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import {useRealtime} from "@/lib/realtime-client"
 
-type ChatItemProps = {
+type InboxMessagesItemProps = {
   chatId: string
   name: string
   photo: string
   status: "online" | "offline"
 }
 
-export default function ChatItem({
+export const InboxMessagesItem = ({
   chatId,
   name,
   photo,
   status
-}: ChatItemProps) {
+}: InboxMessagesItemProps) => {
   const {data: latestMessage, refetch} = useQuery({
     queryKey: ["getLatestMessage: ", chatId],
     queryFn: async () => {
       if (chatId) {
         const res = await edenClient.message.latest.get({query: {chatId}})
-        return res.data
+        return res.data  
       }
     }
   })
