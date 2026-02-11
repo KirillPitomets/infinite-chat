@@ -6,8 +6,10 @@ import {
   ForbiddenError,
   NotFoundError
 } from "@/server/errors/domain.error"
-import {ChatPreviewPrismaType} from "@/shared/chatPreview.schema"
-import {ChatDetailsPrismaType} from "@/shared/chat.schema"
+import { ChatDetailsPrismaType } from "../types/ChatDetails.prisma"
+import { ChatPreviewPrismaType } from "../types/UserChatPreview.prisma"
+
+
 
 type createDirectChatBodyType = {
   memberTag: string
@@ -156,6 +158,7 @@ class ChatService {
   }
 
   async delete(chatId: string) {
+    
     return prisma.chat.delete({where: {id: chatId}})
   }
 }

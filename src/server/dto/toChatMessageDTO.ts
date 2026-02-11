@@ -1,4 +1,6 @@
-import {ChatMessageDTO, ChatMessagePrismaType} from "@/shared/message.schema"
+
+import {ChatMessageDTO} from "@/shared/message.schema"
+import { ChatMessagePrismaType } from "../types/ChatMessage.prisma"
 
 export const toChatMessageDTO = (
   message: ChatMessagePrismaType,

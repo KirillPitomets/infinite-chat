@@ -1,5 +1,6 @@
-import {ChatDetailsDTO, ChatDetailsPrismaType} from "@/shared/chat.schema"
+import {ChatDetailsDTO} from "@/shared/chat.schema"
 import {ConflictError} from "../errors/domain.error"
+import { ChatDetailsPrismaType } from "../types/ChatDetails.prisma"
 
 
 export const toChatDetailsDTO = (
