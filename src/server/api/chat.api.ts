@@ -1,9 +1,10 @@
-import Elysia, {t} from "elysia"
 import {chatService} from "@/server/services/chat.services"
-import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 import {ChatDetailsSchema} from "@/shared/chat.schema"
-import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
+import Elysia from "elysia"
+import z from "zod"
+import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 import {toChatDetailsDTO} from "../dto/toChatDetailsDTO"
+import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 
 export const chatApi = new Elysia({prefix: "/chat"})
@@ -14,9 +15,7 @@ export const chatApi = new Elysia({prefix: "/chat"})
       return await chatService.createDirectChat(userId, body)
     },
     {
-      body: t.Object({
-        memberTag: t.String()
-      })
+      body: z.object({memberTag: z.string()})
     }
   )
   .get(
@@ -34,8 +33,8 @@ export const chatApi = new Elysia({prefix: "/chat"})
       return toChatDetailsDTO(chat, userId)
     },
     {
-      params: t.Object({chatId: t.String()}),
-      response: {200: ChatDetailsSchema, 401: t.Null()}
+      params: z.object({chatId: z.string()}),
+      response: z.union([ChatDetailsSchema, z.null()])
     }
   )
   .get(
@@ -48,7 +47,7 @@ export const chatApi = new Elysia({prefix: "/chat"})
       return chatsDTO
     },
     {
-      response: {200: t.Array(UserChatPreviewSchema)}
+      response: z.array(UserChatPreviewSchema)
     }
   )
   .delete(
@@ -57,6 +56,6 @@ export const chatApi = new Elysia({prefix: "/chat"})
       return await chatService.delete(body.chatId)
     },
     {
-      body: t.Object({chatId: t.String()})
+      body: z.object({chatId: z.string()})
     }
   )

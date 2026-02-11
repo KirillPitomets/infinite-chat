@@ -1,36 +1,30 @@
-import {Static, t} from "elysia"
+import z from 'zod'
 
-const baseUserChatPreviewSchema = t.Object({
-  id: t.String(),
-  createdAt: t.String({format: "date-time"})
-})
+const BaseUserChatPreviewSchema = z.object({
+  id: z.string(),
+  createdAt: z.string().datetime(),
+});
 
-const DirectUserChatPreviewSchema = t.Intersect([
-  baseUserChatPreviewSchema,
-  t.Object({
-    type: t.Literal("DIRECT"),
-    otherUser: t.Object({
-      id: t.String(),
-      name: t.String(),
-      tag: t.String(),
-      lastSeen: t.String({format: "date-time"}),
-      imageUrl: t.String()
-    })
-  })
-])
+const DirectUserChatPreviewSchema = BaseUserChatPreviewSchema.extend({
+  type: z.literal("DIRECT"),
+  otherUser: z.object({
+    id: z.string(),
+    name: z.string(),
+    tag: z.string(),
+    lastSeen: z.string().datetime(),
+    imageUrl: z.string(),
+  }),
+});
 
-const GroupUserChatPreviewSchema = t.Intersect([
-  baseUserChatPreviewSchema,
-  t.Object({
-    type: t.Literal("GROUP"),
-    name: t.String(),
-    membersCount: t.Number()
-  })
-])
+const GroupUserChatPreviewSchema = BaseUserChatPreviewSchema.extend({
+  type: z.literal("GROUP"),
+  name: z.string(),
+  membersCount: z.number(),
+});
 
-export const UserChatPreviewSchema = t.Union([
+export const UserChatPreviewSchema = z.union([
   DirectUserChatPreviewSchema,
-  GroupUserChatPreviewSchema
-])
+  GroupUserChatPreviewSchema,
+]);
 
-export type UserChatPreviewDTO = Static<typeof UserChatPreviewSchema>
+export type UserChatPreviewDTO = z.infer<typeof UserChatPreviewSchema>;

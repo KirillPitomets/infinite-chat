@@ -1,12 +1,12 @@
-import {Static, t} from "elysia"
+import z from "zod";
 
-export const UserSchema = t.Object({
-  id: t.String(),
-  tag: t.String(),
-  email: t.String(),
-  name: t.String(),
-  imageUrl: t.String(),
-  createdAt: t.String({format: "date-time"}),
-})
+export const UserSchema = z.object({
+  id: z.string(),
+  tag: z.string(),
+  email: z.string(),
+  name: z.string(),
+  imageUrl: z.string(),
+  createdAt: z.string().datetime(),
+});
 
-export type UserDTO = Static<typeof UserSchema>
+export type UserDTO = z.infer<typeof UserSchema>;

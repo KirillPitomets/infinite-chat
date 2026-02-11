@@ -1,16 +1,16 @@
-import {Static, t} from "elysia"
+import z from "zod"
 
-export const ChatMessageSchema = t.Object({
-  id: t.String(),
-  content: t.String(),
-  sender: t.Object({
-    id: t.String(),
-    name: t.String(),
-    tag: t.String(),
-    imageUrl: t.String()
+export const ChatMessageSchema = z.object({
+  id: z.string(),
+  content: z.string(),
+  sender: z.object({
+    id: z.string(),
+    name: z.string(),
+    tag: z.string(),
+    imageUrl: z.string()
   }),
-  isMine: t.Boolean(),
-  createdAt: t.String({format: "date-time"})
+  isMine: z.boolean(),
+  createdAt: z.string().datetime()
 })
 
-export type ChatMessageDTO = Static<typeof ChatMessageSchema>
+export type ChatMessageDTO = z.infer<typeof ChatMessageSchema>

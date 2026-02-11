@@ -1,8 +1,10 @@
-import Elysia, {t} from "elysia"
-import {messageService} from "../services/message.service"
+import {realtime} from "@/lib/realtime"
 import {ChatMessageDTO, ChatMessageSchema} from "@/shared/message.schema"
+import Elysia from "elysia"
+import z from "zod"
 import {toChatMessageDTO} from "../dto/toChatMessageDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
+import {messageService} from "../services/message.service"
 
 export const messagesApi = new Elysia({prefix: "/message"})
   .use(userContextMiddleware)
@@ -14,12 +16,17 @@ export const messagesApi = new Elysia({prefix: "/message"})
         chatId: body.chatId,
         content: body.content
       })
-      return toChatMessageDTO(chatMessage, userId)
+
+      const dto = toChatMessageDTO(chatMessage, userId)
+
+      await realtime.channel(body.chatId).emit("chat.message", dto)
+
+      return dto
     },
     {
-      body: t.Object({
-        chatId: t.String(),
-        content: t.String()
+      body: z.object({
+        chatId: z.string(),
+        content: z.string()
       }),
       response: ChatMessageSchema
     }
@@ -36,8 +43,8 @@ export const messagesApi = new Elysia({prefix: "/message"})
       return messagesDTO
     },
     {
-      query: t.Object({chatId: t.String()}),
-      response: t.Array(ChatMessageSchema)
+      query: z.object({chatId: z.string()}),
+      response: z.array(ChatMessageSchema)
     }
   )
   .get(
@@ -50,7 +57,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
       return toChatMessageDTO(message, userId)
     },
     {
-      query: t.Object({chatId: t.String()}),
-      response: t.Union([ChatMessageSchema, t.Null()])
+      query: z.object({chatId: z.string()}),
+      response: z.union([ChatMessageSchema, z.null()])
     }
   )

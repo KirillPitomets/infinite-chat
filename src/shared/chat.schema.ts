@@ -1,38 +1,30 @@
-import {Prisma} from "@/prisma/generated/client"
-import {Static, t} from "elysia"
+import z from "zod";
 
-const BaseChatDetailsSchema = t.Object({
-  id: t.String(),
-  createdAt: t.String({format: "date-time"})
-})
+const BaseChatDetailsSchema = z.object({
+  id: z.string(),
+  createdAt: z.string().datetime(),
+});
 
-const DirectChatDetailsSchema = t.Intersect([
-  BaseChatDetailsSchema,
-  t.Object({
-    type: t.Literal("DIRECT"),
-    otherUser: t.Object({
-      id: t.String(),
-      name: t.String(),
-      tag: t.String(),
-      imageUrl: t.String()
-    })
-  })
-])
+const DirectChatDetailsSchema = BaseChatDetailsSchema.extend({
+  type: z.literal("DIRECT"),
+  otherUser: z.object({
+    id: z.string(),
+    name: z.string(),
+    tag: z.string(),
+    imageUrl: z.string(),
+  }),
+});
 
-const GroupChatDetailsSchema = t.Intersect([
-  BaseChatDetailsSchema,
-  t.Object({
-    type: t.Literal("GROUP"),
-    name: t.String(),
-    membersCount: t.Number(),
-    imageUrl: t.String()
-  })
-])
+const GroupChatDetailsSchema = BaseChatDetailsSchema.extend({
+  type: z.literal("GROUP"),
+  name: z.string(),
+  membersCount: z.number(),
+  imageUrl: z.string(),
+});
 
-export const ChatDetailsSchema = t.Union([
+export const ChatDetailsSchema = z.union([
   DirectChatDetailsSchema,
-  GroupChatDetailsSchema
-])
+  GroupChatDetailsSchema,
+]);
 
-export type ChatDetailsDTO = Static<typeof ChatDetailsSchema>
-
+export type ChatDetailsDTO = z.infer<typeof ChatDetailsSchema>;

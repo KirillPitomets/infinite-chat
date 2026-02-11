@@ -1,7 +1,8 @@
-import Elysia, {t} from "elysia"
+import Elysia from "elysia"
 
 import {userService} from "@/server/services/user.services"
 import {UserDTO, UserSchema} from "@/shared/user.schema"
+import z from "zod"
 import {toUserDTO} from "../dto/toUserDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 
@@ -13,7 +14,7 @@ export const userApi = new Elysia({prefix: "/user"})
       const user = await userService.getById(userId)
       return toUserDTO(user)
     },
-    {response: {201: UserSchema}}
+    {response: UserSchema}
   )
   .get(
     "/all",
@@ -25,6 +26,6 @@ export const userApi = new Elysia({prefix: "/user"})
       return usersDTO
     },
     {
-      response: {200: t.Array(UserSchema), 401: t.Null()}
+      response: z.union([z.array(UserSchema), z.null()])
     }
   )
