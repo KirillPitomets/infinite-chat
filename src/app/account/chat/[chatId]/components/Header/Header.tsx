@@ -1,24 +1,29 @@
 import {IconButtonBase} from "@/components/ui/IconButtonBase"
 import {CameraIcon, InformationIcon, TrashIcon} from "@/components/ui/icons"
-import {useMutation} from "@tanstack/react-query"
-import {edenClient} from "@/lib/eden"
-import {useParams, useRouter} from "next/navigation"
 import {ACOOUNT_PAGES} from "@/config/accountPages.config"
-import Image from "next/image"
+import {edenClient} from "@/lib/eden"
+import {useMutation, useQuery} from "@tanstack/react-query"
+import {useParams, useRouter} from "next/navigation"
+import {DirectInfo} from "./DirectInfo"
+import {GroupInfo} from "./GroupInfo"
+import {HeaderSkeleton} from "./HeaderSkeleton"
 
-type ChatHeaderProps = {
-  name: string
-  tag?: string
-  imageUrl: string
-  status?: "online" | "offline"
-}
-
-export function ChatHeader({name, tag, imageUrl, status}: ChatHeaderProps) {
+export function Header() {
   const {chatId} = useParams<{chatId: string}>()
   const route = useRouter()
 
+  const {data: chatData, isLoading} = useQuery({
+    queryKey: ["chatHeader", chatId],
+    queryFn: async () => {
+      if (!chatId) return
+
+      const res = await edenClient.chat({chatId}).get()
+      return res.data
+    }
+  })
+
   const {mutate: deleteChat} = useMutation({
-    mutationKey: ["chatHeader_deleteChat"],
+    mutationKey: ["chatHeader_deleteChat", chatId],
     mutationFn: async () => {
       const res = await edenClient.chat.delete({chatId})
       if (res.status === 200) {
@@ -27,27 +32,27 @@ export function ChatHeader({name, tag, imageUrl, status}: ChatHeaderProps) {
     }
   })
 
+  if (isLoading || !chatData) return <HeaderSkeleton />
+
   return (
     <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
       <div className="flex items-center gap-2">
-        <div className="max-w-10.5 max-h-10.5 rounded-4xl bg-gray-600 overflow-hidden flex justify-center align-center">
-          <Image
-            width={42}
-            height={42}
-            src={imageUrl}
-            alt={tag ? `${name} - ${tag}` : `${name}`}
+        {chatData.type === "DIRECT" && (
+          <DirectInfo
+            avatarUrl={chatData.otherUser.imageUrl}
+            name={chatData.otherUser.name}
+            tag={chatData.otherUser.tag}
+            status="offline"
           />
-        </div>
-        <div>
-          <p className="font-semibold">{name}</p>
-          <span
-            className={`${status === "online" ? "text-green-700" : "text-zinc-400"}`}
-          >
-            {status}
-          </span>
-        </div>
+        )}
+        {chatData.type === "GROUP" && (
+          <GroupInfo
+            avatarUrl={chatData.imageUrl}
+            membersCount={chatData.membersCount}
+            name={chatData.name}
+          />
+        )}
       </div>
-
       <div className="flex space-x-1">
         <IconButtonBase>
           <CameraIcon />
