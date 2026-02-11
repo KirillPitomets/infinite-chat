@@ -1,8 +1,7 @@
-import {realtime} from "@/lib/realtime"
 import {prisma} from "../db/prisma"
 import {chatService} from "./chat.services"
-import {ChatMessagePrismaType} from "@/shared/message.schema"
 import {NotFoundError} from "../errors/domain.error"
+import { ChatMessagePrismaType } from "../types/ChatMessage.prisma"
 
 class MessageService {
   async createChatMessage({
@@ -37,7 +36,7 @@ class MessageService {
       }
     })
 
-    await realtime.channel(chatId).emit("chat.message", null)
+
 
     return msg
   }
