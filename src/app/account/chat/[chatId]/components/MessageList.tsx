@@ -1,15 +1,14 @@
-import {ChatMessageInput} from "./ChatMessageInput"
+import {ChatInput} from "./Input"
 import {useMutation, useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import {useParams} from "next/navigation"
-import {useRealtime} from "@upstash/realtime/client"
-import ChatMessage from "./ChatMessage/ChatMessage"
+import {Message} from "./Message/Message"
 import {useEffect, useMemo, useRef, useState} from "react"
 import {ChatUIMessage} from "@/types/ChatUiMessage"
 import {useCurrentUser} from "@/context/CurrentUserContext"
-import ChatMessageSkeleton from "./ChatMessage/ChatMessageSkeleton"
+import {MessageSkeleton} from "./Message/MessageSkeleton"
 
-const ChatMessageList = () => {
+export const MessageList = () => {
   const params = useParams<{chatId: string}>()
   const [uiMessages, setUiMessages] = useState<ChatUIMessage[]>([])
   const currentUser = useCurrentUser()
@@ -71,11 +70,7 @@ const ChatMessageList = () => {
     }
   })
 
-  const {
-    data: messages,
-    refetch: refetchMessages,
-    isLoading
-  } = useQuery({
+  const {data: messages, isLoading} = useQuery({
     queryKey: ["getChatMessages", params.chatId],
     queryFn: async () => {
       if (!params.chatId) return []
@@ -100,43 +95,29 @@ const ChatMessageList = () => {
     return [...serverMessages, ...uiMessages.filter(m => !sentIds.has(m.id))]
   }, [messages, uiMessages])
 
-  useRealtime({
-    channels: [params.chatId],
-    events: ["chat.message"],
-    onData: ({event}) => {
-      if (event === "chat.message") {
-        refetchMessages()
-      }
-    }
-  })
-
   useEffect(() => {
     if (messagesEndRef.current) {
-      messagesEndRef.current.scrollTop = messagesEndRef.current.scrollHeight
+      messagesEndRef.current.scrollIntoView()
     }
-  }, [uiMessages.length])
+  }, [mergedMessages])
 
   return (
     <>
-      <div
-        ref={messagesEndRef}
-        className="flex-1 space-y-5 p-5.25 overflow-y-auto scrollbar-thin"
-      >
+      <div className="flex-1 space-y-5 p-5.25 overflow-y-auto scrollbar-thin">
         {isLoading
           ? Array.from({length: 10}).map((_, indx) => (
-              <ChatMessageSkeleton
-                key={` ChatMessageSkeleton-${indx}`}
-                isMine={!!!(indx % 2)}
+              <MessageSkeleton
+                key={`ChatMessageSkeleton-${indx}`}
+                isMine={indx % 2 === 0}
               />
             ))
-          : mergedMessages.map(msg => <ChatMessage key={msg.id} {...msg} />)}
+          : mergedMessages.map(msg => <Message key={msg.id} {...msg} />)}
 
         <div ref={messagesEndRef}></div>
       </div>
 
-      <ChatMessageInput sendFn={sendMessage} />
+      <ChatInput sendFn={sendMessage} />
     </>
   )
 }
 
-export default ChatMessageList

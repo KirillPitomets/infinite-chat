@@ -12,7 +12,7 @@ const formatDate = (unix: string) => {
   return `${hours >= 10 ? hours : "0" + hours}:${minutes >= 10 ? minutes : "0" + minutes}`
 }
 
-const ChatMessage = ({
+export const Message = ({
   id,
   isMine,
   content,
@@ -57,4 +57,3 @@ const ChatMessage = ({
   )
 }
 
-export default ChatMessage

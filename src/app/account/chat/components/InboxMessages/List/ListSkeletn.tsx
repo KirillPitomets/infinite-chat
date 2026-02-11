@@ -1,4 +1,4 @@
-import { InboxMessagesItemSkeleton } from "./Item/InboxMessagesItemSkeleton"
+import { InboxMessagesItemSkeleton } from "./Item/ItemSkeleton"
 
 export function InboxMessagesListSkeleton({
   skeletonItems = 1

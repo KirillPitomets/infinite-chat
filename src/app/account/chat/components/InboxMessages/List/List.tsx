@@ -1,5 +1,5 @@
 import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
-import {InboxMessagesItem} from "./Item/InboxMessagesItem"
+import {InboxMessagesItem} from "./Item/Item"
 
 type InboxMessageListProps = {
   chats: UserChatPreviewDTO[]

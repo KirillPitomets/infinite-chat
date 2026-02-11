@@ -1,4 +1,4 @@
-const ChatMessageSkeleton = ({isMine}: {isMine: boolean}) => {
+export const MessageSkeleton = ({isMine}: {isMine: boolean}) => {
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
       <div
@@ -16,5 +16,3 @@ const ChatMessageSkeleton = ({isMine}: {isMine: boolean}) => {
     </div>
   )
 }
-
-export default ChatMessageSkeleton

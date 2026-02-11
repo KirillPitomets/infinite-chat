@@ -2,7 +2,7 @@
 
 import {ChangeEvent, useLayoutEffect, useRef, useState} from "react"
 
-export function ChatMessageInput({
+export function ChatInput({
   sendFn
 }: {
   sendFn: (content: string) => void
