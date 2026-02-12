@@ -7,6 +7,7 @@ import {LogoutIcon} from "./LogoutIcon"
 import {SettingsIcon} from "./SettingsIcon"
 import {TrashIcon} from "./TrashIcon"
 import {TickIcon} from "./TickIcon"
+import {SendIcon} from './SendIcon'
 
 export {
   NetworkIcon,
@@ -17,5 +18,6 @@ export {
   LogoutIcon,
   SettingsIcon,
   TrashIcon,
-  TickIcon
+  TickIcon,
+  SendIcon
 }

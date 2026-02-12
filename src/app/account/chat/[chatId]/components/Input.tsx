@@ -2,6 +2,8 @@
 
 import {ChangeEvent, useLayoutEffect, useRef, useState} from "react"
 import EmojiPicker, {EmojiClickData} from "emoji-picker-react"
+import {SendIcon} from "@/components/ui/icons"
+import {IconButtonBase} from "@/components/ui/IconButtonBase"
 
 export function ChatInput({sendFn}: {sendFn: (content: string) => void}) {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -46,7 +48,7 @@ export function ChatInput({sendFn}: {sendFn: (content: string) => void}) {
     }
   }
 
-  const handleEmojiPicker = () => {
+  const toggleEmojiPicker = () => {
     setIsOpenEmojiPicker(prev => !prev)
   }
 
@@ -56,8 +58,14 @@ export function ChatInput({sendFn}: {sendFn: (content: string) => void}) {
   }
 
   return (
-    <label className="flex items-end border-t border-zinc-300 py-1 pb-5 px-4 space-x-2 relative">
-      <div className="w-full flex items-center bg-zinc-200 rounded-2xl transition-colors focus:bg-zinc-400">
+    <label className="flex items-center border-t border-zinc-300 p-5 space-x-2 relative">
+      {isOpenEmojiPicker && (
+        <div
+          onClick={toggleEmojiPicker}
+          className="w-screen h-screen  bg-black/4 absolute bottom-0 left-0 z-100"
+        />
+      )}
+      <div className="flex flex-1 items-center bg-zinc-400/50 rounded-2xl transition-colors focus:bg-zinc-400">
         <textarea
           ref={textareaRef}
           onKeyDown={sendMessageViaEnter}
@@ -70,10 +78,13 @@ export function ChatInput({sendFn}: {sendFn: (content: string) => void}) {
         />
 
         <div className="relative">
-          <button className="p-4 cursor-pointer" onClick={handleEmojiPicker}>
+          <button
+            className="p-2 cursor-pointer transition-transform hover:scale-150"
+            onClick={toggleEmojiPicker}
+          >
             {latestEmoji}
           </button>
-          <div className="absolute bottom-full right-0">
+          <div className="absolute bottom-full right-0 z-101">
             <EmojiPicker
               open={isOpenEmojiPicker}
               onEmojiClick={handleEmojiClick}
@@ -82,12 +93,10 @@ export function ChatInput({sendFn}: {sendFn: (content: string) => void}) {
         </div>
       </div>
 
-      <button
-        onClick={sendMessageHandler}
-        className="text-green-600 font-semibold text-nowrap rounded-2xl px-2 py-4 transition-colors cursor-pointer hover:bg-green-500 hover:text-white"
-        disabled={!value.trim()}
-      >
-        Send
+      <button onClick={sendMessageHandler} disabled={!value.trim()}>
+        <IconButtonBase>
+          <SendIcon />
+        </IconButtonBase>
       </button>
     </label>
   )
