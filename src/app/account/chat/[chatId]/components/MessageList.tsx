@@ -5,7 +5,7 @@ import {useParams} from "next/navigation"
 import {Message} from "./Message/Message"
 import {useEffect, useMemo, useRef, useState} from "react"
 import {ChatUIMessage} from "@/types/ChatUiMessage"
-import {useCurrentUser} from "@/context/CurrentUserContext"
+import {useCurrentUser} from "@/context/CurrentUserProvider"
 import {MessageSkeleton} from "./Message/MessageSkeleton"
 
 export const MessageList = () => {

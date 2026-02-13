@@ -5,6 +5,7 @@ import z from "zod"
 import {toChatMessageDTO} from "../dto/toChatMessageDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
 import {messageService} from "../services/message.service"
+import {redis} from "@/lib/redis"
 
 export const messagesApi = new Elysia({prefix: "/message"})
   .use(userContextMiddleware)
@@ -19,7 +20,8 @@ export const messagesApi = new Elysia({prefix: "/message"})
 
       const dto = toChatMessageDTO(chatMessage, userId)
 
-      await realtime.channel(body.chatId).emit("chat.message", dto)
+      await realtime.channel(`chat:${body.chatId}`).emit("chat.message", dto)
+      redis.expire(`chat:${body.chatId}`, 60)
 
       return dto
     },

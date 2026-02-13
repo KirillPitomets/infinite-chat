@@ -4,7 +4,6 @@ import {InternalServerError, UnauthorizedError} from "../errors/domain.error"
 import {auth, clerkClient} from "@clerk/nextjs/server"
 
 export const userContextMiddleware = new Elysia({name: "user-context"})
-  // .use(authMiddleware)
   .derive({as: "scoped"}, async () => {
     const {userId: clerkId, isAuthenticated} = await auth()
     if (!isAuthenticated || !clerkId) {

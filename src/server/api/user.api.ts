@@ -5,6 +5,8 @@ import {UserDTO, UserSchema} from "@/shared/user.schema"
 import z from "zod"
 import {toUserDTO} from "../dto/toUserDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
+import {realtime} from "@/lib/realtime"
+import {redis} from "@/lib/redis"
 
 export const userApi = new Elysia({prefix: "/user"})
   .use(userContextMiddleware)
@@ -28,4 +30,11 @@ export const userApi = new Elysia({prefix: "/user"})
     {
       response: z.union([z.array(UserSchema), z.null()])
     }
+  )
+  .post(
+    "/presence",
+    async ({userId}) => {
+      // TODO: last seen
+    },
+    {}
   )

@@ -37,7 +37,7 @@ const CurrentUserProvider = ({children}: {children: ReactNode}) => {
   }
 
   if (isError || !user) {
-    return <Home />
+    return <Home/>
   }
 
   const currentUser: CurrentUserContextType = {
