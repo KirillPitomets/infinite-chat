@@ -13,7 +13,7 @@ export function InboxMessagesList({chats}: InboxMessageListProps) {
           <InboxMessagesItem
             chatId={chat.id}
             name={chat.type === "DIRECT" ? chat.otherUser.name : chat.name}
-            photo={chat.type === "DIRECT" ? chat.otherUser.imageUrl : ""}
+            avatarUrl={chat.type === "DIRECT" ? chat.otherUser.imageUrl : ""}
             status="online"
           />
         </li>

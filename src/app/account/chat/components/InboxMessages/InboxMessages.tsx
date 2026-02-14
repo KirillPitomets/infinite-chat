@@ -18,7 +18,7 @@ export function InboxMessages() {
   })
 
   return (
-    <div className="py-7.5 h-screen flex flex-col border-r border-zinc-300">
+    <div className="max-w-[30%] py-7.5 h-screen flex flex-col border-r border-zinc-300">
       <div className="px-5 mb-5">
         <h2 className="mb-2 text-xl font-bold">Messages</h2>
         <SearchInput />
