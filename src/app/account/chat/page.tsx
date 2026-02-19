@@ -6,6 +6,7 @@ import {useUser} from "@clerk/nextjs"
 import {useMutation, useQuery} from "@tanstack/react-query"
 import {useRouter} from "next/navigation"
 import {ChangeEvent, useState} from "react"
+import toast from "react-hot-toast"
 
 export default function ChatPage() {
   const {user} = useUser()
@@ -24,12 +25,20 @@ export default function ChatPage() {
 
   const {mutate: createChat} = useMutation({
     mutationFn: async () => {
+      const res = await edenClient.chat.create.post({
+        memberTag: `@${memberTag}`
+      })
 
-      const res = await edenClient.chat.create.post({memberTag: `@${memberTag}`})
-
-      if (res.status === 200 && res.data) {
-        router.push(ACOOUNT_PAGES.CHAT_ID(res.data.id))
+      if (res.status !== 200 || !res.data) {
+        throw new Error(
+          res.error?.value.message ?? "Failed to create new chat :("
+        )
       }
+
+      router.push(ACOOUNT_PAGES.CHAT_ID(res.data.id))
+    },
+    onError: error => {
+      toast.error(error.message)
     }
   })
 
@@ -37,6 +46,7 @@ export default function ChatPage() {
     queryKey: ["getAllUsers"],
     queryFn: async () => {
       const res = await edenClient.user.all.get()
+
       return res.data
     }
   })
@@ -52,9 +62,7 @@ export default function ChatPage() {
           value={memberTag}
           onChange={handleMemberTag}
         />
-        <button onClick={() => createChat()}>
-          Create
-        </button>
+        <button onClick={() => createChat()}>Create</button>
       </label>
       Our people:
       {usersList ? (

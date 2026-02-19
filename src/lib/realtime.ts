@@ -5,8 +5,13 @@ import {ChatMessageSchema} from "@/shared/message.schema"
 
 const schema = {
   chat: {
-    created: z.string(),
-    deleted: z.string(),
+    // [userID, userID]
+    created: z.object({
+      memberships: z.array(z.object({userId: z.string()}))
+    }),
+    deleted: z.object({
+      memberships: z.array(z.object({userId: z.string()}))
+    }),
     message: {
       created: ChatMessageSchema,
       updated: ChatMessageSchema,

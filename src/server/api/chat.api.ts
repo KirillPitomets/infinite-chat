@@ -6,13 +6,20 @@ import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
 import {toChatDetailsDTO} from "../dto/toChatDetailsDTO"
 import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
+import {realtime} from "@/lib/realtime"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(userContextMiddleware)
   .post(
     "/create",
     async ({userId, body}) => {
-      return await chatService.createDirectChat(userId, body)
+      const chat = await chatService.createDirectChat(userId, body)
+
+      await realtime
+        .channel("chats")
+        .emit("chat.created", {memberships: chat.memberships })
+
+      return chat
     },
     {
       body: z.object({memberTag: z.string()})
@@ -53,7 +60,13 @@ export const chatApi = new Elysia({prefix: "/chat"})
   .delete(
     "/",
     async ({body}) => {
-      return await chatService.delete(body.chatId)
+      const deletedChat = await chatService.delete(body.chatId)
+
+      await realtime
+        .channel("chats")
+        .emit("chat.deleted", {memberships: deletedChat.memberships})
+
+      return deletedChat
     },
     {
       body: z.object({chatId: z.string()})

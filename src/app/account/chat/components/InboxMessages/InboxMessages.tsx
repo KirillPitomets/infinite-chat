@@ -5,14 +5,34 @@ import {useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import {InboxMessagesList} from "./List/List"
 import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
+import {useRealtime} from "@/lib/realtime-client"
+import {useCurrentUser} from "@/context/CurrentUserContext"
 
 export function InboxMessages() {
-  const {data: chats = [], isLoading} = useQuery<UserChatPreviewDTO[]>({
+  const currentUser = useCurrentUser()
+
+  const {
+    data: chats = [],
+    isLoading,
+    refetch
+  } = useQuery<UserChatPreviewDTO[]>({
     queryKey: ["getUserChatsPreviewList"],
     queryFn: async () => {
       const res = await edenClient.chat.preview.get()
 
       return res.data ?? []
+    }
+  })
+
+  useRealtime({
+    channels: ["chats"],
+    events: ["chat.created", "chat.deleted"],
+    onData: ({data, event}) => {
+      if (event === "chat.created" || event === "chat.deleted") {
+        if (data.memberships.find(member => member.userId === currentUser.id)) {
+          refetch()
+        }
+      }
     }
   })
 
