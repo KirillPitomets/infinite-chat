@@ -1,11 +1,20 @@
 import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
 import {InboxMessagesItem} from "./Item/Item"
+import {InboxMessagesListSkeleton} from "./ListSkeletn"
 
 type InboxMessageListProps = {
   chats: UserChatPreviewDTO[]
+  isLoadingSkeleton: boolean
 }
 
-export function InboxMessagesList({chats}: InboxMessageListProps) {
+export function InboxMessagesList({
+  chats,
+  isLoadingSkeleton
+}: InboxMessageListProps) {
+  if (isLoadingSkeleton) {
+    return <InboxMessagesListSkeleton skeletonItems={10} />
+  }
+
   return (
     <ul>
       {chats.map(chat => (

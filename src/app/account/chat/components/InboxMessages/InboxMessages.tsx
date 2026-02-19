@@ -5,7 +5,6 @@ import {useQuery} from "@tanstack/react-query"
 import {edenClient} from "@/lib/eden"
 import {InboxMessagesList} from "./List/List"
 import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
-import {InboxMessagesListSkeleton} from "./List/ListSkeletn"
 
 export function InboxMessages() {
   const {data: chats = [], isLoading} = useQuery<UserChatPreviewDTO[]>({
@@ -25,11 +24,7 @@ export function InboxMessages() {
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        {isLoading ? (
-          <InboxMessagesListSkeleton skeletonItems={10} />
-        ) : (
-          <InboxMessagesList chats={chats} />
-        )}
+        <InboxMessagesList chats={chats} isLoadingSkeleton={isLoading} />
       </div>
     </div>
   )

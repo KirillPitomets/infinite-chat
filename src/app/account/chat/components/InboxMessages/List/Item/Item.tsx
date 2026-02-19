@@ -38,7 +38,7 @@ export const InboxMessagesItem = ({
       </div>
 
       <div className="flex-1">
-        <p className="font-semibold text-zinc-950">{name}</p>
+        <p className="font-semibold">{name}</p>
         <LatestMessage chatId={chatId} />
       </div>
     </Link>
