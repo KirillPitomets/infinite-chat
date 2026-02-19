@@ -17,7 +17,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
         content: body.content
       })
 
-      const dto = toChatMessageDTO(chatMessage, userId)
+      const dto = toChatMessageDTO(chatMessage)
 
       await realtime.channel(body.chatId).emit("chat.message.created", dto)
       console.log(dto)
@@ -37,7 +37,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
       const messages = await messageService.getChatMessages(query.chatId)
 
       const messagesDTO: ChatMessageDTO[] = messages.map(msg =>
-        toChatMessageDTO(msg, userId)
+        toChatMessageDTO(msg)
       )
 
       return messagesDTO
@@ -56,7 +56,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
         content: body.content
       })
 
-      const dto = toChatMessageDTO(updatedMessage, userId)
+      const dto = toChatMessageDTO(updatedMessage)
 
       await realtime.channel(chatId).emit("chat.message.updated", dto)
 
@@ -76,7 +76,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
       if (!message) {
         return null
       }
-      return toChatMessageDTO(message, userId)
+      return toChatMessageDTO(message)
     },
     {
       query: z.object({chatId: z.string()}),
