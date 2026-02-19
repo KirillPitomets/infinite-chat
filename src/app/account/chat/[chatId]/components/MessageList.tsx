@@ -1,105 +1,238 @@
-import {ChatInput} from "./Input"
-import {useMutation, useQuery} from "@tanstack/react-query"
-import {edenClient} from "@/lib/eden"
-import {useParams} from "next/navigation"
-import {Message} from "./Message/Message"
-import {useEffect, useMemo, useRef, useState} from "react"
-import {ChatUIMessage} from "@/types/ChatUiMessage"
 import {useCurrentUser} from "@/context/CurrentUserContext"
+import {edenClient} from "@/lib/eden"
+import {ChatUIMessage} from "@/types/ChatUiMessage"
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query"
+import {useParams} from "next/navigation"
+import {useEffect, useRef, useState} from "react"
+import toast from "react-hot-toast"
+import ChatInputController from "./Input/InputController"
+import {Message} from "./Message/Message"
 import {MessageSkeleton} from "./Message/MessageSkeleton"
+import {useRealtime} from "@/lib/realtime-client"
 
 export const MessageList = () => {
-  const params = useParams<{chatId: string}>()
-  const [uiMessages, setUiMessages] = useState<ChatUIMessage[]>([])
+  const {chatId} = useParams<{chatId: string}>()
   const currentUser = useCurrentUser()
   const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [isEditMessage, setIsEditMessage] = useState(false)
+  const [editingMessage, setEditingMessage] = useState<{
+    id: string
+    initialValue: string
+  }>({id: "", initialValue: ""})
 
-  const {mutate: sendMessage} = useMutation({
-    mutationKey: ["sendMessage"],
-    mutationFn: async (content: string) => {
-      if (!params.chatId) {
-        return
-      }
+  const queryClient = useQueryClient()
 
-      const res = await edenClient.message.post({
-        content: content,
-        chatId: params.chatId
+  const {data: messages = [], isLoading} = useQuery<ChatUIMessage[]>({
+    enabled: !!chatId,
+    queryKey: ["getChatMessages", chatId],
+    queryFn: async () => {
+      const res = await edenClient.message.get({
+        query: {chatId: chatId}
       })
 
-      if (res.error) {
-        throw new Error(res.error.value.message)
+      if (!res.data) {
+        throw new Error("Failed to get messages")
       }
-      return res.data
+
+      return res.data.map(msg => ({
+        ...msg,
+        status: "sent"
+      }))
+    }
+  })
+
+  const {mutate: sendMessage} = useMutation<
+    ChatUIMessage,
+    Error,
+    string,
+    {previousMessages: ChatUIMessage[]; tempId: string}
+  >({
+    mutationKey: ["sendMessage", chatId],
+    mutationFn: async (content: string) => {
+      const res = await edenClient.message.post({
+        content,
+        chatId
+      })
+
+      if (!res.data) {
+        throw new Error("Failed to send message")
+      }
+
+      return {...res.data, status: "sent"}
     },
-    onMutate(content) {
+
+    onMutate: async content => {
+      await queryClient.cancelQueries({
+        queryKey: ["getChatMessages", chatId]
+      })
+
+      const previousMessages =
+        queryClient.getQueryData<ChatUIMessage[]>([
+          "getChatMessages",
+          chatId
+        ]) ?? []
+
       const tempId = crypto.randomUUID()
 
-      setUiMessages(prev => [
-        ...prev,
-        {
-          id: tempId,
-          content,
-          isMine: true,
-          sender: {
-            id: currentUser.id,
-            imageUrl: currentUser.imageUrl,
-            name: currentUser.name,
-            tag: currentUser.tag
-          },
-          createdAt: new Date().toISOString(),
-          status: "sending"
-        }
-      ])
-      return {tempId}
+      const optimisticMessage: ChatUIMessage = {
+        id: tempId,
+        content,
+        isMine: true,
+        sender: currentUser,
+        createdAt: new Date().toISOString(),
+        status: "sending"
+      }
+
+      queryClient.setQueryData<ChatUIMessage[]>(
+        ["getChatMessages", chatId],
+        old => [...(old ?? []), optimisticMessage]
+      )
+
+      return {previousMessages, tempId}
     },
-    onSuccess(data, _, ctx) {
-      if (data) {
-        setUiMessages(prev =>
-          prev.map(msg =>
+    onSuccess: (data, _, ctx) => {
+      queryClient.setQueryData<ChatUIMessage[]>(
+        ["getChatMessages", chatId],
+        old =>
+          old?.map(msg =>
             msg.id === ctx.tempId ? {...data, status: "sent"} : msg
-          )
+          ) ?? []
+      )
+    },
+    onError: (error, _, context) => {
+      if (context?.previousMessages) {
+        queryClient.setQueryData(
+          ["getChatMessages", chatId],
+          context.previousMessages ?? []
         )
       }
+
+      toast.error(error.message)
+    }
+  })
+
+  const {mutate: updateMessage} = useMutation<
+    ChatUIMessage,
+    Error,
+    {messageId: string; content: string},
+    {previousMessages: ChatUIMessage[]}
+  >({
+    mutationKey: ["updateMessage"],
+    mutationFn: async ({messageId, content}) => {
+      const res = await edenClient.message({messageId}).put({content})
+
+      if (res.status !== 200 || !res.data) {
+        throw new Error(res.error?.value.message ?? "Failed to update message")
+      }
+
+      return {...res.data, status: "sent"}
     },
-    onError(_, __, ctx) {
-      setUiMessages(prev =>
-        prev.map(msg =>
-          msg.id === ctx?.tempId ? {...msg, status: "error"} : msg
-        )
-      )
-    }
-  })
-
-  const {data: messages, isLoading} = useQuery({
-    queryKey: ["getChatMessages", params.chatId],
-    queryFn: async () => {
-      if (!params.chatId) return []
-
-      const res = await edenClient.message.get({
-        query: {chatId: params.chatId}
+    onMutate: async ({messageId, content}) => {
+      await queryClient.cancelQueries({
+        queryKey: ["getChatMessages", chatId]
       })
+      const previousMessages =
+        queryClient.getQueryData<ChatUIMessage[]>([
+          "getChatMessages",
+          chatId
+        ]) ?? []
 
-      return res.data ?? []
+      // optimistic update
+      queryClient.setQueryData<ChatUIMessage[]>(
+        ["getChatMessages", chatId],
+        old =>
+          old
+            ? old.map(msg =>
+                msg.id === messageId
+                  ? {...msg, content, status: "editing"}
+                  : msg
+              )
+            : []
+      )
+
+      return {previousMessages}
+    },
+    onSuccess: data => {
+      queryClient.setQueryData<ChatUIMessage[]>(
+        ["getChatMessages", chatId],
+        old => old?.map(msg => (msg.id === data.id ? data : msg)) ?? []
+      )
+
+      toast.success("Message have been updated")
+      onCancelUpdate()
+    },
+    onError: (error, _, context) => {
+      if (context?.previousMessages) {
+        queryClient.setQueryData(
+          ["getChatMessages", chatId],
+          context.previousMessages
+        )
+      }
+
+      toast.error(error.message)
+      onCancelUpdate()
     }
   })
 
-  const mergedMessages = useMemo<ChatUIMessage[]>(() => {
-    if (!messages) return []
-
-    const sentIds = new Set(messages.map(m => m.id))
-    const serverMessages: ChatUIMessage[] = messages.map(msg => ({
-      ...msg,
-      status: "sent"
-    }))
-
-    return [...serverMessages, ...uiMessages.filter(m => !sentIds.has(m.id))]
-  }, [messages, uiMessages])
+  useRealtime({
+    channels: [chatId],
+    events: [
+      "chat.message.created",
+      "chat.message.deleted",
+      "chat.message.updated"
+    ],
+    onData({data, event}) {
+      switch (event) {
+        case "chat.message.created":
+          if (data.sender.id !== currentUser.id) {
+            queryClient.setQueryData<ChatUIMessage[]>(
+              ["getChatMessages", chatId],
+              old => [
+                ...(old ?? []),
+                {
+                  ...data,
+                  status: "sent"
+                }
+              ]
+            )
+          }
+          break
+        case "chat.message.updated":
+          queryClient.setQueryData<ChatUIMessage[]>(
+            ["getChatMessages", chatId],
+            old =>
+              old
+                ? old.map(msg =>
+                    msg.id === data.id ? {...data, status: "sent"} : msg
+                  )
+                : []
+          )
+          break
+        default:
+          break
+      }
+    }
+  })
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView()
     }
-  }, [mergedMessages])
+  }, [messages.length, isEditMessage])
+
+  const handleMessageDetails = (messageId: string, initialValue: string) => {
+    setEditingMessage({id: messageId, initialValue})
+    setIsEditMessage(true)
+  }
+
+  const onUpdateMessage = (id: string, value: string) => {
+    updateMessage({messageId: id, content: value})
+  }
+
+  const onCancelUpdate = () => {
+    setEditingMessage({id: "", initialValue: ""})
+    setIsEditMessage(false)
+  }
 
   return (
     <>
@@ -111,13 +244,24 @@ export const MessageList = () => {
                 isMine={indx % 2 === 0}
               />
             ))
-          : mergedMessages.map(msg => <Message key={msg.id} {...msg} />)}
-
+          : messages.map(msg => (
+              <Message
+                key={msg.id}
+                handleUpdateMessage={handleMessageDetails}
+                {...msg}
+                isMine={currentUser.id === msg.sender.id}
+              />
+            ))}
         <div ref={messagesEndRef}></div>
       </div>
-
-      <ChatInput sendFn={sendMessage} />
+      <ChatInputController
+        isEdit={isEditMessage}
+        editingMessageId={editingMessage.id}
+        editingMessageInitialValue={editingMessage.initialValue}
+        onUpdate={onUpdateMessage}
+        onCancelUpdate={onCancelUpdate}
+        onSend={sendMessage}
+      />
     </>
   )
 }
-

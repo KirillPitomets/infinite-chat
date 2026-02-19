@@ -1,15 +1,17 @@
-import Image from "next/image"
-import {ChatUIMessage} from "@/types/ChatUiMessage"
 import Loader from "@/components/ui/Loader"
-import {TickIcon} from "@/components/ui/icons"
+import {CopyIcon, EditIcon, TickIcon, TrashIcon} from "@/components/ui/icons"
+import {edenClient} from "@/lib/eden"
+import {ChatUIMessage} from "@/types/ChatUiMessage"
+import {useMutation} from "@tanstack/react-query"
+import Image from "next/image"
+import {useState} from "react"
+import toast from "react-hot-toast"
+import MessageContextMenu from "./ContextMenu"
+import DeletedMessage from "./DeletedMessage"
+import {formatDate} from "date-fns"
 
-const formatDate = (unix: string) => {
-  // todo: add yersterday, if date is later then DD/MM | HH/MM
-  const date = new Date(unix)
-  const hours = date.getHours()
-  const minutes = date.getMinutes()
-
-  return `${hours >= 10 ? hours : "0" + hours}:${minutes >= 10 ? minutes : "0" + minutes}`
+interface IMessageProps extends ChatUIMessage {
+  handleUpdateMessage: (id: string, initialValue: string) => void
 }
 
 export const Message = ({
@@ -18,13 +20,84 @@ export const Message = ({
   content,
   sender,
   status,
-  createdAt
-}: ChatUIMessage) => {
+  createdAt,
+  handleUpdateMessage
+}: IMessageProps) => {
+  const [isDeletedMessage, setIsDeletedMessage] = useState(false)
+  const [isVisibleContextMenu, setIsVisibleContextMenu] = useState(false)
+
+  const {mutate: deleteMessage} = useMutation({
+    mutationKey: ["deleteMessage", id],
+    mutationFn: async () => {
+      const res = await edenClient.message({messageId: id}).delete()
+      if (res.status !== 200) {
+        throw new Error(res.error?.value.message ?? "Failed to delete message")
+      }
+      return res.data
+    },
+    onSuccess(data) {
+      setIsDeletedMessage(true)
+      toast.success("Message has been deleted")
+    },
+    onError(error) {
+      toast.error(error.message)
+    }
+  })
+
+  const handleContextMenu = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    e.preventDefault()
+
+    setIsVisibleContextMenu(prev => !prev)
+  }
+
+  if (isDeletedMessage) {
+    return (
+      <DeletedMessage
+        isMine={isMine}
+        senderImageUrl={sender.imageUrl}
+        senderName={sender.name}
+      />
+    )
+  }
+
+  const contextMenu = [
+    {
+      icon: EditIcon,
+      handle: () => {
+        setIsVisibleContextMenu(false)
+        handleUpdateMessage(id, content)
+      }
+    },
+    {
+      icon: CopyIcon,
+      handle: () => {
+        setIsVisibleContextMenu(false)
+        navigator.clipboard.writeText(content)
+        toast.success("Message has been copied :)")
+        setIsVisibleContextMenu(false)
+      }
+    },
+    {
+      icon: TrashIcon,
+      handle: () => {
+        setIsVisibleContextMenu(false)
+        deleteMessage()
+      }
+    }
+  ]
+
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
-      {status === "sending" && <div className="flex items-center mr-4"><Loader /></div> }
+      {status === "sending" || status === "editing" && (
+        <div className="flex items-center mr-4">
+          <Loader />
+        </div>
+      )}
+
       <div
-        className={`max-w-[80%] space-y-2 ${status === "sending" && "opacity-70"}`}
+        className={`max-w-[80%] flex flex-col space-y-2 ${status === "sending" && "opacity-70"}`}
       >
         {!isMine && (
           <div className="flex space-x-2.5">
@@ -38,12 +111,17 @@ export const Message = ({
             <p>{sender.name}</p>
           </div>
         )}
+        <div
+          className="relative flex items-end flex-wrap gap-4 p-4 rounded-2xl bg-zinc-100"
+          onContextMenu={handleContextMenu}
+        >
+          {isVisibleContextMenu && <MessageContextMenu buttons={contextMenu} />}
 
-        <div className="flex gap-4 flex-wrap p-4 rounded-2xl bg-zinc-100">
           <p className="text-zinc-800">{content}</p>
+
           <div className="flex justify-end space-x-2">
-            <p className={`text-zinc-500 ${isMine && "text-end"}`}>
-              {formatDate(createdAt)}
+            <p className={`text-sm text-zinc-500/70 ${isMine && "text-end"}`}>
+              {formatDate(createdAt, "HH:mm")}
             </p>
             {status === "sent" && (
               <div className="flex items-end text-green-500">
@@ -56,4 +134,3 @@ export const Message = ({
     </div>
   )
 }
-

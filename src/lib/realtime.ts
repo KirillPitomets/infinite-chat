@@ -1,14 +1,17 @@
 import {Realtime, InferRealtimeEvents} from "@upstash/realtime"
 import {redis} from "./redis"
 import {z} from "zod"
-import { ChatMessageSchema } from "@/shared/message.schema"
-
+import {ChatMessageSchema} from "@/shared/message.schema"
 
 const schema = {
   chat: {
     created: z.string(),
     deleted: z.string(),
-    message: ChatMessageSchema
+    message: {
+      created: ChatMessageSchema,
+      updated: ChatMessageSchema,
+      deleted: ChatMessageSchema
+    }
   }
 }
 

@@ -5,5 +5,5 @@ export type ChatUIMessage = {
   createdAt: string
   sender: {id: string, tag: string, imageUrl: string; name: string}
 
-  status: "sending" | "sent" | "error"
+  status: "sending" | "sent" | "error" | "editing"
 }
