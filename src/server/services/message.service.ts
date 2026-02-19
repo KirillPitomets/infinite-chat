@@ -1,7 +1,7 @@
 import {prisma} from "../db/prisma"
 import {chatService} from "./chat.services"
-import {NotFoundError} from "../errors/domain.error"
-import { ChatMessagePrismaType } from "../types/ChatMessage.prisma"
+import {ForbiddenError, NotFoundError} from "../errors/domain.error"
+import {ChatMessagePrismaType} from "../types/ChatMessage.prisma"
 
 class MessageService {
   async createChatMessage({
@@ -25,6 +25,7 @@ class MessageService {
         id: true,
         content: true,
         createdAt: true,
+        updatedAt: true,
         sender: {
           select: {
             id: true,
@@ -35,8 +36,6 @@ class MessageService {
         }
       }
     })
-
-
 
     return msg
   }
@@ -50,6 +49,7 @@ class MessageService {
         id: true,
         content: true,
         createdAt: true,
+        updatedAt: true,
         sender: {
           select: {
             id: true,
@@ -75,6 +75,7 @@ class MessageService {
             id: true,
             content: true,
             createdAt: true,
+            updatedAt: true,
             sender: {
               select: {
                 id: true,
@@ -95,17 +96,68 @@ class MessageService {
     return chat.messages[0] || null
   }
 
-  async delete(messageId: string, userId: string) {}
+  async delete(messageId: string, userId: string) {
+    // const existingMessage = await prisma.message.findUnique({
+    //   where: {id: messageId}
+    // })
+    // if (!existingMessage) {
+    //   throw new NotFoundError("Message")
+    // }
+    // if (existingMessage.senderId !== userId) {
+    //   throw new ForbiddenError("You cannot delete this message")
+    // }
+    // const deletedMessage = await prisma.message.delete({where: {id: messageId}})
+    // return deletedMessage
+  }
 
   async update({
-    messageId,
     userId,
+    messageId,
     content
   }: {
     messageId: string
     userId: string
     content: string
-  }) {}
+  }): Promise<{updatedMessage: ChatMessagePrismaType; chatId: string}> {
+    const existingMessage = await prisma.message.findUnique({
+      where: {id: messageId}
+    })
+
+    if (!existingMessage) {
+      throw new NotFoundError("Message")
+    }
+
+    if (existingMessage.senderId !== userId) {
+      throw new ForbiddenError("You cannot edit this message")
+    }
+
+    const updatedMessage = await prisma.message.update({
+      where: {
+        id: messageId
+      },
+      data: {
+        content,
+        updatedAt: new Date()
+      },
+      select: {
+        id: true,
+        chatId: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+            imageUrl: true
+          }
+        }
+      }
+    })
+
+    return {updatedMessage: updatedMessage, chatId: updatedMessage.chatId}
+  }
 }
 
 export const messageService = new MessageService()

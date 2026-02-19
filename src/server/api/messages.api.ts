@@ -19,14 +19,14 @@ export const messagesApi = new Elysia({prefix: "/message"})
 
       const dto = toChatMessageDTO(chatMessage, userId)
 
-      await realtime.channel(body.chatId).emit("chat.message", dto)
-
+      await realtime.channel(body.chatId).emit("chat.message.created", dto)
+      console.log(dto)
       return dto
     },
     {
       body: z.object({
         chatId: z.string(),
-        content: z.string()
+        content: z.string().max(2000)
       }),
       response: ChatMessageSchema
     }
@@ -47,6 +47,28 @@ export const messagesApi = new Elysia({prefix: "/message"})
       response: z.array(ChatMessageSchema)
     }
   )
+  .put(
+    "/:messageId",
+    async ({userId, params, body}) => {
+      const {updatedMessage, chatId} = await messageService.update({
+        userId,
+        messageId: params.messageId,
+        content: body.content
+      })
+
+      const dto = toChatMessageDTO(updatedMessage, userId)
+
+      await realtime.channel(chatId).emit("chat.message.updated", dto)
+
+      return dto
+    },
+    {
+      body: z.object({content: z.string()}),
+      response: ChatMessageSchema
+    }
+  )
+  .delete("/:messageId", async () => {})
+
   .get(
     "/latest",
     async ({query, userId}) => {

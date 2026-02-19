@@ -10,7 +10,8 @@ export const ChatMessageSchema = z.object({
     imageUrl: z.string()
   }),
   isMine: z.boolean(),
-  createdAt: z.string().datetime()
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime()
 })
 
 export type ChatMessageDTO = z.infer<typeof ChatMessageSchema>

@@ -1,6 +1,5 @@
-
 import {ChatMessageDTO} from "@/shared/message.schema"
-import { ChatMessagePrismaType } from "../types/ChatMessage.prisma"
+import {ChatMessagePrismaType} from "../types/ChatMessage.prisma"
 
 export const toChatMessageDTO = (
   message: ChatMessagePrismaType,
@@ -16,6 +15,7 @@ export const toChatMessageDTO = (
       imageUrl: message.sender.imageUrl
     },
     isMine: userId === message.sender.id,
-    createdAt: message.createdAt.toISOString()
+    createdAt: message.createdAt.toISOString(),
+    updatedAt: message.updatedAt.toISOString()
   }
 }
