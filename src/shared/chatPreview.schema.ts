@@ -1,7 +1,9 @@
 import z from 'zod'
+import { ChatMessageSchema } from './message.schema';
 
 const BaseUserChatPreviewSchema = z.object({
   id: z.string(),
+  latestMessage: z.union([ChatMessageSchema, z.null()]),
   createdAt: z.string().datetime(),
 });
 

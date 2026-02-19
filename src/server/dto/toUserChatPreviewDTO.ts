@@ -7,6 +7,16 @@ export const toUserChatPreviewDTO = (
   userId: string
 ): UserChatPreviewDTO[] => {
   return chats.map(chat => {
+    const latestMessage = chat.messages[0]
+      ? {
+          id: chat.messages[0].id,
+          content: chat.messages[0].content,
+          sender: chat.messages[0].sender,
+          createdAt: chat.messages[0].createdAt.toISOString(),
+          updatedAt: chat.messages[0].updatedAt.toISOString()
+        }
+      : null
+
     switch (chat.type) {
       case "DIRECT":
         const otherUser = chat.memberships.find(
@@ -20,6 +30,7 @@ export const toUserChatPreviewDTO = (
         return {
           id: chat.id,
           type: chat.type,
+          latestMessage,
           createdAt: chat.createdAt.toISOString(),
           otherUser: {
             id: otherUser.user.id,
@@ -33,6 +44,7 @@ export const toUserChatPreviewDTO = (
         return {
           id: chat.id,
           type: chat.type,
+          latestMessage,
           createdAt: chat.createdAt.toISOString(),
           membersCount: chat.memberships.length,
           name: chat.name
