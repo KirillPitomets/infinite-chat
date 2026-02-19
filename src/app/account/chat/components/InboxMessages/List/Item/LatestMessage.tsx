@@ -1,48 +1,69 @@
+import {useCurrentUser} from "@/context/CurrentUserContext"
 import {edenClient} from "@/lib/eden"
 import {useRealtime} from "@/lib/realtime-client"
+import {ChatMessageDTO} from "@/shared/message.schema"
 import {useQuery, useQueryClient} from "@tanstack/react-query"
 import {format} from "date-fns"
 
-const LatestMessage = ({chatId}: {chatId: string}) => {
+const LatestMessage = ({
+  chatId,
+  initialLatestMessage
+}: {
+  chatId: string
+  initialLatestMessage?: ChatMessageDTO | null | undefined
+}) => {
+  const queryClient = useQueryClient()
+  const currentUser = useCurrentUser()
+
   const {data: latestMessage, isLoading} = useQuery({
+    enabled: !!chatId,
     queryKey: ["latestMessage", chatId],
     queryFn: async () => {
-      if (chatId) {
-        const res = await edenClient.message.latest.get({query: {chatId}})
-        return res.data ?? null
-      }
-    }
-  })
+      const res = await edenClient.message.latest.get({query: {chatId}})
 
-  const queryClient = useQueryClient()
+      if (res.status !== 200) {
+        throw new Error("Failed to get latest message")
+      }
+
+      return res.data
+    },
+    initialData: initialLatestMessage
+  })
 
   useRealtime({
     channels: [chatId],
-    events: ["chat.message"],
+    events: [
+      "chat.message.created",
+      "chat.message.updated",
+      "chat.message.deleted"
+    ],
     onData({data, event}) {
-      if (event === "chat.message") {
-        queryClient.setQueryData(["latestMessage", chatId], data)
+      switch (event) {
+        case "chat.message.created":
+          queryClient.setQueryData(["latestMessage", chatId], data)
+          break
+        case "chat.message.updated":
+          queryClient.setQueryData(["latestMessage", chatId], data)
+          break
+        default:
+          break
       }
     }
   })
 
   if (isLoading) {
-    return (
-      <div className="w-[70%] h-5.5 bg-zinc-300/40 rounded-2xl animate-pulse" />
-    )
-  }
-
-  if (!latestMessage) {
+    return <span className="w-[70%] opacity-60 animate-pulse">...</span>
   }
 
   return (
     <div className="flex justify-between">
-      <p className="max-w-35 truncate text-zinc-500">
+      <p className="truncate max-w-35 opacity-60">
         {latestMessage ? (
           <>
             <span>
-              {latestMessage.isMine ? "you: " : `${latestMessage.sender.name}`}
-              {": "}
+              {latestMessage.sender.id === currentUser.id
+                ? "you: "
+                : `${latestMessage.sender.name}: `}
             </span>
             {latestMessage.content}
           </>
@@ -51,15 +72,10 @@ const LatestMessage = ({chatId}: {chatId: string}) => {
         )}
       </p>
       {latestMessage?.createdAt && (
-        <p className="text-zinc-600">
-          {format(latestMessage.createdAt, "HH:MM")}
-        </p>
+        <p className="opacity-60">{format(latestMessage.createdAt, "HH:MM")}</p>
       )}
     </div>
   )
 }
 
 export default LatestMessage
-/*
-{
-*/

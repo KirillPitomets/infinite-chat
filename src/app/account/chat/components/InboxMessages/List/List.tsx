@@ -21,6 +21,7 @@ export function InboxMessagesList({
         <li key={chat.id}>
           <InboxMessagesItem
             chatId={chat.id}
+            initialLatestMessage={chat.latestMessage}
             name={chat.type === "DIRECT" ? chat.otherUser.name : chat.name}
             avatarUrl={chat.type === "DIRECT" ? chat.otherUser.imageUrl : ""}
             status="online"

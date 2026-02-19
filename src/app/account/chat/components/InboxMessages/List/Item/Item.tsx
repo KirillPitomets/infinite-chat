@@ -2,18 +2,21 @@ import {ACOOUNT_PAGES} from "@/config/accountPages.config"
 import Image from "next/image"
 import Link from "next/link"
 import LatestMessage from "./LatestMessage"
+import {ChatMessageDTO} from "@/shared/message.schema"
 
 type InboxMessagesItemProps = {
   chatId: string
   name: string
   avatarUrl: string
   status: "online" | "offline"
+  initialLatestMessage?: ChatMessageDTO | null | undefined
 }
 
 export const InboxMessagesItem = ({
   chatId,
   name,
   avatarUrl,
+  initialLatestMessage,
   status
 }: InboxMessagesItemProps) => {
   return (
@@ -39,7 +42,10 @@ export const InboxMessagesItem = ({
 
       <div className="flex-1">
         <p className="font-semibold">{name}</p>
-        <LatestMessage chatId={chatId} />
+        <LatestMessage
+          chatId={chatId}
+          initialLatestMessage={initialLatestMessage}
+        />
       </div>
     </Link>
   )
