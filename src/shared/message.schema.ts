@@ -9,7 +9,6 @@ export const ChatMessageSchema = z.object({
     tag: z.string(),
     imageUrl: z.string()
   }),
-  isMine: z.boolean(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime()
 })
