@@ -26,6 +26,7 @@
     "prismabox": "^1.1.26",
     "react": "19.2.3",
     "react-dom": "19.2.3",
+    "react-hot-toast": "^2.6.0",
     "zod": "^4.3.6"
   },
   "devDependencies": {

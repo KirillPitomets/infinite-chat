@@ -1,7 +1,9 @@
 import {Providers} from "@/components/providers"
+import {Toaster} from "react-hot-toast"
 import type {Metadata} from "next"
 import {Noto_Sans} from "next/font/google"
 import "./globals.css"
+import Script from "next/script"
 
 const notoSans = Noto_Sans({
   variable: "--font-noto-sans",
@@ -20,8 +22,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <Script src="http://localhost:8097" />
       <body className={`${notoSans.variable} antialiased`}>
         <Providers>{children}</Providers>
+        <Toaster />
       </body>
     </html>
   )
