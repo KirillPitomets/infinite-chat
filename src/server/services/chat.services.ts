@@ -199,7 +199,7 @@ class ChatService {
   async delete(chatId: string) {
     return prisma.chat.delete({
       where: {id: chatId},
-      select: {memberships: {select: { userId: true }}}
+      select: {memberships: {select: {userId: true}}}
     })
   }
 }

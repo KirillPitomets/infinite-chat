@@ -6,6 +6,7 @@ export type ChatMessagePrismaType = Prisma.MessageGetPayload<{
     content: true
     createdAt: true
     updatedAt: true
+    isDeleted: true
     sender: {
       select: {
         id: true

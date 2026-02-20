@@ -18,9 +18,7 @@ export const messagesApi = new Elysia({prefix: "/message"})
       })
 
       const dto = toChatMessageDTO(chatMessage)
-
       await realtime.channel(body.chatId).emit("chat.message.created", dto)
-      console.log(dto)
       return dto
     },
     {
@@ -67,7 +65,26 @@ export const messagesApi = new Elysia({prefix: "/message"})
       response: ChatMessageSchema
     }
   )
-  .delete("/:messageId", async () => {})
+  .delete(
+    "/:messageId",
+    async ({params, userId}) => {
+      const deletedMessage = await messageService.delete(
+        params.messageId,
+        userId
+      )
+
+      const dtoDeletedMessage = toChatMessageDTO(deletedMessage)
+
+      await realtime
+        .channel(deletedMessage.chatId)
+        .emit("chat.message.deleted", dtoDeletedMessage)
+
+      return dtoDeletedMessage
+    },
+    {
+      response: ChatMessageSchema
+    }
+  )
 
   .get(
     "/latest",

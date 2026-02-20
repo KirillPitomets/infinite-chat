@@ -1,6 +1,10 @@
 import {prisma} from "../db/prisma"
 import {chatService} from "./chat.services"
-import {ForbiddenError, NotFoundError} from "../errors/domain.error"
+import {
+  ConflictError,
+  ForbiddenError,
+  NotFoundError
+} from "../errors/domain.error"
 import {ChatMessagePrismaType} from "../types/ChatMessage.prisma"
 
 class MessageService {
@@ -26,6 +30,7 @@ class MessageService {
         content: true,
         createdAt: true,
         updatedAt: true,
+        isDeleted: true,
         sender: {
           select: {
             id: true,
@@ -50,6 +55,7 @@ class MessageService {
         content: true,
         createdAt: true,
         updatedAt: true,
+        isDeleted: true,
         sender: {
           select: {
             id: true,
@@ -76,6 +82,7 @@ class MessageService {
             content: true,
             createdAt: true,
             updatedAt: true,
+            isDeleted: true,
             sender: {
               select: {
                 id: true,
@@ -97,17 +104,48 @@ class MessageService {
   }
 
   async delete(messageId: string, userId: string) {
-    // const existingMessage = await prisma.message.findUnique({
-    //   where: {id: messageId}
-    // })
-    // if (!existingMessage) {
-    //   throw new NotFoundError("Message")
-    // }
-    // if (existingMessage.senderId !== userId) {
-    //   throw new ForbiddenError("You cannot delete this message")
-    // }
-    // const deletedMessage = await prisma.message.delete({where: {id: messageId}})
-    // return deletedMessage
+    const existingMessage = await prisma.message.findUnique({
+      where: {id: messageId}
+    })
+
+    if (!existingMessage) {
+      throw new NotFoundError("Message")
+    }
+
+    if (existingMessage.senderId !== userId) {
+      throw new ForbiddenError("You can't delete not your message")
+    }
+
+    if (existingMessage.isDeleted) {
+      throw new ConflictError("Message had been deleted, already")
+    }
+
+    const deletedMessage = await prisma.message.update({
+      where: {
+        id: messageId
+      },
+      data: {
+        isDeleted: true
+      },
+      select: {
+        id: true,
+        content: true,
+        createdAt: true,
+        updatedAt: true,
+        isDeleted: true,
+        chatId: true,
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            tag: true,
+            imageUrl: true
+          }
+        }
+      }
+    })
+
+    return deletedMessage
   }
 
   async update({
@@ -145,6 +183,7 @@ class MessageService {
         content: true,
         createdAt: true,
         updatedAt: true,
+        isDeleted: true,
         sender: {
           select: {
             id: true,

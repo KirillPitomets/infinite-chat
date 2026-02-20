@@ -7,6 +7,7 @@ export const toChatMessageDTO = (
   return {
     id: message.id,
     content: message.content,
+    isDeleted: message.isDeleted,
     sender: {
       id: message.sender.id,
       name: message.sender.name,
