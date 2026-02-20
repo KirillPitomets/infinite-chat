@@ -77,8 +77,8 @@ export const MessageList = () => {
       const optimisticMessage: ChatUIMessage = {
         id: tempId,
         content,
-        isMine: true,
         sender: currentUser,
+        isDeleted: false,
         createdAt: new Date().toISOString(),
         status: "sending"
       }
@@ -208,6 +208,18 @@ export const MessageList = () => {
                 : []
           )
           break
+        case "chat.message.deleted":
+          queryClient.setQueryData<ChatUIMessage[]>(
+            ["getChatMessages", chatId],
+            old =>
+              old
+                ? old.map(msg =>
+                    msg.id === data.id ? {...data, status: "deleted"} : msg
+                  )
+                : []
+          )
+
+          break
         default:
           break
       }
@@ -248,8 +260,8 @@ export const MessageList = () => {
               <Message
                 key={msg.id}
                 handleUpdateMessage={handleMessageDetails}
-                {...msg}
                 isMine={currentUser.id === msg.sender.id}
+                {...msg}
               />
             ))}
         <div ref={messagesEndRef}></div>

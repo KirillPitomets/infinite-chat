@@ -1,9 +1,9 @@
 export type ChatUIMessage = {
   id: string
-  isMine: boolean
   content: string
   createdAt: string
+  isDeleted: boolean
   sender: {id: string, tag: string, imageUrl: string; name: string}
 
-  status: "sending" | "sent" | "error" | "editing"
+  status: "sending" | "sent" | "error" | "editing" | "deleted"
 }

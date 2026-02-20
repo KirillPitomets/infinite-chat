@@ -8,7 +8,7 @@ type InboxMessageListProps = {
 }
 
 export function InboxMessagesList({
-  chats,
+  chats = [],
   isLoadingSkeleton
 }: InboxMessageListProps) {
   if (isLoadingSkeleton) {

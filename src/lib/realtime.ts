@@ -14,8 +14,8 @@ const schema = {
     }),
     message: {
       created: ChatMessageSchema,
-      updated: ChatMessageSchema,
-      deleted: ChatMessageSchema
+      updated: ChatMessageSchema, // id, content
+      deleted: ChatMessageSchema // id
     }
   }
 }

@@ -11,6 +11,7 @@ import DeletedMessage from "./DeletedMessage"
 import {formatDate} from "date-fns"
 
 interface IMessageProps extends ChatUIMessage {
+  isMine: boolean
   handleUpdateMessage: (id: string, initialValue: string) => void
 }
 
@@ -20,13 +21,13 @@ export const Message = ({
   content,
   sender,
   status,
+  isDeleted,
   createdAt,
   handleUpdateMessage
 }: IMessageProps) => {
-  const [isDeletedMessage, setIsDeletedMessage] = useState(false)
   const [isVisibleContextMenu, setIsVisibleContextMenu] = useState(false)
 
-  const {mutate: deleteMessage} = useMutation({
+  const {mutate: deleteMessage, isPending: isDeletingMessage} = useMutation({
     mutationKey: ["deleteMessage", id],
     mutationFn: async () => {
       const res = await edenClient.message({messageId: id}).delete()
@@ -36,7 +37,7 @@ export const Message = ({
       return res.data
     },
     onSuccess(data) {
-      setIsDeletedMessage(true)
+      // setIsDeletedMessage(true)
       toast.success("Message has been deleted")
     },
     onError(error) {
@@ -52,7 +53,7 @@ export const Message = ({
     setIsVisibleContextMenu(prev => !prev)
   }
 
-  if (isDeletedMessage) {
+  if (isDeleted) {
     return (
       <DeletedMessage
         isMine={isMine}
@@ -90,11 +91,13 @@ export const Message = ({
 
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
-      {status === "sending" || status === "editing" && (
-        <div className="flex items-center mr-4">
-          <Loader />
-        </div>
-      )}
+      {status === "sending" ||
+        status === "editing" ||
+        isDeletingMessage && (
+          <div className="flex items-center mr-4">
+            <Loader />
+          </div>
+        )}
 
       <div
         className={`max-w-[80%] flex flex-col space-y-2 ${status === "sending" && "opacity-70"}`}

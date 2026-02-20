@@ -22,7 +22,7 @@ export const InboxMessagesItem = ({
   return (
     <Link
       href={ACOOUNT_PAGES.CHAT_ID(chatId)}
-      className="flex gap-2 px-5 py-1 transition-colors hover:bg-zinc-300"
+      className="flex items-center gap-2 px-5 py-1 transition-colors hover:bg-zinc-300"
     >
       <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-zinc-300">
         {avatarUrl && (
