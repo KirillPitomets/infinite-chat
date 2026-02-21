@@ -1,5 +1,5 @@
 import {User} from "@/prisma/generated/client"
-import {UserDTO} from "@/shared/user.schema"
+import {UserDTO} from "@/shared/schemes/user.schema"
 
 export const toUserDTO = (user: User): UserDTO => {
   return {

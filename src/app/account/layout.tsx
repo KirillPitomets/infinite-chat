@@ -1,6 +1,6 @@
 "use client"
-import Sidebar from "@/components/Sidebar/Sidebar"
-import CurrentUserProvider from "@/context/CurrentUserContext"
+import Sidebar from "@/shared/ui/Sidebar/Sidebar"
+import CurrentUserProvider from "@/shared/context/CurrentUserContext"
 
 export default function ChatLayot({children}: {children: React.ReactNode}) {
   return (

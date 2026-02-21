@@ -1,6 +1,6 @@
 "use client"
 
-import {useAuthRedirect} from "@/hooks/useAuthRedirect"
+import {useAuthRedirect} from "@/shared/hooks/useAuthRedirect"
 import {SignInButton, SignUpButton} from "@clerk/nextjs"
 
 export default function Home() {

@@ -1,6 +1,6 @@
 "use client"
 
-import { useAuthRedirect } from "@/hooks/useAuthRedirect"
+import { useAuthRedirect } from "@/shared/hooks/useAuthRedirect"
 
 
 export default function AccountPage() {

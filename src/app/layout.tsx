@@ -1,4 +1,4 @@
-import {Providers} from "@/components/providers"
+import {Providers} from "@/shared/providers"
 import {Toaster} from "react-hot-toast"
 import type {Metadata} from "next"
 import {Noto_Sans} from "next/font/google"

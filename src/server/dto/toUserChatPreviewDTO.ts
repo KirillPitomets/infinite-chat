@@ -1,7 +1,7 @@
-import {UserChatPreviewDTO} from "@/shared/chatPreview.schema"
+import {UserChatPreviewDTO} from "@/shared/schemes/chatPreview.schema"
 import {ConflictError} from "../errors/domain.error"
 import {ChatPreviewPrismaType} from "../types/UserChatPreview.prisma"
-import {ChatMessageDTO} from "@/shared/message.schema"
+import {ChatMessageDTO} from "@/shared/schemes/message.schema"
 
 export const toUserChatPreviewDTO = (
   chats: ChatPreviewPrismaType[],

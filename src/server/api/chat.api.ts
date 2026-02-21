@@ -1,12 +1,12 @@
 import {chatService} from "@/server/services/chat.services"
-import {ChatDetailsSchema} from "@/shared/chat.schema"
+import {ChatDetailsSchema} from "@/shared/schemes/chat.schema"
 import Elysia from "elysia"
 import z from "zod"
-import {UserChatPreviewSchema} from "../../shared/chatPreview.schema"
+import {UserChatPreviewSchema} from "../../shared/schemes/chatPreview.schema"
 import {toChatDetailsDTO} from "../dto/toChatDetailsDTO"
 import {toUserChatPreviewDTO} from "../dto/toUserChatPreviewDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
-import {realtime} from "@/lib/realtime"
+import {realtime} from "@/shared/lib/realtime"
 
 export const chatApi = new Elysia({prefix: "/chat"})
   .use(userContextMiddleware)

@@ -1,13 +1,5 @@
-"use client"
-
-import {Header} from "./components/Header/Header"
-import {MessageList} from "./components/MessageList"
+import { ChatPage } from "@/features/chat/"
 
 export default function Page() {
-  return (
-    <div className="flex flex-col flex-1 w-full justify-beetwen">
-      <Header />
-      <MessageList />
-    </div>
-  )
+  return <ChatPage />
 }

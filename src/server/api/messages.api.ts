@@ -1,5 +1,5 @@
-import {realtime} from "@/lib/realtime"
-import {ChatMessageDTO, ChatMessageSchema} from "@/shared/message.schema"
+import {realtime} from "@/shared/lib/realtime"
+import {ChatMessageDTO, ChatMessageSchema} from "@/shared/schemes/message.schema"
 import Elysia from "elysia"
 import z from "zod"
 import {toChatMessageDTO} from "../dto/toChatMessageDTO"
