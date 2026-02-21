@@ -1,5 +1,5 @@
 import Elysia from "elysia"
-import {userService} from "../services/user.services"
+import {userService} from "@/server/api/user/user.services"
 import {InternalServerError, UnauthorizedError} from "../errors/domain.error"
 import {auth, clerkClient} from "@clerk/nextjs/server"
 

@@ -29,4 +29,4 @@ export const UserChatPreviewSchema = z.union([
   GroupUserChatPreviewSchema
 ])
 
-export type UserChatPreviewDTO = z.infer<typeof UserChatPreviewSchema>
+export type UserChatPreview = z.infer<typeof UserChatPreviewSchema>

@@ -9,4 +9,4 @@ export const UserSchema = z.object({
   createdAt: z.string().datetime(),
 });
 
-export type UserDTO = z.infer<typeof UserSchema>;
+export type User = z.infer<typeof UserSchema>;

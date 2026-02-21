@@ -14,4 +14,4 @@ export const ChatMessageSchema = z.object({
   updatedAt: z.string().datetime()
 })
 
-export type ChatMessageDTO = z.infer<typeof ChatMessageSchema>
+export type ChatMessage = z.infer<typeof ChatMessageSchema>
