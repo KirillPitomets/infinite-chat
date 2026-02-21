@@ -1,75 +1,67 @@
 import { Prisma } from "@/prisma/generated/client"
 
+export const chatInclude = {
+  memberships: {
+    select: {
+      userId: true
+    }
+  }
+} satisfies Prisma.ChatInclude
+
 export type ChatPrismaType = Prisma.ChatGetPayload<{
-  select: {
-    name: true
-    id: true
-    imageUrl: true
-    createdAt: true
-    type: true
-    memberships: {
-      select: {
-        userId: true
+  include: typeof chatInclude
+}>
+
+export const chatPreviewInclude = {
+  memberships: {
+    select: {
+      user: {
+        select: {
+          id: true,
+          name: true,
+          tag: true,
+          lastSeen: true,
+          imageUrl: true
+        }
+      }
+    }
+  },
+  messages: {
+    take: 1,
+    orderBy: { createdAt: "desc" },
+    include: {
+      sender: {
+        select: {
+          id: true,
+          name: true,
+          tag: true,
+          imageUrl: true
+        }
       }
     }
   }
-}>
+} satisfies Prisma.ChatInclude
 
 export type ChatPreviewPrismaType = Prisma.ChatGetPayload<{
-  select: {
-    id: true
-    type: true
-    createdAt: true
-    name: true
-    memberships: {
-      select: {
-        user: {
-          select: {
-            id: true
-            name: true
-            tag: true
-            lastSeen: true
-            imageUrl: true
-          }
-        }
-      }
-    }
-    messages: {
-      take: 1
-      orderBy: { createdAt: "desc" }
-      include: {
-        sender: {
-          select: {
-            id: true
-            name: true
-            tag: true
-            imageUrl: true
-          }
-        }
-      }
-    }
-  }
+  include: typeof chatPreviewInclude
 }>
 
-export type ChatDetailsPrismaType = Prisma.ChatGetPayload<{
-  select: {
-    id: true
-    type: true
-    name: true
-    createdAt: true
-    imageUrl: true
-    memberships: {
-      select: {
-        role: true
-        user: {
-          select: {
-            id: true
-            name: true
-            tag: true
-            imageUrl: true
-          }
+export const chatDetailsInclude = {
+  memberships: {
+    select: {
+      role: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          tag: true,
+          imageUrl: true
         }
       }
     }
   }
+} satisfies Prisma.ChatInclude
+
+export type ChatDetailsPrismaType = Prisma.ChatGetPayload<{
+  include: typeof chatDetailsInclude
 }>

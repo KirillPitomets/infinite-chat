@@ -5,7 +5,10 @@ import {
   NotFoundError
 } from "@/server/errors/domain.error"
 import { chatService } from "@/server/api/chat/chat.service"
-import { ChatMessagePrismaType } from "@/server/api/message/types/message.prisma"
+import {
+  ChatMessageInclude,
+  ChatMessagePrismaType
+} from "@/server/api/message/types/message.prisma"
 
 class MessageService {
   async createChatMessage({
@@ -25,21 +28,7 @@ class MessageService {
         senderId: senderId,
         content
       },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        isDeleted: true,
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            tag: true,
-            imageUrl: true
-          }
-        }
-      }
+      include: ChatMessageInclude
     })
 
     return msg
@@ -50,21 +39,7 @@ class MessageService {
       where: {
         chatId
       },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        isDeleted: true,
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            tag: true,
-            imageUrl: true
-          }
-        }
-      }
+      include: ChatMessageInclude
     })
   }
 
@@ -77,12 +52,7 @@ class MessageService {
         messages: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            content: true,
-            createdAt: true,
-            updatedAt: true,
-            isDeleted: true,
+          include: {
             sender: {
               select: {
                 id: true,
@@ -127,13 +97,7 @@ class MessageService {
       data: {
         isDeleted: true
       },
-      select: {
-        id: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        isDeleted: true,
-        chatId: true,
+      include: {
         sender: {
           select: {
             id: true,
@@ -177,13 +141,7 @@ class MessageService {
         content,
         updatedAt: new Date()
       },
-      select: {
-        id: true,
-        chatId: true,
-        content: true,
-        createdAt: true,
-        updatedAt: true,
-        isDeleted: true,
+      include: {
         sender: {
           select: {
             id: true,

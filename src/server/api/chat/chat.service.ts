@@ -6,7 +6,10 @@ import {
   NotFoundError
 } from "@/server/errors/domain.error"
 import {
+  chatDetailsInclude,
   ChatDetailsPrismaType,
+  chatInclude,
+  chatPreviewInclude,
   ChatPreviewPrismaType,
   ChatPrismaType
 } from "@/server/api/chat/types/chat.prisma"
@@ -41,25 +44,14 @@ class ChatService {
       throw new ConflictError(`You already have chat with ${memberTag}`)
     }
 
-    const chat: ChatPrismaType = await prisma.chat.create({
+    const chat = await prisma.chat.create({
       data: {
         type: "DIRECT",
         memberships: {
           create: [{ userId }, { userId: member.id }]
         }
       },
-      select: {
-        name: true,
-        id: true,
-        imageUrl: true,
-        createdAt: true,
-        type: true,
-        memberships: {
-          select: {
-            userId: true
-          }
-        }
-      }
+      include: chatInclude
     })
 
     return chat
@@ -69,34 +61,14 @@ class ChatService {
     userId: string,
     chatId: string
   ): Promise<ChatDetailsPrismaType> {
-    const chat: ChatDetailsPrismaType | null = await prisma.chat.findUnique({
+    const chat = await prisma.chat.findUnique({
       where: {
         id: chatId,
         memberships: {
           some: { userId }
         }
       },
-      select: {
-        id: true,
-        type: true,
-        name: true,
-        createdAt: true,
-        imageUrl: true,
-
-        memberships: {
-          select: {
-            role: true,
-            user: {
-              select: {
-                id: true,
-                name: true,
-                tag: true,
-                imageUrl: true
-              }
-            }
-          }
-        }
-      }
+      include: chatDetailsInclude
     })
 
     if (!chat) {
@@ -109,39 +81,7 @@ class ChatService {
   async getUserChatsPreview(userId: string): Promise<ChatPreviewPrismaType[]> {
     const chats = await prisma.chat.findMany({
       where: { memberships: { some: { userId } } },
-      select: {
-        id: true,
-        type: true,
-        createdAt: true,
-        name: true,
-        memberships: {
-          select: {
-            user: {
-              select: {
-                id: true,
-                name: true,
-                tag: true,
-                lastSeen: true,
-                imageUrl: true
-              }
-            }
-          }
-        },
-        messages: {
-          take: 1,
-          orderBy: { createdAt: "desc" },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                tag: true,
-                imageUrl: true
-              }
-            }
-          }
-        }
-      }
+      include: chatPreviewInclude
     })
 
     return chats
