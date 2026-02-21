@@ -1,39 +1,23 @@
-import {Prisma, type Chat} from "@/prisma/generated/client"
-import {prisma} from "@/server/db/prisma"
-import {userService} from "@/server/services/user.services"
+import { type Chat } from "@/prisma/generated/client"
+import { prisma } from "@/server/db/prisma"
 import {
   ConflictError,
   ForbiddenError,
   NotFoundError
 } from "@/server/errors/domain.error"
-import {ChatDetailsPrismaType} from "../types/ChatDetails.prisma"
-import {ChatPreviewPrismaType} from "../types/UserChatPreview.prisma"
-
-type createDirectChatBodyType = {
-  memberTag: string
-}
-
-type ChatPrismaType = Prisma.ChatGetPayload<{
-  select: {
-    name: true
-    id: true
-    imageUrl: true
-    createdAt: true
-    type: true
-    memberships: {
-      select: {
-        userId: true
-      }
-    }
-  }
-}>
+import {
+  ChatDetailsPrismaType,
+  ChatPreviewPrismaType,
+  ChatPrismaType
+} from "@/server/api/chat/types/chat.prisma"
+import { userService } from "@/server/api/user/user.services"
 
 class ChatService {
   async createDirectChat(
     userId: string,
-    body: createDirectChatBodyType
+    memberTag: string
   ): Promise<ChatPrismaType> {
-    const member = await userService.getByTag(body.memberTag)
+    const member = await userService.getByTag(memberTag)
 
     if (!member) {
       throw new NotFoundError("Member")
@@ -43,37 +27,25 @@ class ChatService {
       throw new ConflictError("Cannot create chat with yourself")
     }
 
-    const existsChat: ChatPrismaType | null = await prisma.chat.findFirst({
+    const existsChat = await prisma.chat.findFirst({
       where: {
         type: "DIRECT",
         AND: [
-          {memberships: {some: {userId: userId}}},
-          {memberships: {some: {userId: member.id}}}
+          { memberships: { some: { userId: userId } } },
+          { memberships: { some: { userId: member.id } } }
         ]
-      },
-      select: {
-        name: true,
-        id: true,
-        imageUrl: true,
-        createdAt: true,
-        type: true,
-        memberships: {
-          select: {
-            userId: true
-          }
-        }
       }
     })
 
     if (existsChat) {
-      throw new ConflictError(`You already have chat with ${body.memberTag}`)
+      throw new ConflictError(`You already have chat with ${memberTag}`)
     }
 
     const chat: ChatPrismaType = await prisma.chat.create({
       data: {
         type: "DIRECT",
         memberships: {
-          create: [{userId}, {userId: member.id}]
+          create: [{ userId }, { userId: member.id }]
         }
       },
       select: {
@@ -101,7 +73,7 @@ class ChatService {
       where: {
         id: chatId,
         memberships: {
-          some: {userId}
+          some: { userId }
         }
       },
       select: {
@@ -136,7 +108,7 @@ class ChatService {
 
   async getUserChatsPreview(userId: string): Promise<ChatPreviewPrismaType[]> {
     const chats = await prisma.chat.findMany({
-      where: {memberships: {some: {userId}}},
+      where: { memberships: { some: { userId } } },
       select: {
         id: true,
         type: true,
@@ -157,7 +129,7 @@ class ChatService {
         },
         messages: {
           take: 1,
-          orderBy: {createdAt: "desc"},
+          orderBy: { createdAt: "desc" },
           include: {
             sender: {
               select: {
@@ -182,7 +154,7 @@ class ChatService {
     const chat = await prisma.chat.findUnique({
       where: {
         id: chatId,
-        memberships: {some: {userId}}
+        memberships: { some: { userId } }
       },
       select: {
         id: true
@@ -198,8 +170,8 @@ class ChatService {
 
   async delete(chatId: string) {
     return prisma.chat.delete({
-      where: {id: chatId},
-      select: {memberships: {select: {userId: true}}}
+      where: { id: chatId },
+      include: { memberships: { select: { userId: true } } }
     })
   }
 }

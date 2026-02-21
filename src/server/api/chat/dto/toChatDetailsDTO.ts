@@ -1,12 +1,11 @@
-import {ChatDetailsDTO} from "@/shared/schemes/chat.schema"
-import {ConflictError} from "../errors/domain.error"
-import { ChatDetailsPrismaType } from "../types/ChatDetails.prisma"
-
+import { ChatDetails } from "@/shared/schemes/chat.schema"
+import { ConflictError } from "@/server/errors/domain.error"
+import { ChatDetailsPrismaType } from "@/server/api/chat/types/chat.prisma"
 
 export const toChatDetailsDTO = (
   chat: ChatDetailsPrismaType,
   userId: string
-): ChatDetailsDTO => {
+): ChatDetails => {
   switch (chat.type) {
     case "DIRECT":
       const otherUser = chat.memberships.find(
@@ -35,7 +34,7 @@ export const toChatDetailsDTO = (
         createdAt: chat.createdAt.toISOString(),
         name: chat.name,
         membersCount: chat.memberships.length,
-        imageUrl: chat.imageUrl,
+        imageUrl: chat.imageUrl
       }
     default:
       throw new ConflictError("Unsupported chat type")

@@ -1,12 +1,12 @@
-import {UserChatPreviewDTO} from "@/shared/schemes/chatPreview.schema"
-import {ConflictError} from "../errors/domain.error"
-import {ChatPreviewPrismaType} from "../types/UserChatPreview.prisma"
-import {ChatMessageDTO} from "@/shared/schemes/message.schema"
+import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
+import { ConflictError } from "../../../errors/domain.error"
+import { ChatMessage } from "@/shared/schemes/message.schema"
+import { ChatPreviewPrismaType } from "../types/chat.prisma"
 
 export const toUserChatPreviewDTO = (
   chats: ChatPreviewPrismaType[],
   userId: string
-): UserChatPreviewDTO[] => {
+): UserChatPreview[] => {
   return chats.map(chat => {
     const latestMessage = chat.messages[0]
       ? ({
@@ -16,13 +16,13 @@ export const toUserChatPreviewDTO = (
           isDeleted: chat.messages[0].isDeleted,
           createdAt: chat.messages[0].createdAt.toISOString(),
           updatedAt: chat.messages[0].updatedAt.toISOString()
-        } satisfies ChatMessageDTO)
+        } satisfies ChatMessage)
       : null
 
     switch (chat.type) {
       case "DIRECT":
         const otherUser = chat.memberships.find(
-          ({user: member}) => member.id !== userId
+          ({ user: member }) => member.id !== userId
         )
 
         if (!otherUser) {
@@ -41,7 +41,7 @@ export const toUserChatPreviewDTO = (
             tag: otherUser.user.tag,
             lastSeen: otherUser.user.lastSeen.toISOString()
           }
-        } satisfies UserChatPreviewDTO
+        } satisfies UserChatPreview
       case "GROUP":
         return {
           id: chat.id,
@@ -50,7 +50,7 @@ export const toUserChatPreviewDTO = (
           createdAt: chat.createdAt.toISOString(),
           membersCount: chat.memberships.length,
           name: chat.name
-        } satisfies UserChatPreviewDTO
+        } satisfies UserChatPreview
       default:
         throw new ConflictError("Unsupported chat type")
     }

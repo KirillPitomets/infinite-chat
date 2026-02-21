@@ -1,11 +1,11 @@
-import {prisma} from "../db/prisma"
-import {chatService} from "./chat.services"
+import { prisma } from "@/server/db/prisma"
 import {
   ConflictError,
   ForbiddenError,
   NotFoundError
-} from "../errors/domain.error"
-import {ChatMessagePrismaType} from "../types/ChatMessage.prisma"
+} from "@/server/errors/domain.error"
+import { chatService } from "@/server/api/chat/chat.service"
+import { ChatMessagePrismaType } from "@/server/api/message/types/message.prisma"
 
 class MessageService {
   async createChatMessage({
@@ -72,11 +72,11 @@ class MessageService {
     chatId: string
   ): Promise<ChatMessagePrismaType | null> {
     const chat = await prisma.chat.findUnique({
-      where: {id: chatId},
+      where: { id: chatId },
       select: {
         messages: {
           take: 1,
-          orderBy: {createdAt: "desc"},
+          orderBy: { createdAt: "desc" },
           select: {
             id: true,
             content: true,
@@ -105,7 +105,7 @@ class MessageService {
 
   async delete(messageId: string, userId: string) {
     const existingMessage = await prisma.message.findUnique({
-      where: {id: messageId}
+      where: { id: messageId }
     })
 
     if (!existingMessage) {
@@ -156,9 +156,9 @@ class MessageService {
     messageId: string
     userId: string
     content: string
-  }): Promise<{updatedMessage: ChatMessagePrismaType; chatId: string}> {
+  }): Promise<{ updatedMessage: ChatMessagePrismaType; chatId: string }> {
     const existingMessage = await prisma.message.findUnique({
-      where: {id: messageId}
+      where: { id: messageId }
     })
 
     if (!existingMessage) {
@@ -195,7 +195,7 @@ class MessageService {
       }
     })
 
-    return {updatedMessage: updatedMessage, chatId: updatedMessage.chatId}
+    return { updatedMessage: updatedMessage, chatId: updatedMessage.chatId }
   }
 }
 
