@@ -1,7 +1,7 @@
 import Elysia from "elysia"
 
 import {userService} from "@/server/services/user.services"
-import {UserDTO, UserSchema} from "@/shared/user.schema"
+import {UserDTO, UserSchema} from "@/shared/schemes/user.schema"
 import z from "zod"
 import {toUserDTO} from "../dto/toUserDTO"
 import {userContextMiddleware} from "../middlewares/userContextMiddleware"
