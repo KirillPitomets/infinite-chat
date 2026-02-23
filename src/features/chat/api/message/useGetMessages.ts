@@ -1,7 +1,7 @@
 import { edenClient } from "@/shared/lib/eden"
 import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import { useQuery } from "@tanstack/react-query"
-import { chatKeys } from "./chat.key"
+import { chatKeys } from "../chat.key"
 
 export function useGetMessages(chatId: string) {
   return useQuery<ChatUIMessage[]>({

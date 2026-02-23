@@ -1,7 +1,7 @@
 import {useCurrentUser} from "@/shared/context/CurrentUserContext"
 import {edenClient} from "@/shared/lib/eden"
 import {useRealtime} from "@/shared/lib/realtime-client"
-import {ChatMessageDTO} from "@/shared/schemes/message.schema"
+import {ChatMessage} from "@/shared/schemes/message.schema"
 import {useQuery, useQueryClient} from "@tanstack/react-query"
 import {format} from "date-fns"
 
@@ -10,7 +10,7 @@ const LatestMessage = ({
   initialLatestMessage
 }: {
   chatId: string
-  initialLatestMessage?: ChatMessageDTO | null | undefined
+  initialLatestMessage?: ChatMessage | null | undefined
 }) => {
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()

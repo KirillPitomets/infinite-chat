@@ -1,8 +1,8 @@
 import { useRealtime } from "@/shared/lib/realtime-client"
-import { ChatUIMessage } from "../model/chat.types"
 import { useQueryClient } from "@tanstack/react-query"
-import { chatKeys } from "./chat.key"
-import { useChangeMessageStatus } from "./useChangeMessageStatus"
+import { chatKeys } from "../chat.key"
+import { useChangeMessageStatus } from "@/features/chat/api/message/useChangeMessageStatus"
+import { ChatUIMessage } from "@/features/chat/model/chat.types"
 
 export function useChatRealtime(chatId: string, userId: string) {
   const queryClient = useQueryClient()

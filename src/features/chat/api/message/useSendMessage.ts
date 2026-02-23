@@ -4,7 +4,7 @@ import { ChatUIMessage } from "@/features/chat/model/chat.types"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { chatKeys } from "./chat.key"
+import { chatKeys } from "../chat.key"
 
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient()

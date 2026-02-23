@@ -2,7 +2,7 @@ import { edenClient } from "@/shared/lib/eden"
 import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { chatKeys } from "./chat.key"
+import { chatKeys } from "../chat.key"
 
 type useUpdateMessageArgs = {
   chatId: string
