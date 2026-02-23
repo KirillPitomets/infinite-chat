@@ -1,36 +1,33 @@
 import { IconButtonBase } from "@/shared/ui/IconButtonBase"
 import { CameraIcon, InformationIcon, TrashIcon } from "@/shared/ui/icons"
-import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
-import { edenClient } from "@/shared/lib/eden"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
 import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
 import { HeaderSkeleton } from "./HeaderSkeleton"
 
-export function ChatHeader({chatId}: {chatId: string}) {
-  const route = useRouter()
+type DirectChat = {
+  type: "DIRECT"
+  otherUser: {
+    id: string
+    name: string
+    tag: string
+    imageUrl: string
+  }
+}
+type GroupChat = {
+  type: "GROUP"
+  name: string
+  membersCount: number
+  imageUrl: string
+}
 
-  const { data: chatData, isLoading } = useQuery({
-    queryKey: ["chatHeader", chatId],
-    queryFn: async () => {
-      if (!chatId) return
+type ChatHeaderProps = {
+  chatId: string
+  isLoading: boolean
+  chatData?: DirectChat | GroupChat
+  onDelete: () => void
+}
 
-      const res = await edenClient.chat({ chatId }).get()
-      return res.data
-    }
-  })
-
-  const { mutate: deleteChat } = useMutation({
-    mutationKey: ["chatHeader_deleteChat", chatId],
-    mutationFn: async () => {
-      const res = await edenClient.chat.delete({ chatId })
-      if (res.status === 200) {
-        route.replace(ACOOUNT_PAGES.CHAT)
-      }
-    }
-  })
-
+export function ChatHeader({ isLoading, chatData, onDelete }: ChatHeaderProps) {
   if (isLoading || !chatData) return <HeaderSkeleton />
 
   return (
@@ -38,10 +35,10 @@ export function ChatHeader({chatId}: {chatId: string}) {
       <div className="flex items-center gap-2">
         {chatData.type === "DIRECT" && (
           <DirectInfo
+            memberId={chatData.otherUser.id}
             avatarUrl={chatData.otherUser.imageUrl}
             name={chatData.otherUser.name}
             tag={chatData.otherUser.tag}
-            status="offline"
           />
         )}
         {chatData.type === "GROUP" && (
@@ -60,7 +57,7 @@ export function ChatHeader({chatId}: {chatId: string}) {
           <InformationIcon />
         </IconButtonBase>
 
-        <button onClick={() => deleteChat()}>
+        <button onClick={() => onDelete()}>
           <IconButtonBase>
             <TrashIcon />
           </IconButtonBase>

@@ -1,13 +1,14 @@
-import {prisma} from "@/server/db/prisma"
-import type {User} from "@/prisma/generated/client"
-import {NotFoundError} from "@/server/errors/domain.error"
+import { prisma } from "@/server/db/prisma"
+import type { User } from "@/prisma/generated/client"
+import { NotFoundError } from "@/server/errors/domain.error"
+import { redis } from "@/shared/lib/redis"
 
 type SyncUserType = Pick<User, "authId" | "email" | "imageUrl" | "name">
 
 class UserService {
   async syncCurrentUser(user: SyncUserType): Promise<User> {
     return prisma.user.upsert({
-      where: {authId: user.authId},
+      where: { authId: user.authId },
       update: {
         name: user.name,
         email: user.email
@@ -24,7 +25,7 @@ class UserService {
 
   async getDbUserByAuthId(authId: string): Promise<User> {
     const user = await prisma.user.findUnique({
-      where: {authId}
+      where: { authId }
     })
 
     if (!user) {
@@ -36,7 +37,7 @@ class UserService {
 
   async getById(id: string): Promise<User> {
     const user = await prisma.user.findUnique({
-      where: {id}
+      where: { id }
     })
 
     if (!user) {
@@ -58,8 +59,21 @@ class UserService {
     return user
   }
 
+  async heartbeart(userId: string) {
+    await redis.set(`presence:user:${userId}`, Date.now(), { ex: 15 })
+  }
+
   async getAllUsers() {
     return prisma.user.findMany()
+  }
+
+  async getLastSeen(userId: string) {
+    const lastSeen = await redis.get<number>(`presence:user:${userId}`)
+    if (!lastSeen) {
+      return 0
+    }
+
+    return lastSeen
   }
 }
 

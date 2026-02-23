@@ -1,15 +1,16 @@
-import {ACOOUNT_PAGES} from "@/shared/config/accountPages.config"
+import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
 import Image from "next/image"
 import Link from "next/link"
 import LatestMessage from "./LatestMessage"
-import {ChatMessageDTO} from "@/shared/schemes/message.schema"
+import { ChatMessage } from "@/shared/schemes/message.schema"
+import { usePresenceUserStatus } from "@/shared/hooks/useUserPresence"
 
 type ChatInboxItemProps = {
   chatId: string
   name: string
   avatarUrl: string
-  status: "online" | "offline"
-  initialLatestMessage?: ChatMessageDTO | null | undefined
+  memberId: string
+  initialLatestMessage?: ChatMessage | null | undefined
 }
 
 export const ChatInboxItem = ({
@@ -17,8 +18,10 @@ export const ChatInboxItem = ({
   name,
   avatarUrl,
   initialLatestMessage,
-  status
+  memberId
 }: ChatInboxItemProps) => {
+  const { isOnline } = usePresenceUserStatus(memberId)
+
   return (
     <Link
       href={ACOOUNT_PAGES.CHAT_ID(chatId)}
@@ -35,7 +38,7 @@ export const ChatInboxItem = ({
           />
         )}
 
-        {status === "online" && (
+        {isOnline && (
           <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full" />
         )}
       </div>

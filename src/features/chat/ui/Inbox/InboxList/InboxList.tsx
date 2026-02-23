@@ -1,9 +1,9 @@
-import { UserChatPreviewDTO } from "@/shared/schemes/chatPreview.schema"
+import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { ChatInboxItem } from "./InboxItem/InboxItem"
 import { ChatInboxListSkeleton } from "./InboxListSkeleton"
 
 type InboxMessageListProps = {
-  chats: UserChatPreviewDTO[]
+  chats: UserChatPreview[]
   isLoadingSkeleton: boolean
 }
 
@@ -24,7 +24,7 @@ export function ChatInboxList({
             initialLatestMessage={chat.latestMessage}
             name={chat.type === "DIRECT" ? chat.otherUser.name : chat.name}
             avatarUrl={chat.type === "DIRECT" ? chat.otherUser.imageUrl : ""}
-            status="online"
+            memberId={chat.type === "DIRECT" ? chat.otherUser.id : ""}
           />
         </li>
       ))}

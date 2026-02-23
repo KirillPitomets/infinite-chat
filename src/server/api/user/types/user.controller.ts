@@ -7,5 +7,6 @@ export const UserApiSchema = {
   },
   getAll: {
     response: z.union([z.array(UserSchema), z.null()])
-  }
+  },
+  presence: { response: z.object({ lastSeen: z.number() }) }
 } as const

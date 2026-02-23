@@ -5,11 +5,15 @@ import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { useState } from "react"
-import { useChatRealtime } from "../api/useChatRealtime"
-import { useDeleteMessage } from "../api/useDeleteMessage"
-import { useGetMessages } from "../api/useGetMessages"
-import { useSendMessage } from "../api/useSendMessage"
-import { useUpdateMessage } from "../api/useUpdateMessage"
+
+import { edenClient } from "@/shared/lib/eden"
+import { useQuery } from "@tanstack/react-query"
+import { useChatRealtime } from "../api/chat/useChatRealtime"
+import { useDeleteChat } from "../api/chat/useDeleteChat"
+import { useDeleteMessage } from "../api/message/useDeleteMessage"
+import { useGetMessages } from "../api/message/useGetMessages"
+import { useSendMessage } from "../api/message/useSendMessage"
+import { useUpdateMessage } from "../api/message/useUpdateMessage"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
@@ -18,6 +22,15 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     id: string
     initialValue: string
   }>({ id: "", initialValue: "" })
+  const { data: chatData, isLoading: isChatDataLoading } = useQuery({
+    queryKey: ["chatHeader", chatId],
+    queryFn: async () => {
+      if (!chatId) return
+
+      const res = await edenClient.chat({ chatId }).get()
+      return res.data
+    }
+  })
   const { data: messages = [], isLoading } = useGetMessages(chatId)
   const { mutate: sendMessage } = useSendMessage(chatId)
   const { mutate: updateMessage } = useUpdateMessage({
@@ -41,9 +54,28 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     setEditingMessage({ id: "", initialValue: "" })
     setIsEditMessage(false)
   }
+
+  const { mutate: deleteChat } = useDeleteChat(chatId)
+
   return (
     <div className="flex flex-col flex-1 w-full justify-beetwen">
-      <ChatHeader chatId={chatId} />
+      <ChatHeader
+        chatId={chatId}
+        chatData={
+          chatData?.type === "DIRECT"
+            ? {
+                type: "DIRECT",
+                otherUser: chatData.otherUser
+              }
+            : chatData?.type === "GROUP"
+              ? {
+                  ...chatData
+                }
+              : undefined
+        }
+        onDelete={() => deleteChat()}
+        isLoading={isChatDataLoading}
+      />
       <MessageList
         chatId={chatId}
         currentUser={currentUser}
