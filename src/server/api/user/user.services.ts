@@ -1,13 +1,22 @@
-import { prisma } from "@/server/db/prisma"
 import type { User } from "@/prisma/generated/client"
+import { prisma } from "@/server/db/prisma"
 import { NotFoundError } from "@/server/errors/domain.error"
-import { redis } from "@/shared/lib/redis"
 
 type SyncUserType = Pick<User, "authId" | "email" | "imageUrl" | "name">
 
 class UserService {
-  async syncCurrentUser(user: SyncUserType): Promise<User> {
-    return prisma.user.upsert({
+  private generateTag(name: string): string {
+    const base = name
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_")
+      .replace(/[^a-z0-9_]/g, "")
+    const discriminator = Math.floor(1000 + Math.random() * 9000).toString()
+    return `${base}#${discriminator}`
+  }
+
+  async syncUser(user: SyncUserType): Promise<User> {
+    const updatedUser = prisma.user.upsert({
       where: { authId: user.authId },
       update: {
         name: user.name,
@@ -15,12 +24,14 @@ class UserService {
       },
       create: {
         authId: user.authId,
-        email: user.email,
+        email: user.email.toLowerCase(),
         name: user.name,
-        tag: `@${user.email.split("@")[0]}`,
+        tag: this.generateTag(user.name),
         imageUrl: user.imageUrl
       }
     })
+
+    return updatedUser
   }
 
   async getDbUserByAuthId(authId: string): Promise<User> {
@@ -59,21 +70,8 @@ class UserService {
     return user
   }
 
-  async heartbeart(userId: string) {
-    await redis.set(`presence:user:${userId}`, Date.now(), { ex: 15 })
-  }
-
   async getAllUsers() {
     return prisma.user.findMany()
-  }
-
-  async getLastSeen(userId: string) {
-    const lastSeen = await redis.get<number>(`presence:user:${userId}`)
-    if (!lastSeen) {
-      return 0
-    }
-
-    return lastSeen
   }
 }
 

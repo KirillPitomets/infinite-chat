@@ -7,10 +7,10 @@ export const UserPresenceProvider = ({
   children: React.ReactNode
 }) => {
   useEffect(() => {
-    const heartbeart = async () => {
-      await edenClient.user.heartbeart.post()
+    const heartbeat = async () => {
+      await edenClient.presence.heartbeat.post()
     }
-    const interval = setInterval(heartbeart, 10000)
+    const interval = setInterval(heartbeat, 10000)
     return () => clearInterval(interval)
   }, [])
 

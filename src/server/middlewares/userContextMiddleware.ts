@@ -1,12 +1,12 @@
 import Elysia from "elysia"
-import {userService} from "@/server/api/user/user.services"
-import {InternalServerError, UnauthorizedError} from "../errors/domain.error"
-import {auth, clerkClient} from "@clerk/nextjs/server"
+import { userService } from "@/server/api/user/user.services"
+import { InternalServerError, UnauthorizedError } from "../errors/domain.error"
+import { auth, clerkClient } from "@clerk/nextjs/server"
 
-export const userContextMiddleware = new Elysia({name: "user-context"})
+export const userContextMiddleware = new Elysia({ name: "user-context" })
   // .use(authMiddleware)
-  .derive({as: "scoped"}, async () => {
-    const {userId: clerkId, isAuthenticated} = await auth()
+  .derive({ as: "scoped" }, async () => {
+    const { userId: clerkId, isAuthenticated } = await auth()
     if (!isAuthenticated || !clerkId) {
       throw new UnauthorizedError()
     }
@@ -22,7 +22,7 @@ export const userContextMiddleware = new Elysia({name: "user-context"})
       throw new InternalServerError("Clerk misconfigured")
     }
 
-    const user = await userService.syncCurrentUser({
+    const user = await userService.syncUser({
       authId: clerkUser.id,
       email: clerkUser.primaryEmailAddress.emailAddress,
       imageUrl: clerkUser.imageUrl,

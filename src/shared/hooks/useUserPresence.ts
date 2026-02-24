@@ -20,7 +20,7 @@ export function usePresenceUserStatus(userId: string) {
   const { data } = useQuery<UserPresence>({
     queryKey: ["presence", "user", userId],
     queryFn: async () => {
-      const res = await edenClient.user.presence({ userId }).get()
+      const res = await edenClient.presence({ userId }).get()
       if (res.status !== 200 || !res.data) {
         return { lastSeen: null }
       }
