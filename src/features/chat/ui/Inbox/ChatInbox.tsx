@@ -4,7 +4,7 @@ import SearchInput from "@/shared/ui/SearchInput/SearchInput"
 import { useQuery } from "@tanstack/react-query"
 import { edenClient } from "@/shared/lib/eden"
 import { ChatInboxList } from "@/features/chat/ui/Inbox/InboxList/InboxList"
-import { UserChatPreviewDTO } from "@/shared/schemes/chatPreview.schema"
+import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { useRealtime } from "@/shared/lib/realtime-client"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 
@@ -15,7 +15,7 @@ export function ChatInbox() {
     data: chats = [],
     isLoading,
     refetch
-  } = useQuery<UserChatPreviewDTO[]>({
+  } = useQuery<UserChatPreview[]>({
     queryKey: ["getUserChatsPreviewList"],
     queryFn: async () => {
       const res = await edenClient.chat.preview.get()
