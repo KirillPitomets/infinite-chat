@@ -5,9 +5,7 @@ import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { useState } from "react"
-
-import { edenClient } from "@/shared/lib/eden"
-import { useQuery } from "@tanstack/react-query"
+import { useChatData } from "../api/chat/useChatData"
 import { useChatRealtime } from "../api/chat/useChatRealtime"
 import { useDeleteChat } from "../api/chat/useDeleteChat"
 import { useDeleteMessage } from "../api/message/useDeleteMessage"
@@ -22,15 +20,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     id: string
     initialValue: string
   }>({ id: "", initialValue: "" })
-  const { data: chatData, isLoading: isChatDataLoading } = useQuery({
-    queryKey: ["chatHeader", chatId],
-    queryFn: async () => {
-      if (!chatId) return
-
-      const res = await edenClient.chat({ chatId }).get()
-      return res.data
-    }
-  })
+  const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
   const { data: messages = [], isLoading } = useGetMessages(chatId)
   const { mutate: sendMessage } = useSendMessage(chatId)
   const { mutate: updateMessage } = useUpdateMessage({
