@@ -48,16 +48,10 @@ export const chatApi = new Elysia({ prefix: "/chat" })
       response: ChatApiSchema.preview.response
     }
   )
-  .delete(
-    "/",
-    async ({ body }) => {
-      const deletedChat = await chatService.delete(body.chatId)
-      await realtime
-        .channel("chats")
-        .emit("chat.deleted", { memberships: deletedChat.memberships })
-      return deletedChat
-    },
-    {
-      body: ChatApiSchema.delete.body
-    }
-  )
+  .delete("/:chatId", async ({ params, userId }) => {
+    const chatId = params.chatId
+    const deletedChat = await chatService.delete(userId, chatId)
+    await realtime
+      .channel("chats")
+      .emit("chat.deleted", { memberships: deletedChat.memberships })
+  })

@@ -65,3 +65,11 @@ export const chatDetailsInclude = {
 export type ChatDetailsPrismaType = Prisma.ChatGetPayload<{
   include: typeof chatDetailsInclude
 }>
+
+export const chatDeleteInclude = {
+  memberships: { select: { userId: true } }
+} satisfies Prisma.ChatInclude
+
+export type ChatDeletePrismaType = Prisma.ChatGetPayload<{
+  include: typeof chatDeleteInclude
+}>

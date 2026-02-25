@@ -6,6 +6,8 @@ import {
   NotFoundError
 } from "@/server/errors/domain.error"
 import {
+  chatDeleteInclude,
+  ChatDeletePrismaType,
   chatDetailsInclude,
   ChatDetailsPrismaType,
   chatInclude,
@@ -108,11 +110,26 @@ class ChatService {
     return chat
   }
 
-  async delete(chatId: string) {
-    return prisma.chat.delete({
+  async delete(userId: string, chatId: string): Promise<ChatDeletePrismaType> {
+    const chatExist = await prisma.chat.findUnique({
       where: { id: chatId },
       include: { memberships: { select: { userId: true } } }
     })
+
+    if (!chatExist) {
+      throw new NotFoundError("Chat")
+    }
+
+    if (!chatExist.memberships.some(u => u.userId !== userId)) {
+      throw new ForbiddenError("You are not a chat member")
+    }
+
+    const deletedChat = await prisma.chat.delete({
+      where: { id: chatId, memberships: { some: { userId } } },
+      include: chatDeleteInclude
+    })
+
+    return deletedChat
   }
 }
 

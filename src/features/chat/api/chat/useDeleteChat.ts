@@ -9,7 +9,7 @@ export function useDeleteChat(chatId: string) {
   return useMutation({
     mutationKey: ["chatHeader_deleteChat", chatId],
     mutationFn: async () => {
-      const res = await edenClient.chat.delete({ chatId })
+      const res = await edenClient.chat({ chatId }).delete()
       if (res.status === 200) {
         route.replace(ACOOUNT_PAGES.CHAT)
       }

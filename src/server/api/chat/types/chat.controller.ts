@@ -11,5 +11,4 @@ export const ChatApiSchema = {
     response: ChatDetailsSchema
   },
   preview: { response: z.array(UserChatPreviewSchema) },
-  delete: { body: z.object({ chatId: z.string() }) }
 } as const
