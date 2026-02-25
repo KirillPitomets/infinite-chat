@@ -1,12 +1,12 @@
 "use client"
 
-import SearchInput from "@/shared/ui/SearchInput/SearchInput"
 import { useQuery } from "@tanstack/react-query"
 import { edenClient } from "@/shared/lib/eden"
 import { ChatInboxList } from "@/features/chat/ui/Inbox/InboxList/InboxList"
 import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { useRealtime } from "@/shared/lib/realtime-client"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
+import SearchInput from "@/shared/components/ui/SearchInput/SearchInput"
 
 export function ChatInbox() {
   const currentUser = useCurrentUser()

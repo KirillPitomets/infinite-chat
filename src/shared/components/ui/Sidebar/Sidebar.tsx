@@ -1,12 +1,12 @@
-import { IconButtonBase } from "@/shared/ui/IconButtonBase"
 import Image from "next/image"
 import Link from "next/link"
 
 import NavMenu from "./NavMenu"
 import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
-import { SettingsIcon, LogoutIcon } from "@/shared/ui/icons"
 
 import { SignOutButton, UserButton } from "@clerk/nextjs"
+import { IconButtonBase } from "../IconButtonBase"
+import { LogoutIcon, SettingsIcon } from "../icons"
 
 export default function Sidebar() {
   return (
@@ -36,7 +36,7 @@ export default function Sidebar() {
           <SettingsIcon />
         </IconButtonBase>
 
-        <SignOutButton>
+        <SignOutButton signOutOptions={{redirectUrl: ACOOUNT_PAGES.HOME}}>
           <IconButtonBase tone="muted">
             <LogoutIcon />
           </IconButtonBase>

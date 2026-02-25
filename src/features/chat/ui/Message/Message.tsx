@@ -1,8 +1,9 @@
-import Loader from "@/shared/ui/Loader"
-import { CopyIcon, EditIcon, TickIcon, TrashIcon } from "@/shared/ui/icons"
+
 import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
+import { CopyIcon, EditIcon, TickIcon, TrashIcon } from "@/shared/components/ui/icons"
+import Loader from "@/shared/components/ui/Loader"
 import { formatDate } from "date-fns"
 import Image from "next/image"
 import { useState } from "react"

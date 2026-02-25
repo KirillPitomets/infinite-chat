@@ -1,16 +1,23 @@
-import {ChangeEvent, useEffect, useLayoutEffect, useRef, useState} from "react"
-import EmojiPicker, {EmojiClickData} from "emoji-picker-react"
-import {SendIcon} from "@/shared/ui/icons"
-import {IconButtonBase} from "@/shared/ui/IconButtonBase"
+"use client"
+import {
+  ChangeEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "react"
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
+import UploadFileButton from "@/shared/components/UploadFileButton/UploadFileButton"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { SendIcon } from "@/shared/components/ui/icons"
 
 type ChatInputProps = {
   onSubmit: (value: string) => void
   onCancel?: () => void
   initialValue: string
-  // submitLabel: "save" | "send"
 }
 
-export function ChatInputUI({initialValue, onSubmit}: ChatInputProps) {
+export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
   const [value, setValue] = useState<string>(initialValue)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
@@ -68,6 +75,8 @@ export function ChatInputUI({initialValue, onSubmit}: ChatInputProps) {
 
   return (
     <label className="flex items-center border-t border-zinc-300 p-5 space-x-2 relative">
+      <UploadFileButton />
+
       {isOpenEmojiPicker && (
         <div
           onClick={toggleEmojiPicker}
