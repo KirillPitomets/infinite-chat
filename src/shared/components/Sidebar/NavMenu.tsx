@@ -4,7 +4,7 @@ import {usePathname} from "next/navigation"
 import {navItems} from "./navItems.data"
 import Link from "next/link"
 import {matchRoute} from "@/shared/utils/matchRoute"
-import { IconButtonBase } from "../IconButtonBase"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 
 export default function NavMenu() {
   const pathname = usePathname()

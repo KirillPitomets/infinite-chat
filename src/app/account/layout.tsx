@@ -1,5 +1,5 @@
 "use client"
-import Sidebar from "@/shared/components/ui/Sidebar/Sidebar"
+import Sidebar from "@/shared/components/Sidebar/Sidebar"
 import CurrentUserProvider from "@/shared/context/CurrentUserContext"
 import { UserPresenceProvider } from "@/shared/context/UserPresenceContext"
 

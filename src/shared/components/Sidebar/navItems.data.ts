@@ -1,6 +1,11 @@
-import {ACOOUNT_PAGES} from "@/shared/config/accountPages.config"
-import { CameraIcon, MessageIcon, NetworkIcon, NoteIcon } from "../icons"
-import { CalendarIcon } from "../icons/CalendarIcon"
+import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import {
+  CalendarIcon,
+  CameraIcon,
+  MessageIcon,
+  NetworkIcon,
+  NoteIcon
+} from "@/shared/components/ui/icons"
 
 export const navItems = [
   {

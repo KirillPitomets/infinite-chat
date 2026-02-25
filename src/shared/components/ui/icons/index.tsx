@@ -11,6 +11,7 @@ import {SendIcon} from "./SendIcon"
 import {EditIcon} from "./EditIcon"
 import {CopyIcon} from "./CopyIcon"
 import {CrossIcon} from "./CrossIcon"
+import { CalendarIcon} from "./CalendarIcon"
 
 export {
   NetworkIcon,
@@ -25,5 +26,6 @@ export {
   SendIcon,
   EditIcon,
   CopyIcon,
-  CrossIcon
+  CrossIcon,
+  CalendarIcon
 }

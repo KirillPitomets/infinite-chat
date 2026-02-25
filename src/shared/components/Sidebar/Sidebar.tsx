@@ -5,8 +5,8 @@ import NavMenu from "./NavMenu"
 import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
 
 import { SignOutButton, UserButton } from "@clerk/nextjs"
-import { IconButtonBase } from "../IconButtonBase"
-import { LogoutIcon, SettingsIcon } from "../icons"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { LogoutIcon, SettingsIcon } from "@/shared/components/ui/icons"
 
 export default function Sidebar() {
   return (
