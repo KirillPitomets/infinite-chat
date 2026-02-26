@@ -9,6 +9,9 @@ import {
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { SendIcon } from "@/shared/components/ui/icons"
+import { UploadButton } from "@/shared/components/UploadButton"
+import { PreviewFiles } from "@/shared/components/ui/PreviewFiles/PreviewFiles"
+import { PreviewFile } from "@/shared/components/ui/PreviewFiles/PreviewFile.types"
 
 type ChatInputProps = {
   onSubmit: (value: string) => void
@@ -18,9 +21,11 @@ type ChatInputProps = {
 
 export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
   const [value, setValue] = useState<string>(initialValue)
+  // const [files, setFiles] = useState<File[]>([])
+  const [files, setFiles] = useState<PreviewFile[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
-  const [latestEmoji, setLatestEmoji] = useState("😀")
+  const [latestEmoji, setLatestEmoji] = useState("🥰")
 
   const MIN_TEXTAREA_HEIGHT = 32
 
@@ -59,6 +64,28 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
     }
   }
 
+  const handleUploadButtonChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const inputFiles = e.target.files
+
+    if (!inputFiles?.length) return
+
+    const tempInputFiles: PreviewFile[] = []
+
+    for (const file of inputFiles) {
+      if (!file.name.match(/\.(jpg|jpeg|png|gif)$/)) {
+        tempInputFiles.push({ isImg: false, file, preview: "" })
+      } else {
+        tempInputFiles.push({
+          isImg: true,
+          file,
+          preview: URL.createObjectURL(file)
+        })
+      }
+    }
+    console.log("ECHO INPUT UI, UPLOAD BUTTON: ", tempInputFiles)
+    setFiles(prev => [...prev, ...tempInputFiles])
+  }
+
   const toggleEmojiPicker = () => {
     setIsOpenEmojiPicker(prev => !prev)
   }
@@ -73,48 +100,63 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
   }, [initialValue])
 
   return (
-    <label className="flex items-center border-t border-zinc-300 p-5 space-x-2 relative">
+    <div>
+      <PreviewFiles
+        files={files}
+        removeFile={filename =>
+          setFiles(prev =>
+            prev.filter(prevFile => !(prevFile.file.name === filename))
+          )
+        }
+      />
+      <div className="relative flex items-center gap-2 p-5 space-x-2 border-t border-zinc-300">
+        <UploadButton onChange={handleUploadButtonChange} />
 
-
-      {isOpenEmojiPicker && (
-        <div
-          onClick={toggleEmojiPicker}
-          className="w-screen h-screen  bg-black/4 absolute bottom-0 left-0 z-100"
-        />
-      )}
-      <div className="flex flex-1 items-center bg-zinc-400/50 rounded-2xl transition-colors focus:bg-zinc-400">
-        <textarea
-          ref={textareaRef}
-          onKeyDown={onSubmitMessageViaEnter}
-          onChange={onChange}
-          value={value}
-          className="w-full max-h-62.5 px-4 py-2.5 text-zinc-900 outline-none resize-none"
-          autoFocus
-          rows={1}
-          placeholder="Message..."
-        />
-
-        <div className="relative">
-          <button
-            className="p-2 cursor-pointer transition-transform hover:scale-150"
+        {isOpenEmojiPicker && (
+          <div
             onClick={toggleEmojiPicker}
-          >
-            {latestEmoji}
-          </button>
-          <div className="absolute bottom-full right-0 z-101">
-            <EmojiPicker
-              open={isOpenEmojiPicker}
-              onEmojiClick={handleEmojiClick}
-            />
+            className="absolute bottom-0 left-0 w-screen h-screen bg-black/4 z-100"
+          />
+        )}
+        <div className="flex items-center flex-1 transition-colors bg-zinc-400/50 rounded-2xl focus:bg-zinc-400">
+          <textarea
+            ref={textareaRef}
+            onKeyDown={onSubmitMessageViaEnter}
+            onChange={onChange}
+            value={value}
+            className="w-full max-h-62.5 px-4 py-2.5 text-zinc-900 outline-none resize-none"
+            autoFocus
+            rows={1}
+            placeholder="Message..."
+          />
+
+          <div className="relative">
+            <button
+              className="p-2 transition-transform cursor-pointer hover:scale-150"
+              onClick={toggleEmojiPicker}
+            >
+              {latestEmoji}
+            </button>
+            <div className="absolute right-0 bottom-full z-101">
+              <EmojiPicker
+                open={isOpenEmojiPicker}
+                onEmojiClick={handleEmojiClick}
+              />
+            </div>
           </div>
         </div>
-      </div>
 
-      <button onClick={onSubmitMessage} disabled={!value.trim()}>
-        <IconButtonBase>
-          <SendIcon />
-        </IconButtonBase>
-      </button>
-    </label>
+        <button onClick={onSubmitMessage} disabled={!value.trim()}>
+          <IconButtonBase>
+            <SendIcon />
+          </IconButtonBase>
+        </button>
+      </div>
+    </div>
   )
 }
+
+/*
+        
+
+*/
