@@ -70,15 +70,15 @@ export function useSendMessage(chatId: string) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         status: "sending",
-        attachments: [
-          {
-            key: "",
-            name: "",
-            size: 0,
-            type: "IMAGE",
-            url: "https://placehold.co/600x400"
-          }
-        ]
+        attachments: files
+          ? files.map(file => ({
+              key: "",
+              name: "",
+              size: 0,
+              type: "IMAGE",
+              url: "https://placehold.co/600x400"
+            }))
+          : []
       }
 
       queryClient.setQueryData<ChatUIMessage[]>(
