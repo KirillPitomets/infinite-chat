@@ -40,7 +40,7 @@ export const Message = ({
     setIsVisibleContextMenu(prev => !prev)
   }
 
-  if (isDeleted) {
+  if (isDeleted || status === "deleted") {
     return (
       <DeletedMessage
         isMine={isMine}
@@ -107,16 +107,20 @@ export const Message = ({
           {isVisibleContextMenu && <MessageContextMenu buttons={contextMenu} />}
 
           <div>
-            <div>
-              {attachments?.map((file, indx) => (
-                <img
-                  className="max-w-[200px] contain-content"
-                  key={`msg-preview-img-${indx}-${file}`}
-                  src={file ? file.url : "https://placehold.co/600x400"}
-                  alt={file.name}
-                />
-              ))}
-            </div>
+            {attachments.length > 0 && (
+              <div>
+                {attachments.map((file, indx) => (
+                  <Image
+                    width={200}
+                    height={200}
+                    className="max-w-[200px] contain-content"
+                    key={`msg-preview-img-${indx}-${file}`}
+                    src={file ? file.url : "https://placehold.co/600x400"}
+                    alt={file.name}
+                  />
+                ))}
+              </div>
+            )}
             <p className="text-zinc-800">{content}</p>
           </div>
 
