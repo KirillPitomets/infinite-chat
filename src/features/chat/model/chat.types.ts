@@ -1,9 +1,5 @@
-export type ChatUIMessage = {
-  id: string
-  content: string
-  createdAt: string
-  isDeleted: boolean
-  sender: {id: string, tag: string, imageUrl: string; name: string}
+import { ChatMessage } from "@/shared/schemes/message.schema"
 
+export interface ChatUIMessage extends ChatMessage {
   status: "sending" | "sent" | "error" | "editing" | "deleted"
 }

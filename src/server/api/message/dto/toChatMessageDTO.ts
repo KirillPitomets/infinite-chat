@@ -1,4 +1,7 @@
-import { ChatMessage } from "@/shared/schemes/message.schema"
+import {
+  ChatMessage,
+  messageAttachmentsMapper
+} from "@/shared/schemes/message.schema"
 import { ChatMessagePrismaType } from "@/server/api/message/types/message.prisma"
 
 export const toChatMessageDTO = (
@@ -14,6 +17,7 @@ export const toChatMessageDTO = (
       tag: message.sender.tag,
       imageUrl: message.sender.imageUrl
     },
+    attachments: messageAttachmentsMapper(message.attachments) || [],
     createdAt: message.createdAt.toISOString(),
     updatedAt: message.updatedAt.toISOString()
   }

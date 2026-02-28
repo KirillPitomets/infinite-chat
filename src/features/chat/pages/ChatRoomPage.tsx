@@ -81,7 +81,9 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         editingMessageInitialValue={editingMessage.initialValue}
         onUpdate={onUpdateMessage}
         onCancelUpdate={onCancelUpdate}
-        onSend={sendMessage}
+        onSubmit={(content, files) => {
+          sendMessage({ content, files })
+        }}
       />
     </div>
   )

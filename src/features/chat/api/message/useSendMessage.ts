@@ -5,22 +5,41 @@ import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
 import { chatKeys } from "../chat.key"
+import { useUploadThing } from "@/shared/utils/uploadthing"
+import { MessageAttachment } from "@/shared/schemes/message.schema"
 
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
 
+  const { startUpload } = useUploadThing("chatUploadImage")
+
   return useMutation<
     ChatUIMessage,
     Error,
-    string,
+    { content: string; files?: File[] },
     { previousMessages: ChatUIMessage[]; tempId: string }
   >({
     mutationKey: chatKeys.sendMessages(chatId),
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, files }) => {
+      const filesUploaded = files?.length ? await startUpload(files) : []
+
+      const formatted: MessageAttachment[] = filesUploaded
+        ? filesUploaded.map(file => ({
+            key: file.key,
+            name: file.name,
+            size: file.size,
+            url: file.ufsUrl,
+            type: "IMAGE",
+            height: 0,
+            width: 0
+          }))
+        : []
+
       const res = await edenClient.message.post({
+        chatId,
         content,
-        chatId
+        files: formatted
       })
 
       if (!res.data) {
@@ -30,7 +49,7 @@ export function useSendMessage(chatId: string) {
       return { ...res.data, status: "sent" }
     },
 
-    onMutate: async content => {
+    onMutate: async ({ content, files }) => {
       await queryClient.cancelQueries({
         queryKey: chatKeys.messages(chatId)
       })
@@ -49,7 +68,17 @@ export function useSendMessage(chatId: string) {
         sender: currentUser,
         isDeleted: false,
         createdAt: new Date().toISOString(),
-        status: "sending"
+        updatedAt: new Date().toISOString(),
+        status: "sending",
+        attachments: [
+          {
+            key: "",
+            name: "",
+            size: 0,
+            type: "IMAGE",
+            url: "https://placehold.co/600x400"
+          }
+        ]
       }
 
       queryClient.setQueryData<ChatUIMessage[]>(

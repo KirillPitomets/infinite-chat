@@ -1,4 +1,9 @@
 "use client"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { SendIcon } from "@/shared/components/ui/icons"
+import { PreviewFiles } from "@/shared/components/ui/PreviewFiles/PreviewFiles"
+import { UploadButton } from "@/shared/components/UploadButton"
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
 import {
   ChangeEvent,
   useEffect,
@@ -6,23 +11,17 @@ import {
   useRef,
   useState
 } from "react"
-import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
-import { SendIcon } from "@/shared/components/ui/icons"
-import { UploadButton } from "@/shared/components/UploadButton"
-import { PreviewFiles } from "@/shared/components/ui/PreviewFiles/PreviewFiles"
-import { PreviewFile } from "@/shared/components/ui/PreviewFiles/PreviewFile.types"
+import toast from "react-hot-toast"
 
 type ChatInputProps = {
-  onSubmit: (value: string) => void
+  onSubmit: (value: string, files?: File[]) => void
   onCancel?: () => void
   initialValue: string
 }
 
 export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
   const [value, setValue] = useState<string>(initialValue)
-  // const [files, setFiles] = useState<File[]>([])
-  const [files, setFiles] = useState<PreviewFile[]>([])
+  const [files, setFiles] = useState<File[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
   const [latestEmoji, setLatestEmoji] = useState("🥰")
@@ -47,9 +46,10 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
 
   const onSubmitMessage = () => {
     if (value.trim().length > 0 && value.trim().length < 1000) {
-      onSubmit(value)
+      onSubmit(value, files)
       textareaRef.current?.focus()
       setValue("")
+      setFiles([])
     }
   }
 
@@ -66,24 +66,12 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
 
   const handleUploadButtonChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const inputFiles = e.target.files
-
-    if (!inputFiles?.length) return
-
-    const tempInputFiles: PreviewFile[] = []
-
-    for (const file of inputFiles) {
-      if (!file.name.match(/\.(jpg|jpeg|png|gif)$/)) {
-        tempInputFiles.push({ isImg: false, file, preview: "" })
-      } else {
-        tempInputFiles.push({
-          isImg: true,
-          file,
-          preview: URL.createObjectURL(file)
-        })
-      }
+    if (!inputFiles) return
+    if (files.length > 4 || inputFiles.length > 4) {
+      toast.error("You can upload only 4 files")
+      return
     }
-    console.log("ECHO INPUT UI, UPLOAD BUTTON: ", tempInputFiles)
-    setFiles(prev => [...prev, ...tempInputFiles])
+    setFiles(prev => [...prev, ...inputFiles])
   }
 
   const toggleEmojiPicker = () => {
@@ -105,7 +93,7 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
         files={files}
         removeFile={filename =>
           setFiles(prev =>
-            prev.filter(prevFile => !(prevFile.file.name === filename))
+            prev.filter(prevFile => !(prevFile.name === filename))
           )
         }
       />

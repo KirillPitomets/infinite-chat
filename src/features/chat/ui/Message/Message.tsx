@@ -1,8 +1,12 @@
-
 import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
-import { CopyIcon, EditIcon, TickIcon, TrashIcon } from "@/shared/components/ui/icons"
+import {
+  CopyIcon,
+  EditIcon,
+  TickIcon,
+  TrashIcon
+} from "@/shared/components/ui/icons"
 import Loader from "@/shared/components/ui/Loader"
 import { formatDate } from "date-fns"
 import Image from "next/image"
@@ -20,6 +24,7 @@ export const Message = ({
   isMine,
   content,
   sender,
+  attachments,
   status,
   isDeleted,
   createdAt,
@@ -101,7 +106,19 @@ export const Message = ({
         >
           {isVisibleContextMenu && <MessageContextMenu buttons={contextMenu} />}
 
-          <p className="text-zinc-800">{content}</p>
+          <div>
+            <div>
+              {attachments?.map((file, indx) => (
+                <img
+                  className="max-w-[200px] contain-content"
+                  key={`msg-preview-img-${indx}-${file}`}
+                  src={file ? file.url : "https://placehold.co/600x400"}
+                  alt={file.name}
+                />
+              ))}
+            </div>
+            <p className="text-zinc-800">{content}</p>
+          </div>
 
           <div className="flex justify-end space-x-2">
             <p className={`text-sm text-zinc-500/70 ${isMine && "text-end"}`}>

@@ -9,38 +9,68 @@ import {
   ChatMessageInclude,
   ChatMessagePrismaType
 } from "@/server/api/message/types/message.prisma"
+import { MessageAttachment } from "@/shared/schemes/message.schema"
 
 class MessageService {
   async createChatMessage({
     senderId,
     chatId,
-    content
+    content,
+    files
   }: {
     senderId: string
     chatId: string
     content: string
+    files?: MessageAttachment[]
   }): Promise<ChatMessagePrismaType> {
     const chat = await chatService.assertUserInChat(chatId, senderId)
 
-    const msg = await prisma.message.create({
-      data: {
-        chatId: chat.id,
-        senderId: senderId,
-        content
-      },
-      include: ChatMessageInclude
+    if (!content && (!files || files.length === 0)) {
+      throw new ConflictError("Message must have content or attachments")
+    }
+
+    const message = await prisma.$transaction(async tx => {
+      const createdMessage = await tx.message.create({
+        data: {
+          chatId: chat.id,
+          senderId,
+          content
+        }
+      })
+
+      if (files && files.length > 0) {
+        await tx.attachment.createMany({
+          data: files.map(file => ({
+            messageId: createdMessage.id,
+            key: file.key,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            width: file.width,
+            height: file.height,
+            url: file.url
+          }))
+        })
+      }
+
+      return tx.message.findUniqueOrThrow({
+        where: { id: createdMessage.id },
+        include: ChatMessageInclude
+      })
     })
 
-    return msg
+    return message
   }
 
   async getChatMessages(chatId: string): Promise<ChatMessagePrismaType[]> {
-    return await prisma.message.findMany({
+    const messages = await prisma.message.findMany({
       where: {
         chatId
       },
       include: ChatMessageInclude
     })
+
+    return messages
   }
 
   async getLatestMessage(
@@ -52,16 +82,7 @@ class MessageService {
         messages: {
           take: 1,
           orderBy: { createdAt: "desc" },
-          include: {
-            sender: {
-              select: {
-                id: true,
-                name: true,
-                tag: true,
-                imageUrl: true
-              }
-            }
-          }
+          include: ChatMessageInclude
         }
       }
     })
@@ -97,16 +118,7 @@ class MessageService {
       data: {
         isDeleted: true
       },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            tag: true,
-            imageUrl: true
-          }
-        }
-      }
+      include: ChatMessageInclude
     })
 
     return deletedMessage
@@ -141,16 +153,7 @@ class MessageService {
         content,
         updatedAt: new Date()
       },
-      include: {
-        sender: {
-          select: {
-            id: true,
-            name: true,
-            tag: true,
-            imageUrl: true
-          }
-        }
-      }
+      include: ChatMessageInclude
     })
 
     return { updatedMessage: updatedMessage, chatId: updatedMessage.chatId }

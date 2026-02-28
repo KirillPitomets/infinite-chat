@@ -1,5 +1,5 @@
 export type PreviewFile = {
-  file: File
+  data: File
   preview: string
   isImg: boolean
 }

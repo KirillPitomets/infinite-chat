@@ -1,12 +1,16 @@
 import { UserChatPreviewSchema } from "@/shared/schemes/chatPreview.schema"
-import { ChatMessageSchema } from "@/shared/schemes/message.schema"
+import {
+  ChatMessageSchema,
+  MessageAttachmentSchema
+} from "@/shared/schemes/message.schema"
 import z from "zod"
 
 export const MessageApiSchema = {
   create: {
     body: z.object({
       chatId: z.string(),
-      content: z.string().max(2000)
+      content: z.string().max(2000),
+      files: z.array(MessageAttachmentSchema).default([])
     }),
     response: ChatMessageSchema
   },

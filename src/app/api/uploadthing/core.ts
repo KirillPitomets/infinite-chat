@@ -8,7 +8,7 @@ export const ourFileRouter = {
   chatUploadImage: f({
     image: {
       maxFileSize: "4MB",
-      maxFileCount: 1
+      maxFileCount: 4
     }
   })
     .middleware(async ({ req }) => {

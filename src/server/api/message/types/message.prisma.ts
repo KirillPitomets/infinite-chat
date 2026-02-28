@@ -8,7 +8,8 @@ export const ChatMessageInclude = {
       tag: true,
       imageUrl: true
     }
-  }
+  },
+  attachments: true
 } satisfies Prisma.MessageInclude
 
 export type ChatMessagePrismaType = Prisma.MessageGetPayload<{

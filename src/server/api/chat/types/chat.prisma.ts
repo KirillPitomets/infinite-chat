@@ -1,4 +1,5 @@
 import { Prisma } from "@/prisma/generated/client"
+import { ChatMessageInclude } from "../../message/types/message.prisma"
 
 export const chatInclude = {
   memberships: {
@@ -29,16 +30,7 @@ export const chatPreviewInclude = {
   messages: {
     take: 1,
     orderBy: { createdAt: "desc" },
-    include: {
-      sender: {
-        select: {
-          id: true,
-          name: true,
-          tag: true,
-          imageUrl: true
-        }
-      }
-    }
+    include: ChatMessageInclude
   }
 } satisfies Prisma.ChatInclude
 

@@ -14,7 +14,8 @@ export const messagesApi = new Elysia({ prefix: "/message" })
       const chatMessage = await messageService.createChatMessage({
         senderId: userId,
         chatId: body.chatId,
-        content: body.content
+        content: body.content,
+        files: body.files
       })
 
       const dto = toChatMessageDTO(chatMessage)
