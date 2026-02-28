@@ -1,6 +1,7 @@
 import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
+import { Dialog } from "@/shared/components/Dialog/Dialog"
 import {
   CopyIcon,
   EditIcon,
@@ -12,6 +13,7 @@ import { formatDate } from "date-fns"
 import Image from "next/image"
 import { useState } from "react"
 import toast from "react-hot-toast"
+import { Attachments } from "./Attachments"
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
@@ -32,6 +34,10 @@ export const Message = ({
   onDelete
 }: IMessageProps) => {
   const [isVisibleContextMenu, setIsVisibleContextMenu] = useState(false)
+  const [selectedImage, setSelectedImage] = useState<{
+    url: string
+    name: string
+  } | null>(null)
 
   const handleContextMenu = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
@@ -104,23 +110,18 @@ export const Message = ({
           className="relative flex flex-wrap items-end gap-4 p-3 rounded-2xl bg-zinc-100"
           onContextMenu={handleContextMenu}
         >
-          {isVisibleContextMenu && <MessageContextMenu buttons={contextMenu} />}
+          <MessageContextMenu
+            isVisible={isVisibleContextMenu}
+            buttons={contextMenu}
+          />
 
-          <div>
-            {attachments.length > 0 && (
-              <div>
-                {attachments.map((file, indx) => (
-                  <Image
-                    width={200}
-                    height={200}
-                    className="max-w-[200px] contain-content"
-                    key={`msg-preview-img-${indx}-${file}`}
-                    src={file ? file.url : "https://placehold.co/600x400"}
-                    alt={file.name}
-                  />
-                ))}
-              </div>
-            )}
+          <div className="space-y-3">
+            <Attachments
+              attachments={attachments}
+              openDialog={(url: string, name: string) =>
+                setSelectedImage({ url, name })
+              }
+            />
             <p className="text-zinc-800">{content}</p>
           </div>
 
@@ -136,6 +137,15 @@ export const Message = ({
           </div>
         </div>
       </div>
+      <Dialog isOpen={!!selectedImage} onClose={() => setSelectedImage(null)}>
+        {selectedImage && (
+          <img
+            className="max-w-full"
+            src={selectedImage.url}
+            alt={selectedImage.name}
+          />
+        )}
+      </Dialog>
     </div>
   )
 }

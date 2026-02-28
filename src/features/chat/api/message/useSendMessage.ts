@@ -76,7 +76,7 @@ export function useSendMessage(chatId: string) {
               name: "",
               size: 0,
               type: "IMAGE",
-              url: "https://placehold.co/600x400"
+              url: ""
             }))
           : []
       }

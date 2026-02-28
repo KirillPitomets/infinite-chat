@@ -6,10 +6,13 @@ type ContextButtons = {
 }
 
 type ContextMenuProps = {
+  isVisible: boolean
   buttons: ContextButtons[]
 }
 
-const MessageContextMenu = ({buttons}: ContextMenuProps) => {
+const MessageContextMenu = ({ isVisible, buttons }: ContextMenuProps) => {
+  if (!isVisible) return null
+
   return (
     <ul className="absolute right-0 flex rounded-lg -top-5 bg-zinc-300 z-1">
       {buttons.map((item, indx) => (
