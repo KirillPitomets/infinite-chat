@@ -99,7 +99,7 @@ export const Message = ({
               src={sender.imageUrl}
               alt={sender.name}
               className="rounded-2xl"
-              />
+            />
             <p>{sender.name}</p>
           </div>
         )}
@@ -109,22 +109,23 @@ export const Message = ({
         <div
           className="relative flex flex-wrap items-end gap-4 p-3 rounded-2xl bg-zinc-100"
           onContextMenu={handleContextMenu}
-          >
+        >
           <MessageContextMenu
             isVisible={isVisibleContextMenu}
             buttons={contextMenu}
-            />
+          />
 
           <div className="space-y-3">
             <Attachments
+              messageStatus={status}
               attachments={attachments}
               openDialog={(url: string, alt: string) =>
                 onPreviewImage({ url, alt })
               }
-              />
+            />
             <p className="text-zinc-800">{content}</p>
           </div>
-            {/* TODO: /\/\/\ to new component --> "MessageContent" */}
+          {/* TODO: /\/\/\ to new component --> "MessageContent" */}
 
           <div className="flex justify-end space-x-2">
             <p className={`text-sm text-zinc-500/70 ${isMine && "text-end"}`}>
