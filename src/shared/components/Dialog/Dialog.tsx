@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useState } from "react"
+import React, { useEffect } from "react"
 import { createPortal } from "react-dom"
 
 type DialogProps = {
@@ -34,11 +34,8 @@ export const Dialog = ({ isOpen, onClose, children }: DialogProps) => {
         onClick={onClose}
       />
 
-      <div
-        className={`relative z-10 flex items-center justify-center max-w-4xl p-6 bg-white shadow-xl rounded-2xl`}
-      >
-        {children}
-      </div>
+      {/*  flex items-center justify-center max-w-4xl p-6 bg-white shadow-xl rounded-2xl */}
+      <div className={`relative z-10`}>{children}</div>
     </div>,
     document.body
   )

@@ -11,6 +11,7 @@ import {
   useRef,
   useState
 } from "react"
+import { createPortal } from "react-dom"
 import toast from "react-hot-toast"
 
 type ChatInputProps = {
@@ -50,6 +51,9 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
       textareaRef.current?.focus()
       setValue("")
       setFiles([])
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "unset"
+      }
     }
   }
 
@@ -67,7 +71,8 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
   const handleUploadButtonChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const inputFiles = e.target.files
     if (!inputFiles) return
-    if (files.length > 4 || inputFiles.length > 4) {
+    const totalFiles = files.length + inputFiles.length
+    if (totalFiles > 4) {
       toast.error("You can upload only 4 files")
       return
     }
@@ -87,6 +92,19 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
     setValue(initialValue)
   }, [initialValue])
 
+  useEffect(() => {
+    if (!isOpenEmojiPicker) return
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpenEmojiPicker(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [isOpenEmojiPicker])
+
   return (
     <div>
       <PreviewFiles
@@ -99,13 +117,6 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
       />
       <div className="relative flex items-center gap-2 p-5 space-x-2 border-t border-zinc-300">
         <UploadButton onChange={handleUploadButtonChange} />
-
-        {isOpenEmojiPicker && (
-          <div
-            onClick={toggleEmojiPicker}
-            className="absolute bottom-0 left-0 w-screen h-screen bg-black/4 z-100"
-          />
-        )}
         <div className="flex items-center flex-1 transition-colors bg-zinc-400/50 rounded-2xl focus:bg-zinc-400">
           <textarea
             ref={textareaRef}
@@ -130,6 +141,17 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
                 open={isOpenEmojiPicker}
                 onEmojiClick={handleEmojiClick}
               />
+              {createPortal(
+                <>
+                  {isOpenEmojiPicker && (
+                    <div
+                      onClick={toggleEmojiPicker}
+                      className="absolute bottom-0 left-0 w-screen h-screen bg-black/10 z-100"
+                    />
+                  )}
+                </>,
+                document.body
+              )}
             </div>
           </div>
         </div>

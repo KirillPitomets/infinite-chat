@@ -1,10 +1,9 @@
-import Loader from "@/shared/components/ui/Loader"
 import { MessageAttachment } from "@/shared/schemes/message.schema"
 import Image from "next/image"
 
 type AttachmentsProps = {
   attachments: MessageAttachment[]
-  openDialog: (url: string, name: string) => void
+  openDialog: (url: string, alt: string) => void
 }
 
 export const Attachments = ({ attachments, openDialog }: AttachmentsProps) => {
@@ -27,8 +26,7 @@ export const Attachments = ({ attachments, openDialog }: AttachmentsProps) => {
             key={`msg-preview-img-${indx}-${file}`}
           >
             <div className="flex items-center justify-center gap-4 animate-pulse">
-              <Loader />
-              <p className="font-semibold ">Loading</p>
+              <p className="font-semibold ">Loading...</p>
             </div>
           </div>
         )

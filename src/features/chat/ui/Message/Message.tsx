@@ -19,6 +19,7 @@ interface IMessageProps extends ChatUIMessage {
   isMine: boolean
   onUpdate: (id: string, initialValue: string) => void
   onDelete: (id: string) => void
+  onPreviewImage: (image: { alt: string; url: string }) => void
 }
 
 export const Message = ({
@@ -31,14 +32,10 @@ export const Message = ({
   isDeleted,
   createdAt,
   onUpdate,
-  onDelete
+  onDelete,
+  onPreviewImage
 }: IMessageProps) => {
   const [isVisibleContextMenu, setIsVisibleContextMenu] = useState(false)
-  const [selectedImage, setSelectedImage] = useState<{
-    url: string
-    name: string
-  } | null>(null)
-
   const handleContextMenu = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
@@ -84,16 +81,16 @@ export const Message = ({
 
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
-      {status === "sending" ||
-        (status === "editing" && (
-          <div className="flex items-center mr-4">
-            <Loader />
-          </div>
-        ))}
+      {status === "loading" && (
+        <div className="flex items-center mr-4">
+          <Loader />
+        </div>
+      )}
 
       <div
-        className={`max-w-[80%] flex flex-col space-y-2 ${status === "sending" && "opacity-70"}`}
+        className={`max-w-[80%] flex flex-col space-y-2 ${status === "loading" && "opacity-70"}`}
       >
+        {/* TODO: \/\/\/ to new component --> "MessageSender" */}
         {!isMine && (
           <div className="flex space-x-2.5">
             <Image
@@ -102,28 +99,32 @@ export const Message = ({
               src={sender.imageUrl}
               alt={sender.name}
               className="rounded-2xl"
-            />
+              />
             <p>{sender.name}</p>
           </div>
         )}
+        {/* TODO: /\/\/\ to new component --> "MessageSender" */}
+        {/* "===============================================" */}
+        {/* TODO: \/\/\/ to new component --> "MessageContent" */}
         <div
           className="relative flex flex-wrap items-end gap-4 p-3 rounded-2xl bg-zinc-100"
           onContextMenu={handleContextMenu}
-        >
+          >
           <MessageContextMenu
             isVisible={isVisibleContextMenu}
             buttons={contextMenu}
-          />
+            />
 
           <div className="space-y-3">
             <Attachments
               attachments={attachments}
-              openDialog={(url: string, name: string) =>
-                setSelectedImage({ url, name })
+              openDialog={(url: string, alt: string) =>
+                onPreviewImage({ url, alt })
               }
-            />
+              />
             <p className="text-zinc-800">{content}</p>
           </div>
+            {/* TODO: /\/\/\ to new component --> "MessageContent" */}
 
           <div className="flex justify-end space-x-2">
             <p className={`text-sm text-zinc-500/70 ${isMine && "text-end"}`}>
@@ -137,15 +138,6 @@ export const Message = ({
           </div>
         </div>
       </div>
-      <Dialog isOpen={!!selectedImage} onClose={() => setSelectedImage(null)}>
-        {selectedImage && (
-          <img
-            className="max-w-full"
-            src={selectedImage.url}
-            alt={selectedImage.name}
-          />
-        )}
-      </Dialog>
     </div>
   )
 }
