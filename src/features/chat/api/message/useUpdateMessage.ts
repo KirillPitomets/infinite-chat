@@ -47,10 +47,10 @@ export function useUpdateMessage({
           old
             ? old.map(msg =>
                 msg.id === messageId
-                  ? { ...msg, content, status: "editing" }
+                  ? { ...msg, content, status: "loading" }
                   : msg
               )
-            : []
+            : old
       )
 
       return { previousMessages }

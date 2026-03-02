@@ -69,7 +69,7 @@ export function useSendMessage(chatId: string) {
         isDeleted: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
-        status: "sending",
+        status: "loading",
         attachments: files
           ? files.map(file => ({
               key: "",
