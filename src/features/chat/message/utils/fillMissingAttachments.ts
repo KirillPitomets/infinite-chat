@@ -1,4 +1,4 @@
-import { UIAttachment } from "@/features/chat/model/chat.types"
+import { UIAttachment } from "@/features/chat/message/model/message.types"
 
 export const fillMissingAttachment = (
   attachments: UIAttachment[],

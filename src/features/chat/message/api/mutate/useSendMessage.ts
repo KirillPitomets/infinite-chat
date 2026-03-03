@@ -1,17 +1,16 @@
 import {
   ChatUIMessage,
-  mapAPIMessageToUI,
-  UIAttachment
-} from "@/features/chat/model/chat.types"
+  mapAPIMessageToUI
+} from "@/features/chat/message/model/message.types"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { edenClient } from "@/shared/lib/eden"
 
+import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
 import { MessageAttachment } from "@/shared/schemes/message.schema"
 import { useUploadThing } from "@/shared/utils/uploadthing"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { chatKeys } from "../chat.key"
-import { fillMissingAttachment } from "@/shared/utils/fillMissingAttachments"
+import { chatKeys } from "../../../chat/model/chat.keys"
 
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient()

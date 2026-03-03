@@ -1,5 +1,5 @@
 import Image from "next/image"
-import { ChatUIMessage, UIAttachment } from "../../model/chat.types"
+import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
 
 type AttachmentsProps = {
   messageStatus: ChatUIMessage["status"]

@@ -1,8 +1,11 @@
 import { useRealtime } from "@/shared/lib/realtime-client"
 import { useQueryClient } from "@tanstack/react-query"
-import { chatKeys } from "../chat.key"
-import { useChangeMessageStatus } from "@/features/chat/api/message/useChangeMessageStatus"
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
+import { chatKeys } from "../model/chat.keys"
+import { useChangeMessageStatus } from "@/features/chat/message/api/useChangeMessageStatus"
+import {
+  ChatUIMessage,
+  mapAPIMessageToUI
+} from "@/features/chat/message/model/message.types"
 
 export function useChatRealtime(chatId: string, userId: string) {
   const queryClient = useQueryClient()
@@ -21,13 +24,7 @@ export function useChatRealtime(chatId: string, userId: string) {
           case "chat.message.created":
             queryClient.setQueryData<ChatUIMessage[]>(
               chatKeys.messages(chatId),
-              old => [
-                ...(old ?? []),
-                {
-                  ...data,
-                  status: "sent"
-                }
-              ]
+              old => [...(old ?? []), mapAPIMessageToUI(data, "sent", false)]
             )
             break
           case "chat.message.updated":
@@ -36,7 +33,9 @@ export function useChatRealtime(chatId: string, userId: string) {
               old =>
                 old
                   ? old.map(msg =>
-                      msg.id === data.id ? { ...data, status: "sent" } : msg
+                      msg.id === data.id
+                        ? mapAPIMessageToUI(data, "sent", false)
+                        : msg
                     )
                   : []
             )

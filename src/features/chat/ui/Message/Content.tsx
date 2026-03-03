@@ -1,4 +1,4 @@
-import { ChatUIMessage, UIAttachment } from "../../model/chat.types"
+import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
 import { Attachments } from "./Attachments"
 
 type MessageContentProps = {

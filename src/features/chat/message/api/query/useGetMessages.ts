@@ -1,7 +1,10 @@
 import { edenClient } from "@/shared/lib/eden"
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
+import {
+  ChatUIMessage,
+  mapAPIMessageToUI
+} from "@/features/chat/message/model/message.types"
 import { useQuery } from "@tanstack/react-query"
-import { chatKeys } from "../chat.key"
+import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 
 export function useGetMessages(chatId: string) {
   return useQuery<ChatUIMessage[]>({
@@ -16,10 +19,7 @@ export function useGetMessages(chatId: string) {
         throw new Error("Failed to get messages")
       }
 
-      return res.data.map(msg => ({
-        ...msg,
-        status: "sent"
-      }))
+      return res.data.map(msg => mapAPIMessageToUI(msg, "sent", false))
     }
   })
 }

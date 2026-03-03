@@ -1,6 +1,6 @@
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
+import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { useQueryClient } from "@tanstack/react-query"
-import { chatKeys } from "../chat.key"
+import { chatKeys } from "../../chat/model/chat.keys"
 
 interface useChangeMessageArgs extends Pick<ChatUIMessage, "status"> {
   chatId: string

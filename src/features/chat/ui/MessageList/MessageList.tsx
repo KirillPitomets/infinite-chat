@@ -1,6 +1,6 @@
 import { Message } from "@/features/chat/ui/Message/Message"
 import { useEffect, useRef } from "react"
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
+import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { User } from "@/shared/types/User.type"
 import { MessageListSkeleton } from "./Skeleton"
 

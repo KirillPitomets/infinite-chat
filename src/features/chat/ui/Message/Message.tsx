@@ -1,11 +1,7 @@
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
+import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
-import {
-  CopyIcon,
-  EditIcon,
-  TrashIcon
-} from "@/shared/components/ui/icons"
+import { CopyIcon, EditIcon, TrashIcon } from "@/shared/components/ui/icons"
 import { formatDate } from "date-fns"
 import { useState } from "react"
 import toast from "react-hot-toast"
@@ -86,7 +82,7 @@ export const Message = ({
         )}
 
         <div
-          className="relative p-4 bg-zinc-100"
+          className="relative p-1.5 rounded-xl bg-zinc-100"
           onContextMenu={handleContextMenu}
         >
           <MessageContextMenu

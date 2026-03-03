@@ -1,4 +1,4 @@
-import { ChatUIMessage } from "../../model/chat.types"
+import { ChatUIMessage } from "../../message/model/message.types"
 import { CrossIcon, TickIcon } from "@/shared/components/ui/icons"
 import { Loader } from "@/shared/components/ui/Loader"
 

@@ -1,8 +1,11 @@
 import { edenClient } from "@/shared/lib/eden"
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
+import {
+  ChatUIMessage,
+  mapAPIMessageToUI
+} from "@/features/chat/message/model/message.types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { chatKeys } from "../chat.key"
+import { chatKeys } from "../../../chat/model/chat.keys"
 
 type useUpdateMessageArgs = {
   chatId: string
@@ -28,7 +31,7 @@ export function useUpdateMessage({
         throw new Error(res.error?.value.message ?? "Failed to update message")
       }
 
-      return { ...res.data, status: "sent" }
+      return mapAPIMessageToUI(res.data, "sent", false)
     },
     onMutate: async ({ messageId, content }) => {
       await queryClient.cancelQueries({

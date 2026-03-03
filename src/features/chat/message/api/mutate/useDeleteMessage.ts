@@ -1,8 +1,8 @@
 import { edenClient } from "@/shared/lib/eden"
 import { useMutation } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { useChangeMessageStatus } from "./useChangeMessageStatus"
-import { ChatUIMessage } from "../../model/chat.types"
+import { useChangeMessageStatus } from "../useChangeMessageStatus"
+import { ChatUIMessage, mapAPIMessageToUI } from "../../model/message.types"
 
 export function useDeleteMessage(chatId: string) {
   const changeMessageStatus = useChangeMessageStatus()
@@ -15,8 +15,7 @@ export function useDeleteMessage(chatId: string) {
         throw new Error(res.error?.value.message ?? "Failed to delete message")
       }
 
-
-      return { ...res.data, status: "deleted" }
+      return mapAPIMessageToUI(res.data, "deleted", false)
     },
     onMutate(messageId) {
       changeMessageStatus({ chatId, messageId: messageId, status: "loading" })

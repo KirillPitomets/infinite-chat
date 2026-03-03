@@ -1,6 +1,6 @@
 import { edenClient } from "@/shared/lib/eden"
 import { useQuery } from "@tanstack/react-query"
-import { chatKeys } from "../chat.key"
+import { chatKeys } from "../model/chat.keys"
 
 export function useChatData(chatId: string) {
   return useQuery({
