@@ -8,6 +8,7 @@ import toast from "react-hot-toast"
 import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
 import { MessageStatus } from "./Status"
+import { useMessageContextMenu } from "../../message/model/useMessageContextMenu"
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
@@ -36,6 +37,19 @@ export const Message = ({
     e.preventDefault()
     setIsVisibleContextMenu(prev => !prev)
   }
+  const contextMenu = useMessageContextMenu({
+    closeContext: () => setIsVisibleContextMenu(false),
+    copyMessage: () => {
+      navigator.clipboard.writeText(content)
+      toast.success("Message copied :)")
+    },
+    deleteMessage() {
+      onDelete(id)
+    },
+    updateMessage() {
+      onUpdate(id, content)
+    }
+  })
 
   if (isDeleted || status === "deleted") {
     return (
@@ -46,31 +60,6 @@ export const Message = ({
       />
     )
   }
-
-  const contextMenu = [
-    {
-      icon: EditIcon,
-      handle: () => {
-        setIsVisibleContextMenu(false)
-        onUpdate(id, content)
-      }
-    },
-    {
-      icon: CopyIcon,
-      handle: () => {
-        navigator.clipboard.writeText(content)
-        toast.success("Message has been copied :)")
-        setIsVisibleContextMenu(false)
-      }
-    },
-    {
-      icon: TrashIcon,
-      handle: () => {
-        setIsVisibleContextMenu(false)
-        onDelete(id)
-      }
-    }
-  ]
 
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
@@ -85,10 +74,12 @@ export const Message = ({
           className="relative p-1.5 rounded-xl bg-zinc-100"
           onContextMenu={handleContextMenu}
         >
-          <MessageContextMenu
-            isVisible={isVisibleContextMenu}
-            buttons={contextMenu}
-          />
+          {isMine && (
+            <MessageContextMenu
+              isVisible={isVisibleContextMenu}
+              buttons={contextMenu}
+            />
+          )}
 
           <MessageContent
             attachments={attachments}
