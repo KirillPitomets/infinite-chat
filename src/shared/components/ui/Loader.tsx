@@ -1,7 +1,19 @@
-const Loader = () => {
-  return (
-    <div className="block w-5 h-5 border-t-2 border-l-2 border-green-500 rounded-full animate-spin "></div>
-  )
+type LoaderProps = {
+  size?: number
+  thickness?: number
 }
 
-export default Loader
+export function Loader({ size = 24, thickness = 3 }: LoaderProps) {
+  return (
+    <div
+      className={
+        "animate-spin rounded-full border-solid border-current border-t-transparent"
+      }
+      style={{
+        width: size,
+        height: size,
+        borderWidth: thickness
+      }}
+    />
+  )
+}
