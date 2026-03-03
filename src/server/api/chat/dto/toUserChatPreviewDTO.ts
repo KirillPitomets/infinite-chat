@@ -1,6 +1,9 @@
 import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { ConflictError } from "../../../errors/domain.error"
-import { ChatMessage } from "@/shared/schemes/message.schema"
+import {
+  ChatMessage,
+  messageAttachmentsMapper
+} from "@/shared/schemes/message.schema"
 import { ChatPreviewPrismaType } from "../types/chat.prisma"
 
 export const toUserChatPreviewDTO = (
@@ -8,14 +11,17 @@ export const toUserChatPreviewDTO = (
   userId: string
 ): UserChatPreview[] => {
   return chats.map(chat => {
-    const latestMessage = chat.messages[0]
+    const latestMessageObj = chat.messages[0]
+
+    const latestMessage = latestMessageObj
       ? ({
-          id: chat.messages[0].id,
-          content: chat.messages[0].content,
-          sender: chat.messages[0].sender,
-          isDeleted: chat.messages[0].isDeleted,
-          createdAt: chat.messages[0].createdAt.toISOString(),
-          updatedAt: chat.messages[0].updatedAt.toISOString()
+          id: latestMessageObj.id,
+          content: latestMessageObj.content,
+          sender: latestMessageObj.sender,
+          isDeleted: latestMessageObj.isDeleted,
+          attachments: messageAttachmentsMapper(latestMessageObj.attachments),
+          createdAt: latestMessageObj.createdAt.toISOString(),
+          updatedAt: latestMessageObj.updatedAt.toISOString()
         } satisfies ChatMessage)
       : null
 

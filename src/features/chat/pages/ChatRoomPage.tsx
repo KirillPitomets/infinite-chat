@@ -12,9 +12,15 @@ import { useDeleteMessage } from "../api/message/useDeleteMessage"
 import { useGetMessages } from "../api/message/useGetMessages"
 import { useSendMessage } from "../api/message/useSendMessage"
 import { useUpdateMessage } from "../api/message/useUpdateMessage"
+import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
+  const [isOpenImagePreview, setIsOpenImagePreview] = useState(false)
+  const [previewImage, setPreviewImage] = useState<{
+    alt: string
+    url: string
+  }>({ alt: "", url: "" })
   const [isEditMessage, setIsEditMessage] = useState(false)
   const [editingMessage, setEditingMessage] = useState<{
     id: string
@@ -47,8 +53,18 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
 
   const { mutate: deleteChat } = useDeleteChat(chatId)
 
+  const handleImagePreviewDialog = (image: { alt: string; url: string }) => {
+    setPreviewImage(image)
+    setIsOpenImagePreview(true)
+  }
+
   return (
     <div className="flex flex-col flex-1 w-full justify-beetwen">
+      <ImagePreviewDialog
+        isOpen={isOpenImagePreview}
+        image={previewImage}
+        onClose={() => setIsOpenImagePreview(false)}
+      />
       <ChatHeader
         chatId={chatId}
         chatData={
@@ -74,6 +90,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         isEditMessage={isEditMessage}
         onUpdate={handleMessageDetails}
         onDelete={deleteMessage}
+        onPreviewImage={image => handleImagePreviewDialog(image)}
       />
       <ChatInputController
         isEdit={isEditMessage}
@@ -81,7 +98,9 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         editingMessageInitialValue={editingMessage.initialValue}
         onUpdate={onUpdateMessage}
         onCancelUpdate={onCancelUpdate}
-        onSend={sendMessage}
+        onSubmit={(content, files) => {
+          sendMessage({ content, files })
+        }}
       />
     </div>
   )

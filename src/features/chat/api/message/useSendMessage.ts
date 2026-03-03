@@ -1,36 +1,60 @@
+import {
+  ChatUIMessage,
+  mapAPIMessageToUI,
+  UIAttachment
+} from "@/features/chat/model/chat.types"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { edenClient } from "@/shared/lib/eden"
-import { ChatUIMessage } from "@/features/chat/model/chat.types"
 
+import { MessageAttachment } from "@/shared/schemes/message.schema"
+import { useUploadThing } from "@/shared/utils/uploadthing"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
 import { chatKeys } from "../chat.key"
+import { fillMissingAttachment } from "@/shared/utils/fillMissingAttachments"
 
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
 
+  const { startUpload } = useUploadThing("chatUploadImage")
+
   return useMutation<
     ChatUIMessage,
     Error,
-    string,
-    { previousMessages: ChatUIMessage[]; tempId: string }
+    { content: string; files?: File[] },
+    { previousMessages: ChatUIMessage[]; tempId: string; filesCount?: number }
   >({
     mutationKey: chatKeys.sendMessages(chatId),
-    mutationFn: async (content: string) => {
+    mutationFn: async ({ content, files }) => {
+      const filesUploaded = files?.length ? await startUpload(files) : []
+
+      const formatted: MessageAttachment[] = filesUploaded
+        ? filesUploaded.map(file => ({
+            key: file.key,
+            name: file.name,
+            size: file.size,
+            url: file.ufsUrl,
+            type: "IMAGE",
+            height: 0,
+            width: 0
+          }))
+        : []
+
       const res = await edenClient.message.post({
+        chatId,
         content,
-        chatId
+        files: formatted
       })
 
       if (!res.data) {
         throw new Error("Failed to send message")
       }
 
-      return { ...res.data, status: "sent" }
+      return mapAPIMessageToUI(res.data, "sent", false)
     },
 
-    onMutate: async content => {
+    onMutate: async ({ content, files }) => {
       await queryClient.cancelQueries({
         queryKey: chatKeys.messages(chatId)
       })
@@ -49,7 +73,18 @@ export function useSendMessage(chatId: string) {
         sender: currentUser,
         isDeleted: false,
         createdAt: new Date().toISOString(),
-        status: "sending"
+        updatedAt: new Date().toISOString(),
+        status: "loading",
+        attachments: files
+          ? files.map(_ => ({
+              key: `temp-${Date.now()}-missingAttachment`,
+              name: "temp-attachment",
+              size: 0,
+              type: "VIDEO",
+              url: "",
+              isError: false
+            }))
+          : []
       }
 
       queryClient.setQueryData<ChatUIMessage[]>(
@@ -57,14 +92,23 @@ export function useSendMessage(chatId: string) {
         old => [...(old ?? []), optimisticMessage]
       )
 
-      return { previousMessages, tempId }
+      return { previousMessages, tempId, filesCount: files?.length || 0 }
     },
     onSuccess: (data, _, ctx) => {
       queryClient.setQueryData<ChatUIMessage[]>(
         chatKeys.messages(chatId),
         old =>
           old?.map(msg =>
-            msg.id === ctx.tempId ? { ...data, status: "sent" } : msg
+            msg.id === ctx.tempId
+              ? {
+                  ...data,
+                  status: "sent",
+                  attachments: fillMissingAttachment(
+                    data.attachments,
+                    ctx.filesCount
+                  )
+                }
+              : msg
           ) ?? []
       )
     },

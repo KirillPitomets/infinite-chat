@@ -6,7 +6,7 @@ type ChatinputControllerProps = {
   editingMessageInitialValue: string
   onCancelUpdate: () => void
   onUpdate: (id: string, value: string) => void
-  onSend: (value: string) => void
+  onSubmit: (value: string, files?: File[]) => void
 }
 
 export const ChatInputController = ({
@@ -15,7 +15,7 @@ export const ChatInputController = ({
   editingMessageInitialValue,
   onUpdate,
   onCancelUpdate,
-  onSend
+  onSubmit
 }: ChatinputControllerProps) => {
   if (isEdit) {
     return (
@@ -35,5 +35,5 @@ export const ChatInputController = ({
     )
   }
 
-  return <ChatInputUI onSubmit={value => onSend(value)} initialValue="" />
+  return <ChatInputUI onSubmit={(value, files) => onSubmit(value, files)} initialValue="" />
 }

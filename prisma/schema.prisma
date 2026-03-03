@@ -64,19 +64,37 @@ model Chat {
 }
 
 model Message {
-  id        String    @id @default(cuid())
-  senderId  String
-  chatId    String
-  content   String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  isDeleted Boolean   @default(false)
+  id          String        @id @default(cuid())
+  senderId    String
+  chatId      String
+  content     String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  isDeleted   Boolean       @default(false)
+  attachments Attachment[]
 
-  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender    User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender      User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([chatId, createdAt])
   @@index([senderId])
+}
+
+model Attachment  {
+  id        String          @id @default(cuid())
+  messageId String
+  message   Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  url       String
+  key       String          @unique
+  name      String
+  size      Int
+  type      AttachmentType
+
+  width     Int?
+  height    Int?
+
+  createdAt DateTime        @default(now())
 
 }
 
@@ -89,4 +107,10 @@ enum Role {
 enum ChatTpye {
   DIRECT 
   GROUP 
+}
+
+enum AttachmentType {
+  IMAGE
+  VIDEO
+  FILE
 }

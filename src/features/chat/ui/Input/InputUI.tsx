@@ -1,20 +1,31 @@
-import {ChangeEvent, useEffect, useLayoutEffect, useRef, useState} from "react"
-import EmojiPicker, {EmojiClickData} from "emoji-picker-react"
-import {SendIcon} from "@/shared/ui/icons"
-import {IconButtonBase} from "@/shared/ui/IconButtonBase"
+"use client"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { SendIcon } from "@/shared/components/ui/icons"
+import { PreviewFiles } from "@/shared/components/ui/PreviewFiles/PreviewFiles"
+import { UploadButton } from "@/shared/components/UploadButton"
+import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
+import {
+  ChangeEvent,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState
+} from "react"
+import { createPortal } from "react-dom"
+import toast from "react-hot-toast"
 
 type ChatInputProps = {
-  onSubmit: (value: string) => void
+  onSubmit: (value: string, files?: File[]) => void
   onCancel?: () => void
   initialValue: string
-  // submitLabel: "save" | "send"
 }
 
-export function ChatInputUI({initialValue, onSubmit}: ChatInputProps) {
+export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
   const [value, setValue] = useState<string>(initialValue)
+  const [files, setFiles] = useState<File[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
-  const [latestEmoji, setLatestEmoji] = useState("😀")
+  const [latestEmoji, setLatestEmoji] = useState("🥰")
 
   const MIN_TEXTAREA_HEIGHT = 32
 
@@ -36,9 +47,13 @@ export function ChatInputUI({initialValue, onSubmit}: ChatInputProps) {
 
   const onSubmitMessage = () => {
     if (value.trim().length > 0 && value.trim().length < 1000) {
-      onSubmit(value)
+      onSubmit(value, files)
       textareaRef.current?.focus()
       setValue("")
+      setFiles([])
+      if (textareaRef.current) {
+        textareaRef.current.style.height = "unset"
+      }
     }
   }
 
@@ -51,6 +66,17 @@ export function ChatInputUI({initialValue, onSubmit}: ChatInputProps) {
         onSubmitMessage()
       }
     }
+  }
+
+  const handleUploadButtonChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const inputFiles = e.target.files
+    if (!inputFiles) return
+    const totalFiles = files.length + inputFiles.length
+    if (totalFiles > 4) {
+      toast.error("You can upload only 4 files")
+      return
+    }
+    setFiles(prev => [...prev, ...inputFiles])
   }
 
   const toggleEmojiPicker = () => {
@@ -66,47 +92,81 @@ export function ChatInputUI({initialValue, onSubmit}: ChatInputProps) {
     setValue(initialValue)
   }, [initialValue])
 
-  return (
-    <label className="flex items-center border-t border-zinc-300 p-5 space-x-2 relative">
-      {isOpenEmojiPicker && (
-        <div
-          onClick={toggleEmojiPicker}
-          className="w-screen h-screen  bg-black/4 absolute bottom-0 left-0 z-100"
-        />
-      )}
-      <div className="flex flex-1 items-center bg-zinc-400/50 rounded-2xl transition-colors focus:bg-zinc-400">
-        <textarea
-          ref={textareaRef}
-          onKeyDown={onSubmitMessageViaEnter}
-          onChange={onChange}
-          value={value}
-          className="w-full max-h-62.5 px-4 py-2.5 text-zinc-900 outline-none resize-none"
-          autoFocus
-          rows={1}
-          placeholder="Message..."
-        />
+  useEffect(() => {
+    if (!isOpenEmojiPicker) return
 
-        <div className="relative">
-          <button
-            className="p-2 cursor-pointer transition-transform hover:scale-150"
-            onClick={toggleEmojiPicker}
-          >
-            {latestEmoji}
-          </button>
-          <div className="absolute bottom-full right-0 z-101">
-            <EmojiPicker
-              open={isOpenEmojiPicker}
-              onEmojiClick={handleEmojiClick}
-            />
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setIsOpenEmojiPicker(false)
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown)
+    return () => document.removeEventListener("keydown", handleKeyDown)
+  }, [isOpenEmojiPicker])
+
+  return (
+    <div>
+      <PreviewFiles
+        files={files}
+        removeFile={filename =>
+          setFiles(prev =>
+            prev.filter(prevFile => !(prevFile.name === filename))
+          )
+        }
+      />
+      <div className="relative flex items-center gap-2 p-5 space-x-2 border-t border-zinc-300">
+        <UploadButton onChange={handleUploadButtonChange} />
+        <div className="flex items-center flex-1 transition-colors bg-zinc-400/50 rounded-2xl focus:bg-zinc-400">
+          <textarea
+            ref={textareaRef}
+            onKeyDown={onSubmitMessageViaEnter}
+            onChange={onChange}
+            value={value}
+            className="w-full max-h-62.5 px-4 py-2.5 text-zinc-900 outline-none resize-none"
+            autoFocus
+            rows={1}
+            placeholder="Message..."
+          />
+
+          <div className="relative">
+            <button
+              className="p-2 transition-transform cursor-pointer hover:scale-150"
+              onClick={toggleEmojiPicker}
+            >
+              {latestEmoji}
+            </button>
+            <div className="absolute right-0 bottom-full z-101">
+              <EmojiPicker
+                open={isOpenEmojiPicker}
+                onEmojiClick={handleEmojiClick}
+              />
+              {createPortal(
+                <>
+                  {isOpenEmojiPicker && (
+                    <div
+                      onClick={toggleEmojiPicker}
+                      className="absolute bottom-0 left-0 w-screen h-screen bg-black/10 z-100"
+                    />
+                  )}
+                </>,
+                document.body
+              )}
+            </div>
           </div>
         </div>
-      </div>
 
-      <button onClick={onSubmitMessage} disabled={!value.trim()}>
-        <IconButtonBase>
-          <SendIcon />
-        </IconButtonBase>
-      </button>
-    </label>
+        <button onClick={onSubmitMessage} disabled={!value.trim()}>
+          <IconButtonBase>
+            <SendIcon />
+          </IconButtonBase>
+        </button>
+      </div>
+    </div>
   )
 }
+
+/*
+        
+
+*/

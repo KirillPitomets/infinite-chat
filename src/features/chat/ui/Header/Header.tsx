@@ -1,8 +1,8 @@
-import { IconButtonBase } from "@/shared/ui/IconButtonBase"
-import { CameraIcon, InformationIcon, TrashIcon } from "@/shared/ui/icons"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
 import { HeaderSkeleton } from "./HeaderSkeleton"
+import { CameraIcon, InformationIcon, TrashIcon } from "@/shared/components/ui/icons"
 
 type DirectChat = {
   type: "DIRECT"

@@ -12,6 +12,7 @@ type MessageListProps = {
   currentUser: User
   onUpdate: (id: string, initialValue: string) => void
   onDelete: (id: string) => void
+  onPreviewImage: (image: {alt: string, url: string}) => void
 }
 
 export const MessageList = ({
@@ -20,7 +21,8 @@ export const MessageList = ({
   isLoading,
   currentUser,
   onUpdate,
-  onDelete
+  onDelete,
+  onPreviewImage
 }: MessageListProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
@@ -29,7 +31,6 @@ export const MessageList = ({
       messagesEndRef.current.scrollIntoView()
     }
   }, [messages.length, isEditMessage])
-
   return (
     <>
       <div className="flex-1 space-y-5 p-5.25 overflow-y-auto scrollbar-thin">
@@ -42,6 +43,7 @@ export const MessageList = ({
               onUpdate={onUpdate}
               onDelete={onDelete}
               isMine={currentUser.id === msg.sender.id}
+              onPreviewImage={onPreviewImage} 
               {...msg}
             />
           ))
