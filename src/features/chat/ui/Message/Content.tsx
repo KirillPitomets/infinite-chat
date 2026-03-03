@@ -19,7 +19,7 @@ export const MessageContent = ({
       <div className="space-y-3">
         {attachments.length > 0 && (
           <Attachments
-            messageStatus={messageStatus}
+            isLoading={messageStatus === "loading" ? true : false}
             attachments={attachments}
             openDialog={(url: string, alt: string) =>
               onPreviewImage({ url, alt })

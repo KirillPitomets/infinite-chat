@@ -1,19 +1,22 @@
+import { UIAttachment } from "@/features/chat/message/model/message.types"
 import Image from "next/image"
-import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
+import { AttachmentsSkeleton } from "./AttachmentsSkeleton"
 
 type AttachmentsProps = {
-  messageStatus: ChatUIMessage["status"]
+  isLoading?: boolean
   attachments: UIAttachment[]
   openDialog: (url: string, alt: string) => void
 }
 
-// TODO: Make Attachemnts Skeletons if message status === "loading"
-
 export const Attachments = ({
-  messageStatus,
+  isLoading = false,
   attachments,
   openDialog
 }: AttachmentsProps) => {
+  if (isLoading) {
+    return <AttachmentsSkeleton count={attachments.length} />
+  }
+
   return (
     <div className="space-y-2">
       {attachments.map((file, indx) => (
