@@ -13,6 +13,7 @@ import { useGetMessages } from "../message/api/query/useGetMessages"
 import { useSendMessage } from "../message/api/mutate/useSendMessage"
 import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
 import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
+import { UIAttachment } from "../message/model/message.types"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
@@ -25,6 +26,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const [editingMessage, setEditingMessage] = useState<{
     id: string
     initialValue: string
+    initialAttachments?: UIAttachment[]
   }>({ id: "", initialValue: "" })
   const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
   const { data: messages = [], isLoading } = useGetMessages(chatId)
@@ -37,13 +39,25 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
 
   useChatRealtime(chatId, currentUser.id)
 
-  const handleMessageDetails = (messageId: string, initialValue: string) => {
-    setEditingMessage({ id: messageId, initialValue })
+  const handleMessageDetails = (
+    messageId: string,
+    initialValue: string,
+    attachments?: UIAttachment[]
+  ) => {
+    setEditingMessage({
+      id: messageId,
+      initialValue,
+      initialAttachments: attachments
+    })
     setIsEditMessage(true)
   }
 
-  const onUpdateMessage = (id: string, value: string) => {
-    updateMessage({ messageId: id, content: value })
+  const onUpdateMessage = (id: string, value: string, files?: File[]) => {
+    updateMessage({
+      messageId: id,
+      content: value,
+      files: files
+    })
   }
 
   const onCancelUpdate = () => {
@@ -88,14 +102,13 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         isLoading={isLoading}
         messages={messages}
         isEditMessage={isEditMessage}
-        onUpdate={handleMessageDetails}
+        handleUpdate={handleMessageDetails}
         onDelete={deleteMessage}
         onPreviewImage={image => handleImagePreviewDialog(image)}
       />
       <ChatInputController
         isEdit={isEditMessage}
-        editingMessageId={editingMessage.id}
-        editingMessageInitialValue={editingMessage.initialValue}
+        editingMessage={editingMessage}
         onUpdate={onUpdateMessage}
         onCancelUpdate={onCancelUpdate}
         onSubmit={(content, files) => {

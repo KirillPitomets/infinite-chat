@@ -1,6 +1,9 @@
 import { Message } from "@/features/chat/ui/Message/Message"
 import { useEffect, useRef } from "react"
-import { ChatUIMessage } from "@/features/chat/message/model/message.types"
+import {
+  ChatUIMessage,
+  UIAttachment
+} from "@/features/chat/message/model/message.types"
 import { User } from "@/shared/types/User.type"
 import { MessageListSkeleton } from "./Skeleton"
 
@@ -10,9 +13,13 @@ type MessageListProps = {
   isEditMessage: boolean
   isLoading: boolean
   currentUser: User
-  onUpdate: (id: string, initialValue: string) => void
+  handleUpdate: (
+    id: string,
+    initialValue: string,
+    initialAttachments?: UIAttachment[]
+  ) => void
   onDelete: (id: string) => void
-  onPreviewImage: (image: {alt: string, url: string}) => void
+  onPreviewImage: (image: { alt: string; url: string }) => void
 }
 
 export const MessageList = ({
@@ -20,7 +27,7 @@ export const MessageList = ({
   isEditMessage,
   isLoading,
   currentUser,
-  onUpdate,
+  handleUpdate,
   onDelete,
   onPreviewImage
 }: MessageListProps) => {
@@ -40,10 +47,10 @@ export const MessageList = ({
           messages.map(msg => (
             <Message
               key={msg.id}
-              onUpdate={onUpdate}
+              handleUpdate={handleUpdate}
               onDelete={onDelete}
               isMine={currentUser.id === msg.sender.id}
-              onPreviewImage={onPreviewImage} 
+              onPreviewImage={onPreviewImage}
               {...msg}
             />
           ))

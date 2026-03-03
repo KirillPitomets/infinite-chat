@@ -1,18 +1,21 @@
 import { ChatInputUI } from "@/features/chat/ui/Input/InputUI"
+import { UIAttachment } from "../../message/model/message.types"
 
 type ChatinputControllerProps = {
   isEdit: boolean
-  editingMessageId: string
-  editingMessageInitialValue: string
+  editingMessage: {
+    id: string
+    initialValue: string
+    initialAttachments?: UIAttachment[]
+  }
   onCancelUpdate: () => void
-  onUpdate: (id: string, value: string) => void
+  onUpdate: (id: string, value: string, files?: File[]) => void
   onSubmit: (value: string, files?: File[]) => void
 }
 
 export const ChatInputController = ({
   isEdit,
-  editingMessageId,
-  editingMessageInitialValue,
+  editingMessage,
   onUpdate,
   onCancelUpdate,
   onSubmit
@@ -23,17 +26,23 @@ export const ChatInputController = ({
         <div className="flex justify-between w-full p-4 border border-zinc-300">
           <div className="">
             <p>Edit message: </p>
-            <p className="truncate max-w-175">{editingMessageInitialValue}</p>
+            <p className="truncate max-w-175">{editingMessage.initialValue}</p>
           </div>
           <button onClick={onCancelUpdate}>cancel</button>
         </div>
         <ChatInputUI
-          onSubmit={value => onUpdate(editingMessageId, value)}
-          initialValue={editingMessageInitialValue}
+          onSubmit={(value, files) => onUpdate(editingMessage.id, value, files)}
+          isEditInput={isEdit}
+          initialValue={editingMessage.initialValue}
         />
       </div>
     )
   }
 
-  return <ChatInputUI onSubmit={(value, files) => onSubmit(value, files)} initialValue="" />
+  return (
+    <ChatInputUI
+      onSubmit={(value, files) => onSubmit(value, files)}
+      initialValue=""
+    />
+  )
 }

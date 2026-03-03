@@ -1,4 +1,6 @@
 import { prisma } from "@/server/db/prisma"
+import { UTApi } from "uploadthing/server"
+
 import {
   ConflictError,
   ForbiddenError,
@@ -10,6 +12,8 @@ import {
   ChatMessagePrismaType
 } from "@/server/api/message/types/message.prisma"
 import { MessageAttachment } from "@/shared/schemes/message.schema"
+
+const uploadAPi = new UTApi()
 
 class MessageService {
   async createChatMessage({
@@ -127,11 +131,13 @@ class MessageService {
   async update({
     userId,
     messageId,
-    content
+    content,
+    files
   }: {
     messageId: string
     userId: string
-    content: string
+    content?: string
+    files?: MessageAttachment[]
   }): Promise<{ updatedMessage: ChatMessagePrismaType; chatId: string }> {
     const existingMessage = await prisma.message.findUnique({
       where: { id: messageId }
@@ -145,18 +151,50 @@ class MessageService {
       throw new ForbiddenError("You cannot edit this message")
     }
 
-    const updatedMessage = await prisma.message.update({
-      where: {
-        id: messageId
-      },
-      data: {
-        content,
-        updatedAt: new Date()
-      },
-      include: ChatMessageInclude
+    if (!content && (!files || files.length === 0)) {
+      throw new ConflictError("Message must have content or attachments")
+    }
+
+    const updatedMessage = await prisma.$transaction(async tx => {
+      if (content) {
+        await tx.message.update({
+          where: { id: messageId },
+          data: { content }
+        })
+      }
+
+      if (files && files.length > 0) {
+        const prevAttachments = await tx.attachment.findMany({
+          where: { messageId }
+        })
+        
+        await tx.attachment.deleteMany({ where: { messageId } })
+
+        const newAttachments = await tx.attachment.createMany({
+          data: files.map(file => ({
+            messageId,
+            key: file.key,
+            name: file.name,
+            size: file.size,
+            type: file.type,
+            width: file.width,
+            height: file.height,
+            url: file.url
+          }))
+        })
+
+        if (newAttachments.count > 0) {
+          await uploadAPi.deleteFiles(prevAttachments.map(prev => prev.key))
+        }
+      }
+
+      return tx.message.findUniqueOrThrow({
+        where: { id: existingMessage.id },
+        include: ChatMessageInclude
+      })
     })
 
-    return { updatedMessage: updatedMessage, chatId: updatedMessage.chatId }
+    return { updatedMessage, chatId: updatedMessage.id }
   }
 }
 

@@ -63,7 +63,8 @@ export const messagesApi = new Elysia({ prefix: "/message" })
       const { updatedMessage, chatId } = await messageService.update({
         userId,
         messageId: params.messageId,
-        content: body.content
+        content: body.content,
+        files: body.files
       })
 
       const dto = toChatMessageDTO(updatedMessage)

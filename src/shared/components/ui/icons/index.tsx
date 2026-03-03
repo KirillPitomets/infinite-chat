@@ -14,6 +14,7 @@ import { CrossIcon } from "./CrossIcon"
 import { CalendarIcon } from "./CalendarIcon"
 import { ClipIcon } from "./ClipIcon"
 import { FileAccepted } from "./FileAccepted"
+import { ReloadIcon } from "./ReloadIcon"
 
 export {
   NetworkIcon,
@@ -31,5 +32,6 @@ export {
   CrossIcon,
   CalendarIcon,
   ClipIcon,
-  FileAccepted
+  FileAccepted,
+  ReloadIcon
 }

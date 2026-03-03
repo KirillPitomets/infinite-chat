@@ -10,7 +10,8 @@ import { MessageAttachment } from "@/shared/schemes/message.schema"
 import { useUploadThing } from "@/shared/utils/uploadthing"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { chatKeys } from "../../../chat/model/chat.keys"
+import { chatKeys } from "@/features/chat/chat/model/chat.keys"
+import { formatUploadedFiles } from "../../utils/formatUploadedFiles"
 
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient()
@@ -28,22 +29,14 @@ export function useSendMessage(chatId: string) {
     mutationFn: async ({ content, files }) => {
       const filesUploaded = files?.length ? await startUpload(files) : []
 
-      const formatted: MessageAttachment[] = filesUploaded
-        ? filesUploaded.map(file => ({
-            key: file.key,
-            name: file.name,
-            size: file.size,
-            url: file.ufsUrl,
-            type: "IMAGE",
-            height: 0,
-            width: 0
-          }))
+      const formattedAttachments: MessageAttachment[] = filesUploaded
+        ? formatUploadedFiles(filesUploaded)
         : []
 
       const res = await edenClient.message.post({
         chatId,
         content,
-        files: formatted
+        files: formattedAttachments
       })
 
       if (!res.data) {

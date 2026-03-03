@@ -1,4 +1,7 @@
-import { ChatUIMessage } from "@/features/chat/message/model/message.types"
+import {
+  ChatUIMessage,
+  UIAttachment
+} from "@/features/chat/message/model/message.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
 import { CopyIcon, EditIcon, TrashIcon } from "@/shared/components/ui/icons"
@@ -12,7 +15,11 @@ import { useMessageContextMenu } from "../../message/model/useMessageContextMenu
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
-  onUpdate: (id: string, initialValue: string) => void
+  handleUpdate: (
+    id: string,
+    initialValue: string,
+    initialAttachments?: UIAttachment[]
+  ) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void
 }
@@ -26,7 +33,7 @@ export const Message = ({
   status,
   isDeleted,
   createdAt,
-  onUpdate,
+  handleUpdate,
   onDelete,
   onPreviewImage
 }: IMessageProps) => {
@@ -47,7 +54,7 @@ export const Message = ({
       onDelete(id)
     },
     updateMessage() {
-      onUpdate(id, content)
+      handleUpdate(id, content, attachments)
     }
   })
 

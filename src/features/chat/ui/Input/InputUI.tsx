@@ -15,14 +15,21 @@ import { createPortal } from "react-dom"
 import toast from "react-hot-toast"
 
 type ChatInputProps = {
-  onSubmit: (value: string, files?: File[]) => void
+  isEditInput?: boolean
+  initialFiles?: File[]
+  initialValue?: string
   onCancel?: () => void
-  initialValue: string
+  onSubmit: (value: string, files?: File[]) => void
 }
 
-export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
+export function ChatInputUI({
+  isEditInput = false,
+  initialValue = "",
+  initialFiles = [],
+  onSubmit
+}: ChatInputProps) {
   const [value, setValue] = useState<string>(initialValue)
-  const [files, setFiles] = useState<File[]>([])
+  const [files, setFiles] = useState<File[]>(initialFiles)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
   const [latestEmoji, setLatestEmoji] = useState("🥰")
@@ -116,7 +123,7 @@ export function ChatInputUI({ initialValue, onSubmit }: ChatInputProps) {
         }
       />
       <div className="relative flex items-center gap-2 p-5 space-x-2 border-t border-zinc-300">
-        <UploadButton onChange={handleUploadButtonChange} />
+        <UploadButton icon={isEditInput ? "reload" : "clip"} onChange={handleUploadButtonChange} />
         <div className="flex items-center flex-1 transition-colors bg-zinc-400/50 rounded-2xl focus:bg-zinc-400">
           <textarea
             ref={textareaRef}
