@@ -2,6 +2,7 @@
 import React, { useEffect } from "react"
 import { createPortal } from "react-dom"
 
+
 type DialogProps = {
   isOpen: boolean
   onClose: () => void
@@ -34,8 +35,9 @@ export const Dialog = ({ isOpen, onClose, children }: DialogProps) => {
         onClick={onClose}
       />
 
-      {/*  flex items-center justify-center max-w-4xl p-6 bg-white shadow-xl rounded-2xl */}
-      <div className={`relative z-10`}>{children}</div>
+      <div className={`relative z-10`}>
+        {children}
+      </div>
     </div>,
     document.body
   )
