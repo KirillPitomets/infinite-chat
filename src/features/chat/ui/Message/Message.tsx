@@ -1,19 +1,17 @@
 import { ChatUIMessage } from "@/features/chat/model/chat.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
-import { Dialog } from "@/shared/components/Dialog/Dialog"
 import {
   CopyIcon,
   EditIcon,
-  TickIcon,
   TrashIcon
 } from "@/shared/components/ui/icons"
-import Loader from "@/shared/components/ui/Loader"
 import { formatDate } from "date-fns"
-import Image from "next/image"
 import { useState } from "react"
 import toast from "react-hot-toast"
-import { Attachments } from "./Attachments"
+import { MessageContent } from "./Content"
+import { MessageSender } from "./Sender"
+import { MessageStatus } from "./Status"
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
@@ -64,7 +62,6 @@ export const Message = ({
     {
       icon: CopyIcon,
       handle: () => {
-        setIsVisibleContextMenu(false)
         navigator.clipboard.writeText(content)
         toast.success("Message has been copied :)")
         setIsVisibleContextMenu(false)
@@ -81,33 +78,15 @@ export const Message = ({
 
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
-      {status === "loading" && (
-        <div className="flex items-center mr-4">
-          <Loader />
-        </div>
-      )}
-
       <div
-        className={`max-w-[80%] flex flex-col space-y-2 ${status === "loading" && "opacity-70"}`}
+        className={`max-w-[80%] flex flex-col space-y-2 ${status === "loading" && "opacity-70"} `}
       >
-        {/* TODO: \/\/\/ to new component --> "MessageSender" */}
         {!isMine && (
-          <div className="flex space-x-2.5">
-            <Image
-              width={25}
-              height={25}
-              src={sender.imageUrl}
-              alt={sender.name}
-              className="rounded-2xl"
-            />
-            <p>{sender.name}</p>
-          </div>
+          <MessageSender avatarUrl={sender.imageUrl} name={sender.name} />
         )}
-        {/* TODO: /\/\/\ to new component --> "MessageSender" */}
-        {/* "===============================================" */}
-        {/* TODO: \/\/\/ to new component --> "MessageContent" */}
+
         <div
-          className="relative flex flex-wrap items-end gap-4 p-3 rounded-2xl bg-zinc-100"
+          className="relative p-4 bg-zinc-100"
           onContextMenu={handleContextMenu}
         >
           <MessageContextMenu
@@ -115,27 +94,19 @@ export const Message = ({
             buttons={contextMenu}
           />
 
-          <div className="space-y-3">
-            <Attachments
-              messageStatus={status}
-              attachments={attachments}
-              openDialog={(url: string, alt: string) =>
-                onPreviewImage({ url, alt })
-              }
-            />
-            <p className="text-zinc-800">{content}</p>
-          </div>
-          {/* TODO: /\/\/\ to new component --> "MessageContent" */}
+          <MessageContent
+            attachments={attachments}
+            onPreviewImage={onPreviewImage}
+            content={content}
+            messageStatus={status}
+          />
 
           <div className="flex justify-end space-x-2">
             <p className={`text-sm text-zinc-500/70 ${isMine && "text-end"}`}>
               {formatDate(createdAt, "HH:mm")}
             </p>
-            {status === "sent" && (
-              <div className="flex items-end text-green-500">
-                <TickIcon />
-              </div>
-            )}
+
+            <MessageStatus status={status} />
           </div>
         </div>
       </div>
