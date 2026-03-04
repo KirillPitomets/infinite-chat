@@ -81,21 +81,17 @@ model Message {
 }
 
 model Attachment  {
-  id        String          @id @default(cuid())
+  id        String    @id @default(cuid())
   messageId String
-  message   Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   url       String
-  key       String          @unique
+  key       String    @unique
   name      String
   size      Int
-  type      AttachmentType
-
-  width     Int?
-  height    Int?
-
-  createdAt DateTime        @default(now())
-
+  type      String
+  
+  createdAt DateTime  @default(now())
 }
 
 enum Role {
@@ -107,10 +103,4 @@ enum Role {
 enum ChatTpye {
   DIRECT 
   GROUP 
-}
-
-enum AttachmentType {
-  IMAGE
-  VIDEO
-  FILE
 }
