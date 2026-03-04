@@ -1,37 +1,41 @@
 import { UserChatPreviewSchema } from "@/shared/schemes/chatPreview.schema"
-import {
-  ChatMessageSchema,
-  MessageAttachmentSchema
-} from "@/shared/schemes/message.schema"
+import { ChatMessageSchema } from "@/shared/schemes/message.schema"
 import z from "zod"
+
+const refineMessageBody = {
+  error: "You must provide either content or files",
+  path: ["content"]
+}
 
 export const MessageApiSchema = {
   create: {
-    body: z.object({
-      chatId: z.string(),
-      content: z.string().max(2000),
-      files: z.array(MessageAttachmentSchema).default([])
-    }),
+    body: z
+      .object({
+        content: z.string().max(2000),
+        files: z.union([
+          z.array(z.instanceof(File)).default([]),
+          z.instanceof(File)
+        ])
+      })
+      .refine(data => data.content || data.files, refineMessageBody),
     response: ChatMessageSchema
   },
   get: {
-    query: z.object({ chatId: z.string() }),
     response: z.array(ChatMessageSchema)
   },
   getLatest: {
-    query: z.object({ chatId: z.string() }),
     response: z.union([ChatMessageSchema, z.null()])
   },
   put: {
     body: z
       .object({
         content: z.string().max(2000),
-        files: z.array(MessageAttachmentSchema).optional()
+        files: z.union([
+          z.array(z.instanceof(File)).default([]),
+          z.instanceof(File)
+        ])
       })
-      .refine(data => data.content || (data.files && data.files.length > 0), {
-        error: "You must provide either content or files",
-        path: ["content"]
-      }),
+      .refine(data => data.content || data.files, refineMessageBody),
     response: ChatMessageSchema
   },
   preview: { response: z.array(UserChatPreviewSchema) },

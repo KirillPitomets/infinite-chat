@@ -11,7 +11,7 @@ export function useGetMessages(chatId: string) {
     enabled: !!chatId,
     queryKey: chatKeys.messages(chatId),
     queryFn: async () => {
-      const res = await edenClient.message.get({
+      const res = await edenClient.chat({ chatId }).messages.get({
         query: { chatId: chatId }
       })
 

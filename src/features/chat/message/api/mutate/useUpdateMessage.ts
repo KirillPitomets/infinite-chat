@@ -1,16 +1,12 @@
-import { edenClient } from "@/shared/lib/eden"
 import {
   ChatUIMessage,
-  mapAPIMessageToUI,
-  UIAttachment
+  mapAPIMessageToUI
 } from "@/features/chat/message/model/message.types"
+import { edenClient } from "@/shared/lib/eden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
 import { chatKeys } from "../../../chat/model/chat.keys"
 import { useChangeMessageStatus } from "../useChangeMessageStatus"
-import { useUploadThing } from "@/shared/utils/uploadthing"
-import { MessageAttachment } from "@/shared/schemes/message.schema"
-import { formatUploadedFiles } from "../../utils/formatUploadedFiles"
 
 type useUpdateMessageArgs = {
   chatId: string
@@ -23,7 +19,6 @@ export function useUpdateMessage({
 }: useUpdateMessageArgs) {
   const queryClient = useQueryClient()
   const changeMessageStatus = useChangeMessageStatus()
-  const { startUpload } = useUploadThing("chatUploadImage")
 
   return useMutation<
     ChatUIMessage,
@@ -36,15 +31,9 @@ export function useUpdateMessage({
     { previousMessages: ChatUIMessage[] }
   >({
     mutationFn: async ({ messageId, content, files }) => {
-      const filesUploaded = files?.length ? await startUpload(files) : []
-
-      const formattedAttachments: MessageAttachment[] = filesUploaded
-        ? formatUploadedFiles(filesUploaded)
-        : []
-
       const res = await edenClient
-        .message({ messageId })
-        .put({ content, files: formattedAttachments })
+        .messages({ messageId })
+        .put({ content, files })
 
       if (res.status !== 200 || !res.data) {
         throw new Error(res.error?.value.message ?? "Failed to update message")

@@ -1,36 +1,43 @@
-import { userContextMiddleware } from "@/server/middlewares/userContextMiddleware"
 import { toChatMessageDTO } from "@/server/api/message/dto/toChatMessageDTO"
 import { messageService } from "@/server/api/message/message.service"
+import { userContextMiddleware } from "@/server/middlewares/userContextMiddleware"
 import { realtime } from "@/shared/lib/realtime"
 import { ChatMessage } from "@/shared/schemes/message.schema"
 import Elysia from "elysia"
 import { MessageApiSchema } from "./types/message.controller"
 
-export const messagesApi = new Elysia({ prefix: "/message" })
+export const messagesApi = new Elysia()
   .use(userContextMiddleware)
   .post(
-    "/",
-    async ({ userId, body }) => {
+    "/chat/:chatId/messages",
+    async ({ userId, params, body }) => {
+      const files: File[] | undefined = body.files
+        ? Array.isArray(body.files)
+          ? body.files
+          : [body.files]
+        : undefined
+
       const chatMessage = await messageService.createChatMessage({
         senderId: userId,
-        chatId: body.chatId,
+        chatId: params.chatId,
         content: body.content,
-        files: body.files
+        files
       })
 
       const dto = toChatMessageDTO(chatMessage)
-      await realtime.channel(body.chatId).emit("chat.message.created", dto)
+      await realtime.channel(params.chatId).emit("chat.message.created", dto)
       return dto
     },
     {
       body: MessageApiSchema.create.body,
-      response: MessageApiSchema.create.response
+      response: MessageApiSchema.create.response,
+      type: "multipart/form-data"
     }
   )
   .get(
-    "/",
-    async ({ query }) => {
-      const messages = await messageService.getChatMessages(query.chatId)
+    "/chat/:chatId/messages",
+    async ({ params }) => {
+      const messages = await messageService.getChatMessages(params.chatId)
 
       const messagesDTO: ChatMessage[] = messages.map(msg =>
         toChatMessageDTO(msg)
@@ -39,12 +46,11 @@ export const messagesApi = new Elysia({ prefix: "/message" })
       return messagesDTO
     },
     {
-      query: MessageApiSchema.get.query,
       response: MessageApiSchema.get.response
     }
   )
   .get(
-    "/latest",
+    "/messages/latest",
     async ({ query }) => {
       const message = await messageService.getLatestMessage(query.chatId)
       if (!message) {
@@ -53,18 +59,23 @@ export const messagesApi = new Elysia({ prefix: "/message" })
       return toChatMessageDTO(message)
     },
     {
-      query: MessageApiSchema.getLatest.query,
       response: MessageApiSchema.getLatest.response
     }
   )
   .put(
-    "/:messageId",
+    "/messages/:messageId",
     async ({ userId, params, body }) => {
+      const files: File[] | undefined = body.files
+        ? Array.isArray(body.files)
+          ? body.files
+          : [body.files]
+        : undefined
+
       const { updatedMessage, chatId } = await messageService.update({
         userId,
         messageId: params.messageId,
         content: body.content,
-        files: body.files
+        files
       })
 
       const dto = toChatMessageDTO(updatedMessage)
@@ -79,7 +90,7 @@ export const messagesApi = new Elysia({ prefix: "/message" })
     }
   )
   .delete(
-    "/:messageId",
+    "/messages/:messageId",
     async ({ params, userId }) => {
       const deletedMessage = await messageService.delete(
         params.messageId,

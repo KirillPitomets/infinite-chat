@@ -1,6 +1,4 @@
 import { prisma } from "@/server/db/prisma"
-import { UTApi } from "uploadthing/server"
-
 import {
   ConflictError,
   ForbiddenError,
@@ -11,9 +9,7 @@ import {
   ChatMessageInclude,
   ChatMessagePrismaType
 } from "@/server/api/message/types/message.prisma"
-import { MessageAttachment } from "@/shared/schemes/message.schema"
-
-const uploadAPi = new UTApi()
+import { fileStorageService } from "../fileStorage/fileStorage.service"
 
 class MessageService {
   async createChatMessage({
@@ -25,12 +21,12 @@ class MessageService {
     senderId: string
     chatId: string
     content: string
-    files?: MessageAttachment[]
+    files?: File[]
   }): Promise<ChatMessagePrismaType> {
     const chat = await chatService.assertUserInChat(chatId, senderId)
 
     if (!content && (!files || files.length === 0)) {
-      throw new ConflictError("Message must have content or attachments")
+      throw new ConflictError("Message must have content or files")
     }
 
     const message = await prisma.$transaction(async tx => {
@@ -43,17 +39,10 @@ class MessageService {
       })
 
       if (files && files.length > 0) {
+        const uploaded = await fileStorageService.uploadMessageFiles(files)
+
         await tx.attachment.createMany({
-          data: files.map(file => ({
-            messageId: createdMessage.id,
-            key: file.key,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            width: file.width,
-            height: file.height,
-            url: file.url
-          }))
+          data: uploaded.map(att => ({ messageId: createdMessage.id, ...att }))
         })
       }
 
@@ -137,7 +126,7 @@ class MessageService {
     messageId: string
     userId: string
     content?: string
-    files?: MessageAttachment[]
+    files?: File[]
   }): Promise<{ updatedMessage: ChatMessagePrismaType; chatId: string }> {
     const existingMessage = await prisma.message.findUnique({
       where: { id: messageId }
@@ -164,27 +153,33 @@ class MessageService {
       }
 
       if (files && files.length > 0) {
-        const prevAttachments = await tx.attachment.findMany({
+        const oldAttachments = await tx.attachment.findMany({
           where: { messageId }
         })
-        
+        // delete old attachments in DB
         await tx.attachment.deleteMany({ where: { messageId } })
+        // delete old attachments in FileStorage
+        const attachmentsKeys: string[] = oldAttachments.map(att => att.key)
+        // Create and save new files
+        const uploaded = await fileStorageService.uploadMessageFiles(files)
 
-        const newAttachments = await tx.attachment.createMany({
-          data: files.map(file => ({
+        const updatedAttachments = await tx.attachment.createMany({
+          data: uploaded.map(att => ({
             messageId,
-            key: file.key,
-            name: file.name,
-            size: file.size,
-            type: file.type,
-            width: file.width,
-            height: file.height,
-            url: file.url
+            ...att
           }))
         })
 
-        if (newAttachments.count > 0) {
-          await uploadAPi.deleteFiles(prevAttachments.map(prev => prev.key))
+        // Delete files from storage If user have been updated successfully
+        if (updatedAttachments) {
+          const resultOfDeletionFilesInStorage =
+            await fileStorageService.deleteByKeys(attachmentsKeys)
+
+          if (!resultOfDeletionFilesInStorage) {
+            console.log(
+              `Files ${attachmentsKeys.map(att => att + ", ")} not deleted from File Storage`
+            )
+          }
         }
       }
 

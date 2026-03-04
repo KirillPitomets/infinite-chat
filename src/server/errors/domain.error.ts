@@ -4,6 +4,7 @@ export enum DomainErrorCode {
   CONFLICT = "CONFLICT",
   BAD_REQUEST = "BAD_REQUEST",
   FORBIDDEN = "FORBIDDEN",
+  FAILED_UPLOAD = "FAILED_UPLOAD",
   INTERNAL_SERVER = "INTERNAL_SERVER"
 }
 
@@ -13,6 +14,7 @@ export const errorStatusMap: Record<DomainErrorCode, number> = {
   BAD_REQUEST: 400,
   FORBIDDEN: 403,
   CONFLICT: 409,
+  FAILED_UPLOAD: 422,
   INTERNAL_SERVER: 500
 }
 
@@ -61,6 +63,13 @@ export class ForbiddenError extends DomainError {
 
 export class InternalServerError extends DomainError {
   readonly code = DomainErrorCode.INTERNAL_SERVER
+  constructor(msg: string) {
+    super(msg)
+  }
+}
+
+export class UploadError extends DomainError {
+  readonly code = DomainErrorCode.FAILED_UPLOAD
   constructor(msg: string) {
     super(msg)
   }

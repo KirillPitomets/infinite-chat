@@ -5,19 +5,14 @@ import {
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { edenClient } from "@/shared/lib/eden"
 
+import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
-import { MessageAttachment } from "@/shared/schemes/message.schema"
-import { useUploadThing } from "@/shared/utils/uploadthing"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
-import { chatKeys } from "@/features/chat/chat/model/chat.keys"
-import { formatUploadedFiles } from "../../utils/formatUploadedFiles"
 
 export function useSendMessage(chatId: string) {
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
-
-  const { startUpload } = useUploadThing("chatUploadImage")
 
   return useMutation<
     ChatUIMessage,
@@ -27,16 +22,9 @@ export function useSendMessage(chatId: string) {
   >({
     mutationKey: chatKeys.sendMessages(chatId),
     mutationFn: async ({ content, files }) => {
-      const filesUploaded = files?.length ? await startUpload(files) : []
-
-      const formattedAttachments: MessageAttachment[] = filesUploaded
-        ? formatUploadedFiles(filesUploaded)
-        : []
-
-      const res = await edenClient.message.post({
-        chatId,
+      const res = await edenClient.chat({ chatId }).messages.post({
         content,
-        files: formattedAttachments
+        files
       })
 
       if (!res.data) {

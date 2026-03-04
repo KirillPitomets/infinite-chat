@@ -6,9 +6,7 @@ export const MessageAttachmentSchema = z.object({
   key: z.string(),
   name: z.string(),
   size: z.number(),
-  type: z.enum(["FILE", "VIDEO", "IMAGE"]),
-  width: z.number().optional(),
-  height: z.number().optional()
+  type: z.string(),
 })
 
 export const ChatMessageSchema = z.object({
@@ -37,8 +35,6 @@ export const messageAttachmentsMapper = (
     name: attach.name,
     size: attach.size,
     type: attach.type,
-    url: attach.url,
-    height: attach.height || 0,
-    width: attach.width || 0
+    url: attach.url
   }))
 }
