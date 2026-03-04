@@ -1,9 +1,9 @@
-import {useCurrentUser} from "@/shared/context/CurrentUserContext"
-import {edenClient} from "@/shared/lib/eden"
-import {useRealtime} from "@/shared/lib/realtime-client"
-import {ChatMessage} from "@/shared/schemes/message.schema"
-import {useQuery, useQueryClient} from "@tanstack/react-query"
-import {format} from "date-fns"
+import { useCurrentUser } from "@/shared/context/CurrentUserContext"
+import { edenClient } from "@/shared/lib/eden"
+import { useRealtime } from "@/shared/lib/realtime-client"
+import { ChatMessage } from "@/shared/schemes/message.schema"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { format } from "date-fns"
 
 const LatestMessage = ({
   chatId,
@@ -15,11 +15,11 @@ const LatestMessage = ({
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
 
-  const {data: latestMessage, isLoading} = useQuery({
+  const { data: latestMessage, isLoading } = useQuery({
     enabled: !!chatId,
     queryKey: ["latestMessage", chatId],
     queryFn: async () => {
-      const res = await edenClient.message.latest.get({query: {chatId}})
+      const res = await edenClient.chat({ chatId }).message.latest.get()
 
       if (res.status !== 200) {
         throw new Error("Failed to get latest message")
@@ -37,7 +37,7 @@ const LatestMessage = ({
       "chat.message.updated",
       "chat.message.deleted"
     ],
-    onData({data, event}) {
+    onData({ data, event }) {
       switch (event) {
         case "chat.message.created":
           queryClient.setQueryData(["latestMessage", chatId], data)
