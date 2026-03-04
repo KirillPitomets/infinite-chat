@@ -1,13 +1,16 @@
 import { InputHTMLAttributes } from "react"
 import { ClipIcon, ReloadIcon } from "../ui/icons"
+import { DropzoneInputProps } from "react-dropzone"
 
 interface UploadButtonProps extends InputHTMLAttributes<HTMLInputElement> {
   icon?: "clip" | "reload"
+  inputDropZoneProps?: DropzoneInputProps
 }
 
 export const UploadButton = ({
   icon = "clip",
   accept = "image/*",
+  inputDropZoneProps,
   ...props
 }: UploadButtonProps) => {
   return (
@@ -16,9 +19,10 @@ export const UploadButton = ({
       <input
         className="absolute opacity-0 -z-1"
         type="file"
-        accept={accept}
-        multiple
+        // accept={accept}
+        // multiple
         {...props}
+        {...inputDropZoneProps}
       />
     </label>
   )

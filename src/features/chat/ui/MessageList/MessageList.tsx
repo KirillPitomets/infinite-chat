@@ -1,11 +1,13 @@
-import { Message } from "@/features/chat/ui/Message/Message"
-import { useEffect, useRef } from "react"
 import {
   ChatUIMessage,
   UIAttachment
 } from "@/features/chat/message/model/message.types"
+import { Message } from "@/features/chat/ui/Message/Message"
 import { User } from "@/shared/types/User.type"
+import { useDropzone } from "react-dropzone"
+import { useCallback, useEffect, useRef } from "react"
 import { MessageListSkeleton } from "./Skeleton"
+import { UploadIcon } from "@/shared/components/ui/icons"
 
 type MessageListProps = {
   chatId: string
@@ -40,7 +42,7 @@ export const MessageList = ({
   }, [messages.length, isEditMessage])
   return (
     <>
-      <div className="flex-1 space-y-5 p-5.25 overflow-y-auto scrollbar-thin">
+      <div className="flex-1 p-4 space-y-5 overflow-y-auto scrollbar-thin">
         {isLoading ? (
           <MessageListSkeleton />
         ) : (

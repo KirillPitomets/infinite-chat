@@ -12,24 +12,28 @@ import {
   useState
 } from "react"
 import { createPortal } from "react-dom"
+import { DropzoneInputProps } from "react-dropzone"
 import toast from "react-hot-toast"
 
 type ChatInputProps = {
   isEditInput?: boolean
-  initialFiles?: File[]
+  previewFiles: File[]
   initialValue?: string
   onCancel?: () => void
-  onSubmit: (value: string, files?: File[]) => void
+  onSubmit: (value: string) => void
+  removePreviewFile: (filename: string) => void
+  inputDropZoneProps?: DropzoneInputProps
 }
 
 export function ChatInputUI({
   isEditInput = false,
   initialValue = "",
-  initialFiles = [],
+  previewFiles = [],
+  removePreviewFile,
+  inputDropZoneProps,
   onSubmit
 }: ChatInputProps) {
   const [value, setValue] = useState<string>(initialValue)
-  const [files, setFiles] = useState<File[]>(initialFiles)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
   const [latestEmoji, setLatestEmoji] = useState("🥰")
@@ -54,10 +58,10 @@ export function ChatInputUI({
 
   const onSubmitMessage = () => {
     if (value.trim().length > 0 && value.trim().length < 1000) {
-      onSubmit(value, files)
+      onSubmit(value)
       textareaRef.current?.focus()
       setValue("")
-      setFiles([])
+      // setFiles([])
       if (textareaRef.current) {
         textareaRef.current.style.height = "unset"
       }
@@ -75,16 +79,6 @@ export function ChatInputUI({
     }
   }
 
-  const handleUploadButtonChange = async (e: ChangeEvent<HTMLInputElement>) => {
-    const inputFiles = e.target.files
-    if (!inputFiles) return
-    const totalFiles = files.length + inputFiles.length
-    if (totalFiles > 4) {
-      toast.error("You can upload only 4 files")
-      return
-    }
-    setFiles(prev => [...prev, ...inputFiles])
-  }
 
   const toggleEmojiPicker = () => {
     setIsOpenEmojiPicker(prev => !prev)
@@ -115,15 +109,15 @@ export function ChatInputUI({
   return (
     <div>
       <PreviewFiles
-        files={files}
-        removeFile={filename =>
-          setFiles(prev =>
-            prev.filter(prevFile => !(prevFile.name === filename))
-          )
-        }
+        files={previewFiles}
+        removeFile={filename => removePreviewFile(filename)}
       />
       <div className="relative flex items-center gap-2 p-5 space-x-2 border-t border-zinc-300">
-        <UploadButton icon={isEditInput ? "reload" : "clip"} onChange={handleUploadButtonChange} />
+        <UploadButton
+          icon={isEditInput ? "reload" : "clip"}
+          inputDropZoneProps={inputDropZoneProps}
+          // onChange={handleUploadButtonChange}
+        />
         <div className="flex items-center flex-1 transition-colors bg-zinc-400/50 rounded-2xl focus:bg-zinc-400">
           <textarea
             ref={textareaRef}

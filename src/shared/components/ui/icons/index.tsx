@@ -15,6 +15,7 @@ import { CalendarIcon } from "./CalendarIcon"
 import { ClipIcon } from "./ClipIcon"
 import { FileAccepted } from "./FileAccepted"
 import { ReloadIcon } from "./ReloadIcon"
+import { UploadIcon } from "./UploadIcon"
 
 export {
   NetworkIcon,
@@ -33,5 +34,6 @@ export {
   CalendarIcon,
   ClipIcon,
   FileAccepted,
-  ReloadIcon
+  ReloadIcon,
+  UploadIcon
 }
