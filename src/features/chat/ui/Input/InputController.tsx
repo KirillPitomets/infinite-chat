@@ -1,6 +1,8 @@
 import { ChatInputUI } from "@/features/chat/ui/Input/InputUI"
 import { UIAttachment } from "../../message/model/message.types"
 import { DropzoneInputProps } from "react-dropzone"
+import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+
 
 type ChatinputControllerProps = {
   isEdit: boolean
@@ -35,7 +37,9 @@ export const ChatInputController = ({
             <p>Edit message: </p>
             <p className="truncate max-w-175">{editingMessage.initialValue}</p>
           </div>
-          <button onClick={onCancelUpdate}>cancel</button>
+          <button onClick={onCancelUpdate}>
+            <IconButtonBase>cancel</IconButtonBase>
+          </button>
         </div>
         <ChatInputUI
           previewFiles={previewFiles}
