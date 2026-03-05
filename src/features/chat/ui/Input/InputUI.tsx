@@ -61,7 +61,6 @@ export function ChatInputUI({
       onSubmit(value)
       textareaRef.current?.focus()
       setValue("")
-      // setFiles([])
       if (textareaRef.current) {
         textareaRef.current.style.height = "unset"
       }
@@ -78,7 +77,6 @@ export function ChatInputUI({
       }
     }
   }
-
 
   const toggleEmojiPicker = () => {
     setIsOpenEmojiPicker(prev => !prev)
@@ -116,7 +114,6 @@ export function ChatInputUI({
         <UploadButton
           icon={isEditInput ? "reload" : "clip"}
           inputDropZoneProps={inputDropZoneProps}
-          // onChange={handleUploadButtonChange}
         />
         <div className="flex items-center flex-1 transition-colors bg-zinc-400/50 rounded-2xl focus:bg-zinc-400">
           <textarea
