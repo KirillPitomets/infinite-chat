@@ -28,3 +28,21 @@ body {
 input {
   outline: none;
 }
+
+/* Делаем скроллбар тонким и округлым */
+::-webkit-scrollbar {
+  width: 6px; /* Ширина вертикального скролла */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Фон дорожки (лучше оставить прозрачным) */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--foreground); /* Цвет ползунка (zinc-700) */
+  border-radius: 10px; /* Скругление */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground); /* Цвет ползунка (zinc-700) */
+}
