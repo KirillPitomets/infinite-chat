@@ -38,15 +38,11 @@ const LatestMessage = ({
       "chat.message.deleted"
     ],
     onData({ data, event }) {
-      switch (event) {
-        case "chat.message.created":
-          queryClient.setQueryData(["latestMessage", chatId], data)
-          break
-        case "chat.message.updated":
-          queryClient.setQueryData(["latestMessage", chatId], data)
-          break
-        default:
-          break
+      if (
+        event === "chat.message.created" ||
+        event === "chat.message.updated"
+      ) {
+        queryClient.setQueryData(["latestMessage", chatId], data)
       }
     }
   })
@@ -57,7 +53,7 @@ const LatestMessage = ({
 
   return (
     <div className="flex justify-between">
-      <p className="truncate max-w-35 opacity-60">
+      <p className="truncate max-w-40 opacity-60">
         {latestMessage ? (
           <>
             <span>

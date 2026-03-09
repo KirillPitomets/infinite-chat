@@ -17,6 +17,7 @@ import { UIAttachment } from "../message/model/message.types"
 import { UploadIcon } from "@/shared/components/ui/icons"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
+import { ChatTypingBanner } from "../ui/ChatTypingBanner/ChatTypingBanner"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
@@ -144,24 +145,31 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           onDelete={deleteMessage}
           onPreviewImage={image => handleImagePreviewDialog(image)}
         />
-        <ChatInputController
-          previewFiles={files}
-          removePreviewFile={filename => {
-            setFiles(prev => prev.filter(file => file.name !== filename))
-          }}
-          inputDropZoneProps={getInputProps()}
-          isEdit={isEditMessage}
-          editingMessage={editingMessage}
-          onUpdate={(id, value) => {
-            onUpdateMessage(id, value, files)
-            setFiles([])
-          }}
-          onCancelUpdate={onCancelUpdate}
-          onSubmit={content => {
-            sendMessage({ content, files })
-            setFiles([])
-          }}
-        />
+
+        <div className="relative">
+          <div className="absolute left-0 bottom-full">
+            <ChatTypingBanner chatId={chatId} />
+          </div>
+          <ChatInputController
+            chatId={chatId}
+            previewFiles={files}
+            isEdit={isEditMessage}
+            removePreviewFile={filename => {
+              setFiles(prev => prev.filter(file => file.name !== filename))
+            }}
+            inputDropZoneProps={getInputProps()}
+            editingMessage={editingMessage}
+            onUpdate={(id, value) => {
+              onUpdateMessage(id, value, files)
+              setFiles([])
+            }}
+            onCancelUpdate={onCancelUpdate}
+            onSubmit={content => {
+              sendMessage({ content, files })
+              setFiles([])
+            }}
+          />
+        </div>
       </div>
     </div>
   )

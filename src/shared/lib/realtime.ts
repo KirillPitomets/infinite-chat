@@ -5,6 +5,12 @@ import { ChatMessageSchema } from "@/shared/schemes/message.schema"
 
 const schema = {
   chat: {
+    presence: {
+      typing: z.object({
+        isTyping: z.boolean(),
+        user: z.object({ id: z.string(), name: z.string() })
+      })
+    },
     created: z.object({
       memberships: z.array(z.object({ userId: z.string() }))
     }),
