@@ -13,15 +13,15 @@ import {
 } from "react"
 import { createPortal } from "react-dom"
 import { DropzoneInputProps } from "react-dropzone"
-import toast from "react-hot-toast"
 
 type ChatInputProps = {
   isEditInput?: boolean
-  previewFiles: File[]
+  previewFiles?: File[]
   initialValue?: string
   onCancel?: () => void
   onSubmit: (value: string) => void
   removePreviewFile: (filename: string) => void
+  handleTypingIndicator?: () => void
   inputDropZoneProps?: DropzoneInputProps
 }
 
@@ -30,6 +30,7 @@ export function ChatInputUI({
   initialValue = "",
   previewFiles = [],
   removePreviewFile,
+  handleTypingIndicator,
   inputDropZoneProps,
   onSubmit
 }: ChatInputProps) {
@@ -54,6 +55,7 @@ export function ChatInputUI({
 
   const onChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     setValue(e.target.value)
+    if (handleTypingIndicator) handleTypingIndicator()
   }
 
   const onSubmitMessage = () => {
@@ -163,8 +165,3 @@ export function ChatInputUI({
     </div>
   )
 }
-
-/*
-        
-
-*/

@@ -1,10 +1,13 @@
 import { ChatInputUI } from "@/features/chat/ui/Input/InputUI"
-import { UIAttachment } from "../../message/model/message.types"
+import { edenClient } from "@/shared/lib/eden"
+import { useMutation } from "@tanstack/react-query"
 import { DropzoneInputProps } from "react-dropzone"
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
-
+import { useTypingIndicator } from "../../hooks/useTypingIndicator"
+import { UIAttachment } from "../../message/model/message.types"
+import { EditMessageInput } from "./EditMessageInput"
 
 type ChatinputControllerProps = {
+  chatId: string
   isEdit: boolean
   editingMessage: {
     id: string
@@ -20,6 +23,7 @@ type ChatinputControllerProps = {
 }
 
 export const ChatInputController = ({
+  chatId,
   isEdit,
   editingMessage,
   inputDropZoneProps,
@@ -29,32 +33,33 @@ export const ChatInputController = ({
   removePreviewFile,
   onSubmit
 }: ChatinputControllerProps) => {
+  const { mutate } = useMutation({
+    mutationFn: async (isTyping: boolean) => {
+      await edenClient.presence.chats({ chatId }).typing.post({ isTyping })
+    }
+  })
+
+  const handleTypingIndicator = useTypingIndicator(isTyping => {
+    mutate(isTyping)
+  }, 1000)
+
   if (isEdit) {
     return (
-      <div>
-        <div className="flex justify-between w-full p-4 border border-zinc-300">
-          <div className="">
-            <p>Edit message: </p>
-            <p className="truncate max-w-175">{editingMessage.initialValue}</p>
-          </div>
-          <button onClick={onCancelUpdate}>
-            <IconButtonBase>cancel</IconButtonBase>
-          </button>
-        </div>
-        <ChatInputUI
-          previewFiles={previewFiles}
-          removePreviewFile={removePreviewFile}
-          onSubmit={value => onUpdate(editingMessage.id, value)}
-          inputDropZoneProps={inputDropZoneProps}
-          isEditInput={isEdit}
-          initialValue={editingMessage.initialValue}
-        />
-      </div>
+      <EditMessageInput
+        messageId={editingMessage.id}
+        initialValue={editingMessage.initialValue}
+        onCancelUpdate={onCancelUpdate}
+        onUpdate={onUpdate}
+        previewFiles={previewFiles}
+        removePreviewFile={removePreviewFile}
+        inputDropZoneProps={inputDropZoneProps}
+      />
     )
   }
 
   return (
     <ChatInputUI
+      handleTypingIndicator={handleTypingIndicator}
       inputDropZoneProps={inputDropZoneProps}
       previewFiles={previewFiles}
       removePreviewFile={removePreviewFile}

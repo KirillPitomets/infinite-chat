@@ -4,6 +4,8 @@ import Link from "next/link"
 import LatestMessage from "./LatestMessage"
 import { ChatMessage } from "@/shared/schemes/message.schema"
 import { usePresenceUserStatus } from "@/shared/hooks/useUserPresence"
+import { useMemberTyping } from "@/features/chat/hooks/useMemberTyping"
+import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
 
 type ChatInboxItemProps = {
   chatId: string
@@ -21,6 +23,8 @@ export const ChatInboxItem = ({
   memberId
 }: ChatInboxItemProps) => {
   const { isOnline } = usePresenceUserStatus(memberId)
+
+  const { isMemberTyping, member } = useMemberTyping(chatId)
 
   return (
     <Link
@@ -45,10 +49,15 @@ export const ChatInboxItem = ({
 
       <div className="flex-1">
         <p className="font-semibold">{name}</p>
-        <LatestMessage
-          chatId={chatId}
-          initialLatestMessage={initialLatestMessage}
-        />
+
+        {isMemberTyping && member.id === memberId ? (
+          <TypingIndicator />
+        ) : (
+          <LatestMessage
+            chatId={chatId}
+            initialLatestMessage={initialLatestMessage}
+          />
+        )}
       </div>
     </Link>
   )
