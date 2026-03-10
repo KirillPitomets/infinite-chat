@@ -5,6 +5,7 @@ import { realtime } from "@/shared/lib/realtime"
 import { ChatMessage } from "@/shared/schemes/message.schema"
 import Elysia from "elysia"
 import { MessageApiSchema } from "./types/message.controller"
+import { chatService } from "../chat/chat.service"
 
 export const messagesApi = new Elysia()
   .use(userContextMiddleware)
@@ -25,7 +26,23 @@ export const messagesApi = new Elysia()
       })
 
       const dto = toChatMessageDTO(chatMessage)
-      await realtime.channel(params.chatId).emit("chat.message.created", dto)
+      await realtime
+        .channel(params.chatId)
+        .emit("chat.message.created", { message: dto, chatId: params.chatId })
+
+      // =====================================
+      // Create notification for users in chat
+      const participants = await chatService.getParticants(userId, params.chatId)
+
+      for (const participant of participants) {
+        await realtime
+          .channel(`user:${participant.userId}`)
+          .emit("notification.message.created", {
+            chatId: params.chatId,
+            message: dto
+          })
+      }
+
       return dto
     },
     {
@@ -80,7 +97,10 @@ export const messagesApi = new Elysia()
 
       const dto = toChatMessageDTO(updatedMessage)
 
-      await realtime.channel(chatId).emit("chat.message.updated", dto)
+      await realtime.channel(chatId).emit("chat.message.updated", {
+        chatId: updatedMessage.chatId,
+        message: dto
+      })
 
       return dto
     },
@@ -101,7 +121,10 @@ export const messagesApi = new Elysia()
 
       await realtime
         .channel(deletedMessage.chatId)
-        .emit("chat.message.deleted", dtoDeletedMessage)
+        .emit("chat.message.deleted", {
+          chatId: deletedMessage.chatId,
+          message: dtoDeletedMessage
+        })
 
       return dtoDeletedMessage
     },

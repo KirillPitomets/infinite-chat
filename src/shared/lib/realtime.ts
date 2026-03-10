@@ -18,9 +18,9 @@ const schema = {
       memberships: z.array(z.object({ userId: z.string() }))
     }),
     message: {
-      created: ChatMessageSchema,
-      updated: ChatMessageSchema, // id, content
-      deleted: ChatMessageSchema // id
+      created: z.object({ message: ChatMessageSchema, chatId: z.string() }),
+      updated: z.object({ message: ChatMessageSchema, chatId: z.string() }),
+      deleted: z.object({ message: ChatMessageSchema, chatId: z.string() })
     }
   },
   user: {
@@ -28,6 +28,11 @@ const schema = {
       userId: z.string(),
       lastSeen: z.number()
     })
+  },
+  notification: {
+    message: {
+      created: z.object({ message: ChatMessageSchema, chatId: z.string() })
+    }
   }
 }
 

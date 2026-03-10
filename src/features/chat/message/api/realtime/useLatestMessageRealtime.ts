@@ -1,7 +1,8 @@
 import { chatKeys } from "@/features/chat/chat/model/chat.keys"
+import { useRealtime } from "@/shared/lib/realtime-client"
 import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
+import { ChatMessage } from "@/shared/schemes/message.schema"
 import { useQueryClient } from "@tanstack/react-query"
-import { useRealtime } from "@upstash/realtime/client"
 
 export const useLatestsMessageRealtime = (chatId: string) => {
   const queryClient = useQueryClient()
@@ -18,7 +19,7 @@ export const useLatestsMessageRealtime = (chatId: string) => {
         event === "chat.message.created" ||
         event === "chat.message.updated"
       ) {
-        queryClient.setQueryData(["latestMessage", chatId], data)
+        queryClient.setQueryData<ChatMessage>(["latestMessage", chatId], data.message)
       }
 
       if (event === "chat.message.created") {
@@ -29,7 +30,7 @@ export const useLatestsMessageRealtime = (chatId: string) => {
 
           if (!chat) return old
 
-          const updatedChat = { ...chat, latestMessage: data }
+          const updatedChat = { ...chat, latestMessage: data.message }
 
           return [updatedChat, ...old.filter(oldChat => oldChat.id !== chatId)]
         })

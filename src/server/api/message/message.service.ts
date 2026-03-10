@@ -23,7 +23,7 @@ class MessageService {
     content: string
     files?: File[]
   }): Promise<ChatMessagePrismaType> {
-    const chat = await chatService.assertUserInChat(chatId, senderId)
+    const chat = await chatService.assertUserInChat(senderId, chatId,)
 
     if (!content && (!files || files.length === 0)) {
       throw new ConflictError("Message must have content or files")

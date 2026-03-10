@@ -1,4 +1,4 @@
-import { type Chat } from "@/prisma/generated/client"
+import { type Chat, ChatUser } from "@/prisma/generated/client"
 import { prisma } from "@/server/db/prisma"
 import {
   ConflictError,
@@ -90,8 +90,8 @@ class ChatService {
   }
 
   async assertUserInChat(
-    chatId: string,
-    userId: string
+    userId: string,
+    chatId: string
   ): Promise<Pick<Chat, "id">> {
     const chat = await prisma.chat.findUnique({
       where: {
@@ -108,6 +108,27 @@ class ChatService {
     }
 
     return chat
+  }
+
+  async getParticants(userId: string, chatId: string): Promise<ChatUser[]> {
+    const chatExist = await prisma.chat.findUnique({ where: { id: chatId } })
+
+    if (!chatExist) {
+      throw new NotFoundError("Chat")
+    }
+
+    await this.assertUserInChat(userId, chatId)
+
+    const participants = await prisma.chat.findUnique({
+      where: { id: chatId },
+      select: { memberships: true }
+    })
+
+    if (!participants) {
+      throw new NotFoundError("Particants")
+    }
+
+    return participants.memberships
   }
 
   async delete(userId: string, chatId: string): Promise<ChatDeletePrismaType> {
