@@ -15,7 +15,7 @@ export const MessageContent = ({
   onPreviewImage
 }: MessageContentProps) => {
   return (
-    <div className="relative flex flex-wrap items-end gap-4 rounded-2xl">
+    <div className="relative flex flex-wrap items-end gap-4 ">
       <div className="space-y-2">
         {attachments.length > 0 && (
           <Attachments

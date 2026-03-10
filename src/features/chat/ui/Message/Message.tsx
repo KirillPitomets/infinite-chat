@@ -4,14 +4,13 @@ import {
 } from "@/features/chat/message/model/message.types"
 import MessageContextMenu from "@/features/chat/ui/Message/ContextMenu"
 import DeletedMessage from "@/features/chat/ui/Message/DeletedMessage"
-import { CopyIcon, EditIcon, TrashIcon } from "@/shared/components/ui/icons"
 import { formatDate } from "date-fns"
 import { useState } from "react"
 import toast from "react-hot-toast"
+import { useMessageContextMenu } from "../../message/model/useMessageContextMenu"
 import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
 import { MessageStatus } from "./Status"
-import { useMessageContextMenu } from "../../message/model/useMessageContextMenu"
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
