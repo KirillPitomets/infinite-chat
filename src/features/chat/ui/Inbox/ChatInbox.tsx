@@ -7,21 +7,29 @@ import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { useRealtime } from "@/shared/lib/realtime-client"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import SearchInput from "@/shared/components/ui/SearchInput/SearchInput"
+import { chatKeys } from "../../chat/model/chat.keys"
 
 export function ChatInbox() {
   const currentUser = useCurrentUser()
 
   const {
-    data: chats = [],
+    data: chats,
     isLoading,
     refetch
   } = useQuery<UserChatPreview[]>({
-    queryKey: ["getUserChatsPreviewList"],
+    queryKey: chatKeys.inbox(),
     queryFn: async () => {
       const res = await edenClient.chat.preview.get()
 
       return res.data ?? []
-    }
+    },
+    initialData: [],
+    select: chats =>
+      [...chats].sort(
+        (a, b) =>
+          new Date(b.latestMessage?.createdAt ?? 0).getTime() -
+          new Date(a.latestMessage?.createdAt ?? 0).getTime()
+      )
   })
 
   useRealtime({

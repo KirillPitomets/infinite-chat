@@ -1,8 +1,8 @@
+import { useLatestsMessageRealtime } from "@/features/chat/message/api/realtime/useLatestMessageRealtime"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { edenClient } from "@/shared/lib/eden"
-import { useRealtime } from "@/shared/lib/realtime-client"
 import { ChatMessage } from "@/shared/schemes/message.schema"
-import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
 
 const LatestMessage = ({
@@ -12,7 +12,6 @@ const LatestMessage = ({
   chatId: string
   initialLatestMessage?: ChatMessage | null | undefined
 }) => {
-  const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
 
   const { data: latestMessage, isLoading } = useQuery({
@@ -30,22 +29,7 @@ const LatestMessage = ({
     initialData: initialLatestMessage
   })
 
-  useRealtime({
-    channels: [chatId],
-    events: [
-      "chat.message.created",
-      "chat.message.updated",
-      "chat.message.deleted"
-    ],
-    onData({ data, event }) {
-      if (
-        event === "chat.message.created" ||
-        event === "chat.message.updated"
-      ) {
-        queryClient.setQueryData(["latestMessage", chatId], data)
-      }
-    }
-  })
+  useLatestsMessageRealtime(chatId)
 
   if (isLoading) {
     return <span className="w-[70%] opacity-60 animate-pulse">...</span>
@@ -68,7 +52,7 @@ const LatestMessage = ({
         )}
       </p>
       {latestMessage?.createdAt && (
-        <p className="opacity-60">{format(latestMessage.createdAt, "HH:MM")}</p>
+        <p className="opacity-60">{format(latestMessage.createdAt, "HH:mm")}</p>
       )}
     </div>
   )
