@@ -46,3 +46,52 @@ input {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--foreground); /* Цвет ползунка (zinc-700) */
 }
+
+@keyframes lightPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes shake {
+  0%, 90%, 100% {
+    transform: translateX(0);
+  }
+
+  92% {
+    transform: translateX(-2px);
+  }
+
+  94% {
+    transform: translateX(2px);
+  }
+
+  96% {
+    transform: translateX(-2px);
+  }
+
+  98% {
+    transform: translateX(2px);
+  }
+}
+
+@layer utilities {
+  .animate-light-pulse {
+    animation: lightPulse 600ms ease-in-out 4;
+  }
+
+  .animate-shake {
+    animation: shake 4s ease-in-out infinite;
+  }
+}

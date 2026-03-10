@@ -4,7 +4,7 @@ import { ChatHeader } from "@/features/chat/ui/Header/Header"
 import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useChatData } from "../chat/api/useChatData"
 import { useChatRealtime } from "../chat/api/useChatRealtime"
 import { useDeleteChat } from "../chat/api/useDeleteChat"
@@ -97,6 +97,10 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     maxFiles: 4,
     multiple: true
   })
+
+  useEffect(() => {
+    toast.dismissAll()
+  }, [])
 
   return (
     <div className="flex flex-col w-full h-full">
