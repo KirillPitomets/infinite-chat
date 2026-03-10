@@ -2,7 +2,11 @@ import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
 import { HeaderSkeleton } from "./HeaderSkeleton"
-import { CameraIcon, InformationIcon, TrashIcon } from "@/shared/components/ui/icons"
+import {
+  CameraIcon,
+  InformationIcon,
+  TrashIcon
+} from "@/shared/components/ui/icons"
 
 type DirectChat = {
   type: "DIRECT"
@@ -50,15 +54,16 @@ export function ChatHeader({ isLoading, chatData, onDelete }: ChatHeaderProps) {
         )}
       </div>
       <div className="flex space-x-1">
-        <IconButtonBase>
+        <IconButtonBase size={4}>
           <CameraIcon />
         </IconButtonBase>
-        <IconButtonBase tone="muted">
+
+        <IconButtonBase tone="muted" size={4}>
           <InformationIcon />
         </IconButtonBase>
 
         <button onClick={() => onDelete()}>
-          <IconButtonBase>
+          <IconButtonBase size={4}>
             <TrashIcon />
           </IconButtonBase>
         </button>

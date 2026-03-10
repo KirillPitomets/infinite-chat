@@ -4,7 +4,7 @@ import toast from "react-hot-toast"
 import { NotificationAlert } from "../components/ui/NotificationAlert/NotificationAlert"
 import { useRealtime } from "../lib/realtime-client"
 import { useCurrentUser } from "./CurrentUserContext"
-import { ACOOUNT_PAGES } from "../config/accountPages.config"
+import { ACСOOUNT_PAGES } from "../config/accountPages.config"
 
 export const NotificationManager = () => {
   const user = useCurrentUser()
@@ -29,7 +29,7 @@ export const NotificationManager = () => {
 
             notify.addEventListener("click", () => {
               window.focus()
-              router.replace(ACOOUNT_PAGES.CHAT_ID(data.chatId))
+              router.replace(ACСOOUNT_PAGES.CHAT_ID(data.chatId))
             })
           }
         })
@@ -40,7 +40,7 @@ export const NotificationManager = () => {
                 <NotificationAlert
                   title={data.message.sender.name}
                   message="New message"
-                  linkTo={ACOOUNT_PAGES.CHAT_ID(data.chatId)}
+                  linkTo={ACСOOUNT_PAGES.CHAT_ID(data.chatId)}
                   handleCloseNotification={() => toast.remove(t.id)}
                 />
               </>

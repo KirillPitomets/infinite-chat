@@ -1,6 +1,6 @@
 "use client"
 
-import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { edenClient } from "@/shared/lib/eden"
 import { useUser } from "@clerk/nextjs"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -35,7 +35,7 @@ export const ChatEmptyState = () => {
         )
       }
 
-      router.push(ACOOUNT_PAGES.CHAT_ID(res.data.id))
+      router.push(ACСOOUNT_PAGES.CHAT_ID(res.data.id))
     },
     onError: error => {
       toast.error(error.message)

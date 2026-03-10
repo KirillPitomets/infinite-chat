@@ -1,4 +1,4 @@
-import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
 import Image from "next/image"
 import Link from "next/link"
 import LatestMessage from "./LatestMessage"
@@ -28,8 +28,8 @@ export const ChatInboxItem = ({
 
   return (
     <Link
-      href={ACOOUNT_PAGES.CHAT_ID(chatId)}
-      className="flex items-center gap-2 px-5 py-1 transition-colors hover:bg-zinc-300"
+      href={ACСOOUNT_PAGES.CHAT_ID(chatId)}
+      className="flex items-center gap-2 px-5 py-1 transition-colors hover:bg-zinc-800 dark:hover:bg-zinc-300 "
     >
       <div className="relative flex items-center justify-center w-8 h-8 rounded-full bg-zinc-300">
         {avatarUrl && (

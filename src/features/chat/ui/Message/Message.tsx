@@ -77,7 +77,7 @@ export const Message = ({
         )}
 
         <div
-          className="relative p-1.5 rounded-xl bg-zinc-100"
+          className="relative px-3 py-1 rounded-xl bg-zinc-800 dark:bg-gray-200"
           onContextMenu={handleContextMenu}
         >
           {isMine && (
@@ -95,7 +95,7 @@ export const Message = ({
           />
 
           <div className="flex justify-end space-x-2">
-            <p className={`text-sm text-zinc-500/70 ${isMine && "text-end"}`}>
+            <p className={`text-sm opacity-50 ${isMine && "text-end"}`}>
               {formatDate(createdAt, "HH:mm")}
             </p>
 

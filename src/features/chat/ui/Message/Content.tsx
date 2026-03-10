@@ -15,7 +15,7 @@ export const MessageContent = ({
   onPreviewImage
 }: MessageContentProps) => {
   return (
-    <div className="relative flex flex-wrap items-end gap-4 ">
+    <div className="relative flex flex-wrap items-end gap-4">
       <div className="space-y-2">
         {attachments.length > 0 && (
           <Attachments
@@ -26,7 +26,7 @@ export const MessageContent = ({
             }
           />
         )}
-        <p className="text-zinc-800">{content}</p>
+        <p className="dark:text-zinc-700">{content}</p>
       </div>
     </div>
   )

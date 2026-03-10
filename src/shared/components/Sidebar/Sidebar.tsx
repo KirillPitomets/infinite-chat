@@ -2,17 +2,18 @@ import Image from "next/image"
 import Link from "next/link"
 
 import NavMenu from "./NavMenu"
-import { ACOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
 
-import { SignOutButton, UserButton } from "@clerk/nextjs"
+import { useClerk, UserButton } from "@clerk/nextjs"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { LogoutIcon, SettingsIcon } from "@/shared/components/ui/icons"
 
 export default function Sidebar() {
+  const { signOut } = useClerk()
   return (
     <aside className="min-h-screen flex flex-col justify-between px-2.75 py-7.5 bg-stone-400/20 ">
       <div className="flex flex-col items-center justify-center gap-3">
-        <Link href={ACOOUNT_PAGES.HOME}>
+        <Link href={ACСOOUNT_PAGES.HOME}>
           <Image
             width={32}
             height={32}
@@ -28,7 +29,6 @@ export default function Sidebar() {
         <div className="h-px w-9 bg-stone-400/50 rounded-2xl"></div>
       </div>
 
-      {/* navbar */}
       <NavMenu />
 
       <div className="flex flex-col ">
@@ -36,11 +36,13 @@ export default function Sidebar() {
           <SettingsIcon />
         </IconButtonBase>
 
-        <SignOutButton signOutOptions={{redirectUrl: ACOOUNT_PAGES.HOME}}>
+        {/* <SignOutButton signOutOptions={{redirectUrl: ACСOOUNT_PAGES.HOME}}> */}
+        <button onClick={() => signOut({ redirectUrl: ACСOOUNT_PAGES.HOME })}>
           <IconButtonBase tone="muted">
             <LogoutIcon />
           </IconButtonBase>
-        </SignOutButton>
+        </button>
+        {/* </SignOutButton> */}
       </div>
     </aside>
   )
