@@ -77,7 +77,7 @@ export const Message = ({
         )}
 
         <div
-          className="relative px-3 py-1 rounded-xl bg-zinc-800 dark:bg-gray-200"
+          className="relative px-3 py-1 rounded-xl bg-zinc-800 dark:bg-gray-200 flex items-center flex-wrap gap-1"
           onContextMenu={handleContextMenu}
         >
           {isMine && (
