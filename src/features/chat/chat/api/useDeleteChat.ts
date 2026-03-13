@@ -1,4 +1,4 @@
-import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { edenClient } from "@/shared/lib/eden"
 import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
@@ -11,7 +11,7 @@ export function useDeleteChat(chatId: string) {
     mutationFn: async () => {
       const res = await edenClient.chat({ chatId }).delete()
       if (res.status === 200) {
-        route.replace(ACСOOUNT_PAGES.CHAT)
+        route.replace(ACCOUNT_PAGES.CHAT)
       }
     }
   })

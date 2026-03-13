@@ -2,7 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import NavMenu from "./NavMenu"
-import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 
 import { useClerk, UserButton } from "@clerk/nextjs"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
@@ -13,7 +13,7 @@ export default function Sidebar() {
   return (
     <aside className="min-h-screen flex flex-col justify-between px-2.75 py-7.5 bg-stone-400/20 ">
       <div className="flex flex-col items-center justify-center gap-3">
-        <Link href={ACСOOUNT_PAGES.HOME}>
+        <Link href={ACCOUNT_PAGES.HOME}>
           <Image
             width={32}
             height={32}
@@ -36,8 +36,8 @@ export default function Sidebar() {
           <SettingsIcon />
         </IconButtonBase>
 
-        {/* <SignOutButton signOutOptions={{redirectUrl: ACСOOUNT_PAGES.HOME}}> */}
-        <button onClick={() => signOut({ redirectUrl: ACСOOUNT_PAGES.HOME })}>
+        {/* <SignOutButton signOutOptions={{redirectUrl: ACCOUNT_PAGES.HOME}}> */}
+        <button onClick={() => signOut({ redirectUrl: ACCOUNT_PAGES.HOME })}>
           <IconButtonBase tone="muted">
             <LogoutIcon />
           </IconButtonBase>

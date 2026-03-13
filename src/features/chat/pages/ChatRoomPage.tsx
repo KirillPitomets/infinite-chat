@@ -3,21 +3,21 @@
 import { ChatHeader } from "@/features/chat/ui/Header/Header"
 import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
+import { UploadIcon } from "@/shared/components/ui/icons"
+import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { useCallback, useEffect, useState } from "react"
-import { useChatData } from "../chat/api/useChatData"
-import { useChatRealtime } from "../chat/api/useChatRealtime"
-import { useDeleteChat } from "../chat/api/useDeleteChat"
-import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
-import { useGetMessages } from "../message/api/query/useGetMessages"
-import { useSendMessage } from "../message/api/mutate/useSendMessage"
-import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
-import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
-import { UIAttachment } from "../message/model/message.types"
-import { UploadIcon } from "@/shared/components/ui/icons"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
+import { useChatData } from "../chat/api/useChatData"
+import { useDeleteChat } from "../chat/api/useDeleteChat"
+import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
+import { useSendMessage } from "../message/api/mutate/useSendMessage"
+import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
+import { useGetMessages } from "../message/api/query/useGetMessages"
+import { UIAttachment } from "../message/model/message.types"
 import { ChatTypingBanner } from "../ui/ChatTypingBanner/ChatTypingBanner"
+import { useChatRealtime } from "../realtime/useRealtimeChat"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
@@ -85,7 +85,6 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         toast.error("You can upload only 4 files")
         return
       }
-      console.log("echo upload button")
       setFiles(prev => [...prev, ...acceptedFiles])
     },
     [files]

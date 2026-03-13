@@ -1,4 +1,4 @@
-import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import {
   CalendarIcon,
   CameraIcon,
@@ -11,26 +11,26 @@ export const navItems = [
   {
     icon: NetworkIcon,
     alt: "Network",
-    href: ACСOOUNT_PAGES.HOME
+    href: ACCOUNT_PAGES.HOME
   },
   {
     icon: MessageIcon,
     alt: "Chats",
-    href: ACСOOUNT_PAGES.CHAT
+    href: ACCOUNT_PAGES.CHAT
   },
   {
     icon: CameraIcon,
     alt: "Events",
-    href: ACСOOUNT_PAGES.MEETINGS
+    href: ACCOUNT_PAGES.MEETINGS
   },
   {
     icon: NoteIcon,
     alt: "Music",
-    href: ACСOOUNT_PAGES.MUSIC
+    href: ACCOUNT_PAGES.MUSIC
   },
   {
     icon: CalendarIcon,
     alt: "date",
-    href: ACСOOUNT_PAGES.EVENTS
+    href: ACCOUNT_PAGES.EVENTS
   }
 ]

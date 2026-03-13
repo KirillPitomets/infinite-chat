@@ -1,6 +1,6 @@
 "use client"
 
-import { ACСOOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { edenClient } from "@/shared/lib/eden"
 import { useUser } from "@clerk/nextjs"
 import { useMutation, useQuery } from "@tanstack/react-query"
@@ -15,18 +15,14 @@ export const ChatEmptyState = () => {
   const router = useRouter()
 
   const handleMemberTag = (e: ChangeEvent<HTMLInputElement>) => {
-    const tag = e.target.value
-
-    if (tag.startsWith("@")) {
-      return setMemberTag(tag.split("").slice(1, -1).join(""))
-    }
-    setMemberTag(tag)
+    // const tag = 
+    setMemberTag(e.target.value)
   }
 
   const { mutate: createChat } = useMutation({
     mutationFn: async () => {
       const res = await edenClient.chat.create.post({
-        memberTag: `@${memberTag}`
+        memberTag: memberTag
       })
 
       if (res.status !== 200 || !res.data) {
@@ -35,7 +31,7 @@ export const ChatEmptyState = () => {
         )
       }
 
-      router.push(ACСOOUNT_PAGES.CHAT_ID(res.data.id))
+      router.push(ACCOUNT_PAGES.CHAT_ID(res.data.id))
     },
     onError: error => {
       toast.error(error.message)
@@ -55,7 +51,6 @@ export const ChatEmptyState = () => {
     <div className="flex flex-col items-center justify-center flex-1 w-full space-y-10">
       <h1 className="text-4xl">Welcome, <b>{user?.username || ""}</b>❤️😉</h1>
       <label className="flex items-center p-2 border border-zinc-600 rounded-2xl">
-        <span>@</span>
         <input
           type="text"
           placeholder="userTag"

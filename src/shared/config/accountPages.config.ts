@@ -7,5 +7,5 @@ class AcoountPagesConfig {
   CHAT_ID = (id: string) => `${this.CHAT}/${id}`
 }
 
-export const ACСOOUNT_PAGES = new AcoountPagesConfig()
+export const ACCOUNT_PAGES = new AcoountPagesConfig()
 
