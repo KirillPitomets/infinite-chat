@@ -32,6 +32,11 @@ export const chatApi = new Elysia({ prefix: "/chat" })
         userId,
         params.chatId
       )
+
+      await realtime
+        .channel(chat.id)
+        .emit("chat.message.readed", { userId, chatId: chat.id })
+
       return toChatDetailsDTO(chat, userId)
     },
     {

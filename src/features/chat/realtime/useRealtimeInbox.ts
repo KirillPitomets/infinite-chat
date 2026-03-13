@@ -21,7 +21,8 @@ export const useRealtimeInbox = (
       "chat.created",
       "chat.deleted",
       "chat.message.created",
-      "chat.message.updated"
+      "chat.message.updated",
+      "chat.message.readed"
     ],
     onData: ({ data, event }) => {
       if (event === "chat.created" || event === "chat.deleted") {
@@ -44,7 +45,7 @@ export const useRealtimeInbox = (
           const chat = old.find(chat => chat.id === data.chatId)
 
           if (!chat) return old
-          console.log(data.message)
+
           const updatedChat: UserChatPreview = {
             ...chat,
             latestMessage: data.message,
@@ -60,6 +61,18 @@ export const useRealtimeInbox = (
             ...old.filter(oldChat => oldChat.id !== data.chatId)
           ]
         })
+      }
+
+      if (event === "chat.message.readed") {
+        if (data.userId === user.id) {
+          queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
+            old
+              ? old.map(chat =>
+                  chat.id === data.chatId ? { ...chat, unreadCount: 0 } : chat
+                )
+              : old
+          )
+        }
       }
     }
   })

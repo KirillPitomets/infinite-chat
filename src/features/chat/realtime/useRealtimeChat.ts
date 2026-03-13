@@ -7,7 +7,7 @@ import { useRealtime } from "@/shared/lib/realtime-client"
 import { useQueryClient } from "@tanstack/react-query"
 import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 
-export function useChatRealtime(chatId: string, userId: string) {
+export function useRealtimeChat(chatId: string, userId: string) {
   const queryClient = useQueryClient()
   const changeMessageStatus = useChangeMessageStatus()
 

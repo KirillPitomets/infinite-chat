@@ -17,7 +17,7 @@ import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
 import { useGetMessages } from "../message/api/query/useGetMessages"
 import { UIAttachment } from "../message/model/message.types"
 import { ChatTypingBanner } from "../ui/ChatTypingBanner/ChatTypingBanner"
-import { useChatRealtime } from "../realtime/useRealtimeChat"
+import { useRealtimeChat } from "../realtime/useRealtimeChat"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
@@ -33,6 +33,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     initialValue: string
     initialAttachments?: UIAttachment[]
   }>({ id: "", initialValue: "" })
+
   const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
   const { data: messages = [], isLoading } = useGetMessages(chatId)
   const { mutate: sendMessage } = useSendMessage(chatId)
@@ -42,7 +43,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   })
   const { mutate: deleteMessage } = useDeleteMessage(chatId)
 
-  useChatRealtime(chatId, currentUser.id)
+  useRealtimeChat(chatId, currentUser.id)
 
   const handleMessageDetails = (
     messageId: string,
@@ -85,6 +86,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         toast.error("You can upload only 4 files")
         return
       }
+      console.log("echo upload button")
       setFiles(prev => [...prev, ...acceptedFiles])
     },
     [files]
