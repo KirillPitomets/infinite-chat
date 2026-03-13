@@ -46,7 +46,8 @@ export const toUserChatPreviewDTO = (
             name: otherUser.user.name,
             tag: otherUser.user.tag,
             lastSeen: otherUser.user.lastSeen.toISOString()
-          }
+          },
+          unreadCount: chat.unreadCount
         } satisfies UserChatPreview
       case "GROUP":
         return {
@@ -55,7 +56,8 @@ export const toUserChatPreviewDTO = (
           latestMessage,
           createdAt: chat.createdAt.toISOString(),
           membersCount: chat.memberships.length,
-          name: chat.name
+          name: chat.name,
+          unreadCount: chat.unreadCount
         } satisfies UserChatPreview
       default:
         throw new ConflictError("Unsupported chat type")

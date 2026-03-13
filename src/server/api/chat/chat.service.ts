@@ -77,16 +77,60 @@ class ChatService {
       throw new NotFoundError(`Chat with id: ${chatId} not found`)
     }
 
+    // ==========
+    // Update lastReadAt
+    await prisma.chatUser.update({
+      where: { userId_chatId: { userId, chatId } },
+      data: {
+        lastReadAt: new Date()
+      }
+    })
+
     return chat
   }
 
   async getUserChatsPreview(userId: string): Promise<ChatPreviewPrismaType[]> {
-    const chats = await prisma.chat.findMany({
-      where: { memberships: { some: { userId } } },
-      include: chatPreviewInclude
+    const memberships = await prisma.chatUser.findMany({
+      where: { userId },
+      include: {
+        chat: {
+          include: chatPreviewInclude
+        }
+      }
     })
 
-    return chats
+    if (!memberships.length) {
+      throw new NotFoundError("Chats")
+    }
+
+    return Promise.all(
+      memberships.map(async membership => {
+        return {
+          ...membership.chat,
+          unreadCount: await this.getCountUnreadMessages(
+            userId,
+            membership.chatId,
+            membership.lastReadAt
+          )
+        }
+      })
+    )
+  }
+
+  async getCountUnreadMessages(
+    userId: string,
+    chatId: string,
+    lastReadAt: Date
+  ): Promise<number> {
+    return prisma.message.count({
+      where: {
+        chatId: chatId,
+        senderId: { not: userId },
+        createdAt: {
+          gt: lastReadAt ?? new Date(0)
+        }
+      }
+    })
   }
 
   async assertUserInChat(

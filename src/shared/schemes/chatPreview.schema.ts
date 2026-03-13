@@ -4,7 +4,8 @@ import { ChatMessageSchema } from "@/shared/schemes/message.schema"
 const BaseUserChatPreviewSchema = z.object({
   id: z.string(),
   latestMessage: z.union([ChatMessageSchema, z.null()]),
-  createdAt: z.string().datetime()
+  createdAt: z.string().datetime(),
+  unreadCount: z.number()
 })
 
 const DirectUserChatPreviewSchema = BaseUserChatPreviewSchema.extend({

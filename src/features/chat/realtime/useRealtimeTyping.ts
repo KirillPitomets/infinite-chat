@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { useRealtime } from "@/shared/lib/realtime-client"
 
-export const useMemberTyping = (
+export const useRealtimeTyping = (
   chatId: string
 ): { isMemberTyping: boolean; member: { id: string; name: string } } => {
   const user = useCurrentUser()

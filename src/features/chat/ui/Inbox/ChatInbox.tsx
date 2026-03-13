@@ -1,17 +1,14 @@
 "use client"
 
-import { useQuery } from "@tanstack/react-query"
-import { edenClient } from "@/shared/lib/eden"
 import { ChatInboxList } from "@/features/chat/ui/Inbox/InboxList/InboxList"
-import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
-import { useRealtime } from "@/shared/lib/realtime-client"
-import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import SearchInput from "@/shared/components/ui/SearchInput/SearchInput"
+import { edenClient } from "@/shared/lib/eden"
+import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
+import { useQuery } from "@tanstack/react-query"
 import { chatKeys } from "../../chat/model/chat.keys"
+import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
 
 export function ChatInbox() {
-  const currentUser = useCurrentUser()
-
   const {
     data: chats,
     isLoading,
@@ -32,17 +29,7 @@ export function ChatInbox() {
       )
   })
 
-  useRealtime({
-    channels: ["chats"],
-    events: ["chat.created", "chat.deleted"],
-    onData: ({ data, event }) => {
-      if (event === "chat.created" || event === "chat.deleted") {
-        if (data.memberships.find(member => member.userId === currentUser.id)) {
-          refetch()
-        }
-      }
-    }
-  })
+  useRealtimeInbox(chats, () => refetch())
 
   return (
     <div className="basis-75 shrink-0 max-w-full py-7.5 h-screen flex flex-col border-r border-zinc-300">

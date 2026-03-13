@@ -39,16 +39,16 @@ model User {
 }
 
 model ChatUser {
-  id         String     @id @default(cuid())
+  id         String    @id @default(cuid())
   userId     String
   chatId     String
 
-  lastReadAt DateTime?
+  lastReadAt DateTime  @default(now())
 
-  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  chat       Chat      @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
-  role       Role       @default(USER)
+  role       Role      @default(USER)
   @@unique([userId, chatId])
 }
 
@@ -90,7 +90,7 @@ model Attachment  {
   name      String
   size      Int
   type      String
-  
+
   createdAt DateTime  @default(now())
 }
 

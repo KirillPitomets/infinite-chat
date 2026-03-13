@@ -1,8 +1,8 @@
 import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
-import { useMemberTyping } from "../../hooks/useMemberTyping"
+import { useRealtimeTyping } from "@/features/chat/realtime/useRealtimeTyping"
 
 export const ChatTypingBanner = ({ chatId }: { chatId: string }) => {
-  const { isMemberTyping, member } = useMemberTyping(chatId)
+  const { isMemberTyping, member } = useRealtimeTyping(chatId)
 
   if (!isMemberTyping) {
     return

@@ -21,7 +21,8 @@ export function ChatInboxList({
         <li key={chat.id}>
           <ChatInboxItem
             chatId={chat.id}
-            initialLatestMessage={chat.latestMessage}
+            unreadConut={chat.unreadCount}
+            latestMessage={chat.latestMessage}
             name={chat.type === "DIRECT" ? chat.otherUser.name : chat.name}
             avatarUrl={chat.type === "DIRECT" ? chat.otherUser.imageUrl : ""}
             memberId={chat.type === "DIRECT" ? chat.otherUser.id : ""}
