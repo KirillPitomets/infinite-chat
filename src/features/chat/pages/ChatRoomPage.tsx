@@ -15,47 +15,34 @@ import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
 import { useSendMessage } from "../message/api/mutate/useSendMessage"
 import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
 import { useGetMessages } from "../message/api/query/useGetMessages"
-import { UIAttachment } from "../message/model/message.types"
-import { ChatTypingBanner } from "../ui/ChatTypingBanner/ChatTypingBanner"
 import { useRealtimeChat } from "../realtime/useRealtimeChat"
+import { ChatTypingBanner } from "../ui/ChatTypingBanner/ChatTypingBanner"
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
   const [files, setFiles] = useState<File[]>([])
-  const [isOpenImagePreview, setIsOpenImagePreview] = useState(false)
   const [previewImage, setPreviewImage] = useState<{
     alt: string
     url: string
   }>({ alt: "", url: "" })
-  const [isEditMessage, setIsEditMessage] = useState(false)
-  const [editingMessage, setEditingMessage] = useState<{
-    id: string
-    initialValue: string
-    initialAttachments?: UIAttachment[]
-  }>({ id: "", initialValue: "" })
+  const [isOpenImagePreview, setIsOpenImagePreview] = useState(false)
 
   const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
   const { data: messages = [], isLoading } = useGetMessages(chatId)
   const { mutate: sendMessage } = useSendMessage(chatId)
-  const { mutate: updateMessage } = useUpdateMessage({
-    chatId,
-    cancelUpdate: () => onCancelUpdate()
-  })
+  const {
+    updateMessage,
+    cancelUpdate,
+    editingMessage,
+    handleEdditingMessage,
+    isEditMessage
+  } = useUpdateMessage(chatId)
   const { mutate: deleteMessage } = useDeleteMessage(chatId)
+  const { mutate: deleteChat } = useDeleteChat(chatId)
 
-  useRealtimeChat(chatId, currentUser.id)
-
-  const handleMessageDetails = (
-    messageId: string,
-    initialValue: string,
-    attachments?: UIAttachment[]
-  ) => {
-    setEditingMessage({
-      id: messageId,
-      initialValue,
-      initialAttachments: attachments
-    })
-    setIsEditMessage(true)
+  const handleImagePreviewDialog = (image: { alt: string; url: string }) => {
+    setPreviewImage(image)
+    setIsOpenImagePreview(true)
   }
 
   const onUpdateMessage = (id: string, value: string, files?: File[]) => {
@@ -64,18 +51,6 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
       content: value,
       files: files
     })
-  }
-
-  const onCancelUpdate = () => {
-    setEditingMessage({ id: "", initialValue: "" })
-    setIsEditMessage(false)
-  }
-
-  const { mutate: deleteChat } = useDeleteChat(chatId)
-
-  const handleImagePreviewDialog = (image: { alt: string; url: string }) => {
-    setPreviewImage(image)
-    setIsOpenImagePreview(true)
   }
 
   const onDrop = useCallback(
@@ -98,6 +73,8 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     maxFiles: 4,
     multiple: true
   })
+
+  useRealtimeChat(chatId, currentUser.id)
 
   useEffect(() => {
     toast.dismissAll()
@@ -146,7 +123,13 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           isLoading={isLoading}
           messages={messages}
           isEditMessage={isEditMessage}
-          handleUpdate={handleMessageDetails}
+          handleUpdate={(id, value, attachments) =>
+            handleEdditingMessage({
+              id,
+              initialValue: value,
+              initialAttachments: attachments
+            })
+          }
           onDelete={deleteMessage}
           onPreviewImage={image => handleImagePreviewDialog(image)}
         />
@@ -168,7 +151,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
               onUpdateMessage(id, value, files)
               setFiles([])
             }}
-            onCancelUpdate={onCancelUpdate}
+            onCancelUpdate={cancelUpdate}
             onSubmit={content => {
               sendMessage({ content, files })
               setFiles([])

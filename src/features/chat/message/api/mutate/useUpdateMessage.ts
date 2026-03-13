@@ -1,26 +1,44 @@
 import {
   ChatUIMessage,
-  mapAPIMessageToUI
+  mapAPIMessageToUI,
+  UIAttachment
 } from "@/features/chat/message/model/message.types"
 import { edenClient } from "@/shared/lib/eden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
 import { chatKeys } from "../../../chat/model/chat.keys"
 import { useChangeMessageStatus } from "../useChangeMessageStatus"
+import { useState } from "react"
 
-type useUpdateMessageArgs = {
-  chatId: string
-  cancelUpdate: () => void
+type EditingMessage = {
+  id: string
+  initialValue: string
+  initialAttachments?: UIAttachment[]
 }
 
-export function useUpdateMessage({
-  chatId,
-  cancelUpdate
-}: useUpdateMessageArgs) {
+export function useUpdateMessage(chatId: string) {
   const queryClient = useQueryClient()
   const changeMessageStatus = useChangeMessageStatus()
 
-  return useMutation<
+  const [isEditMessage, setIsEditMessage] = useState(false)
+  const [editingMessage, setEditingMessage] = useState<EditingMessage>({
+    id: "",
+    initialValue: ""
+  })
+
+  const handleIsEditMessage = () => setIsEditMessage(prev => !prev)
+
+  const handleEdditingMessage = (message: EditingMessage) => {
+    setEditingMessage(message)
+    setIsEditMessage(true)
+  }
+
+  const cancelUpdate = () => {
+    setEditingMessage({ id: "", initialValue: "", initialAttachments: [] })
+    setIsEditMessage(false)
+  }
+
+  const { mutate } = useMutation<
     ChatUIMessage,
     Error,
     {
@@ -76,4 +94,13 @@ export function useUpdateMessage({
       cancelUpdate()
     }
   })
+
+  return {
+    updateMessage: mutate,
+    isEditMessage,
+    handleIsEditMessage,
+    editingMessage,
+    handleEdditingMessage,
+    cancelUpdate
+  }
 }
