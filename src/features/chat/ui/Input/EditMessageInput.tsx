@@ -1,6 +1,6 @@
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { DropzoneInputProps } from "react-dropzone"
 import { ChatInputUI } from "./InputUI"
+import { InputHeader } from "./Header"
 
 type EditMessageInputProps = {
   messageId: string
@@ -23,15 +23,11 @@ export const EditMessageInput = ({
 }: EditMessageInputProps) => {
   return (
     <div>
-      <div className="flex justify-between w-full p-4 border border-zinc-300">
-        <div className="">
-          <p>Edit message: </p>
-          <p className="truncate max-w-175">{initialValue}</p>
-        </div>
-        <button onClick={onCancelUpdate}>
-          <IconButtonBase>cancel</IconButtonBase>
-        </button>
-      </div>
+      <InputHeader
+        title="Edit"
+        content={initialValue}
+        onCancel={onCancelUpdate}
+      />
       <ChatInputUI
         previewFiles={previewFiles}
         removePreviewFile={removePreviewFile}

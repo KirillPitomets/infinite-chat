@@ -19,6 +19,7 @@ interface IMessageProps extends ChatUIMessage {
     initialValue: string,
     initialAttachments?: UIAttachment[]
   ) => void
+  handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void
 }
@@ -31,7 +32,10 @@ export const Message = ({
   attachments,
   status,
   isDeleted,
+  updatedAt,
   createdAt,
+  replyToMessage,
+  handleReplyToMessage,
   handleUpdate,
   onDelete,
   onPreviewImage
@@ -54,6 +58,18 @@ export const Message = ({
     },
     updateMessage() {
       handleUpdate(id, content, attachments)
+    },
+    replyMessage() {
+      handleReplyToMessage({
+        id,
+        attachments,
+        content,
+        createdAt,
+        status,
+        isDeleted,
+        updatedAt,
+        sender
+      })
     }
   })
 
@@ -76,30 +92,38 @@ export const Message = ({
           <MessageSender avatarUrl={sender.imageUrl} name={sender.name} />
         )}
 
-        <div
-          className="relative px-3 py-1 rounded-xl bg-zinc-800 dark:bg-gray-200 flex items-end flex-wrap gap-3"
-          onContextMenu={handleContextMenu}
-        >
-          {isMine && (
+        <div className="relative px-3 py-1 rounded-xl bg-zinc-700 dark:bg-gray-200 ">
+          {replyToMessage && (
+            <div className="bg-zinc-800 dark:bg-gray-300 rounedd-xl p-1 border-l border-black text-sm">
+              <p>{replyToMessage.sender.name}</p> 
+              <p>{replyToMessage.content}</p>
+            </div>
+          )}
+
+          <div
+            className="flex justify-between items-end flex-wrap gap-3"
+            onContextMenu={handleContextMenu}
+          >
             <MessageContextMenu
+              isMineMessage={isMine}
               isVisible={isVisibleContextMenu}
               buttons={contextMenu}
             />
-          )}
 
-          <MessageContent
-            attachments={attachments}
-            onPreviewImage={onPreviewImage}
-            content={content}
-            messageStatus={status}
-          />
+            <MessageContent
+              attachments={attachments}
+              onPreviewImage={onPreviewImage}
+              content={content}
+              messageStatus={status}
+            />
 
-          <div className="flex justify-end space-x-2">
-            <p className={`text-sm opacity-50 ${isMine && "text-end"}`}>
-              {formatDate(createdAt, "HH:mm")}
-            </p>
+            <div className="flex justify-end space-x-2">
+              <p className={`text-sm opacity-50 ${isMine && "text-end"}`}>
+                {formatDate(createdAt, "HH:mm")}
+              </p>
 
-            <MessageStatus status={status} />
+              <MessageStatus status={status} />
+            </div>
           </div>
         </div>
       </div>

@@ -22,6 +22,7 @@ export const messagesApi = new Elysia()
         senderId: userId,
         chatId: params.chatId,
         content: body.content,
+        replyToMessageId: body.replyToMessageId,
         files
       })
 
@@ -32,6 +33,7 @@ export const messagesApi = new Elysia()
 
       // =====================================
       // Create notification for users in chat
+      // =====================================
       const participants = await chatService.getParticants(userId, params.chatId)
 
       for (const participant of participants) {

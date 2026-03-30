@@ -3,33 +3,39 @@ import { edenClient } from "@/shared/lib/eden"
 import { useMutation } from "@tanstack/react-query"
 import { DropzoneInputProps } from "react-dropzone"
 import { useTypingIndicator } from "../../hooks/useTypingIndicator"
-import { UIAttachment } from "../../message/model/message.types"
+import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
 import { EditMessageInput } from "./EditMessageInput"
+import { SubmitMessageArgs } from "../../message/api/mutate/useSendMessage"
+import { ReplyMessageInput } from "./ReplyMessageInput"
 
 type ChatinputControllerProps = {
   chatId: string
-  isEdit: boolean
+  mode?: "edit" | "reply"
   editingMessage: {
     id: string
     initialValue: string
     initialAttachments?: UIAttachment[]
   }
+  replyMessage?: ChatUIMessage
   previewFiles: File[]
   onCancelUpdate: () => void
+  onCancelReplyToMessage: () => void
   onUpdate: (id: string, value: string, files?: File[]) => void
-  onSubmit: (value: string, files?: File[]) => void
+  onSubmit: (args: SubmitMessageArgs) => void
   inputDropZoneProps?: DropzoneInputProps
   removePreviewFile: (filename: string) => void
 }
 
 export const ChatInputController = ({
   chatId,
-  isEdit,
+  mode,
   editingMessage,
   inputDropZoneProps,
   previewFiles,
+  replyMessage,
   onUpdate,
   onCancelUpdate,
+  onCancelReplyToMessage,
   removePreviewFile,
   onSubmit
 }: ChatinputControllerProps) => {
@@ -43,7 +49,7 @@ export const ChatInputController = ({
     mutate(isTyping)
   }, 1000)
 
-  if (isEdit) {
+  if (mode === "edit") {
     return (
       <EditMessageInput
         messageId={editingMessage.id}
@@ -57,13 +63,25 @@ export const ChatInputController = ({
     )
   }
 
+  if (mode === "reply" && replyMessage) {
+    return (
+      <ReplyMessageInput
+        onCancelReplyToMessage={onCancelReplyToMessage}
+        onSubmit={onSubmit}
+        previewFiles={previewFiles}
+        removePreviewFile={removePreviewFile}
+        replyMessage={replyMessage}
+      />
+    )
+  }
+
   return (
     <ChatInputUI
       handleTypingIndicator={handleTypingIndicator}
       inputDropZoneProps={inputDropZoneProps}
       previewFiles={previewFiles}
       removePreviewFile={removePreviewFile}
-      onSubmit={value => onSubmit(value)}
+      onSubmit={value => onSubmit({ content: value })}
       initialValue=""
     />
   )

@@ -29,7 +29,15 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
 
   const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
   const { data: messages = [], isLoading } = useGetMessages(chatId)
-  const { mutate: sendMessage } = useSendMessage(chatId)
+  const {
+    mutate: sendMessage,
+    setIsReplyMessage,
+    isReplyMessage,
+    setReplyMessage,
+    replyMessage,
+    clearReplyMessage
+  } = useSendMessage(chatId)
+
   const {
     updateMessage,
     cancelUpdate,
@@ -123,6 +131,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           isLoading={isLoading}
           messages={messages}
           isEditMessage={isEditMessage}
+          isReplyToMessage={isReplyMessage}
           handleUpdate={(id, value, attachments) =>
             handleEdditingMessage({
               id,
@@ -130,6 +139,10 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
               initialAttachments: attachments
             })
           }
+          handleReplyToMessage={replyMessage => {
+            setIsReplyMessage(true)
+            setReplyMessage(replyMessage)
+          }}
           onDelete={deleteMessage}
           onPreviewImage={image => handleImagePreviewDialog(image)}
         />
@@ -140,8 +153,9 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           </div>
           <ChatInputController
             chatId={chatId}
+            replyMessage={replyMessage}
             previewFiles={files}
-            isEdit={isEditMessage}
+            mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
             removePreviewFile={filename => {
               setFiles(prev => prev.filter(file => file.name !== filename))
             }}
@@ -152,8 +166,9 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
               setFiles([])
             }}
             onCancelUpdate={cancelUpdate}
-            onSubmit={content => {
-              sendMessage({ content, files })
+            onCancelReplyToMessage={clearReplyMessage}
+            onSubmit={({ content, replyMessage }) => {
+              sendMessage({ content, files, replyMessage })
               setFiles([])
             }}
           />

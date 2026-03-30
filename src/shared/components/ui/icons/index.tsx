@@ -17,6 +17,7 @@ import { FileAccepted } from "./FileAccepted"
 import { ReloadIcon } from "./ReloadIcon"
 import { UploadIcon } from "./UploadIcon"
 import {LightIcon} from "./LightIcon"
+import {ReplyIcon} from './ReplyIcon'
 
 export {
   NetworkIcon,
@@ -38,4 +39,5 @@ export {
   ReloadIcon,
   UploadIcon,
   LightIcon,
+  ReplyIcon
 }

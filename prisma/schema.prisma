@@ -64,17 +64,23 @@ model Chat {
 }
 
 model Message {
-  id          String        @id @default(cuid())
-  senderId    String
-  chatId      String
-  content     String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  isDeleted   Boolean       @default(false)
-  attachments Attachment[]
+  id               String        @id @default(cuid())
+  senderId         String
+  chatId           String
+  content          String
 
-  chat        Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender      User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  replyToMessageId String?
+  replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
+  replies          Message[]    @relation("MessageReply")
+
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  isDeleted        Boolean       @default(false)
+
+  attachments      Attachment[]
+
+  chat             Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender           User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
 
   @@index([chatId, createdAt])
   @@index([senderId])

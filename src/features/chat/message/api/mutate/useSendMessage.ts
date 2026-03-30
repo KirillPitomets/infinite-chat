@@ -1,30 +1,46 @@
+import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 import {
   ChatUIMessage,
   mapAPIMessageToUI
 } from "@/features/chat/message/model/message.types"
+import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { edenClient } from "@/shared/lib/eden"
-
-import { chatKeys } from "@/features/chat/chat/model/chat.keys"
-import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useState } from "react"
 import toast from "react-hot-toast"
 
+export type SubmitMessageArgs = {
+  content: string
+  replyMessage?: ChatUIMessage
+  files?: File[]
+}
+
 export function useSendMessage(chatId: string) {
+  const [replyMessage, setReplyMessage] = useState<ChatUIMessage | undefined>(
+    undefined
+  )
+  const [isReplyMessage, setIsReplyMessage] = useState(false)
   const queryClient = useQueryClient()
   const currentUser = useCurrentUser()
 
-  return useMutation<
+  const clearReplyMessage = () => {
+    setIsReplyMessage(false)
+    setReplyMessage(undefined)
+  }
+
+  const { mutate } = useMutation<
     ChatUIMessage,
     Error,
-    { content: string; files?: File[] },
+    SubmitMessageArgs,
     { previousMessages: ChatUIMessage[]; tempId: string; filesCount?: number }
   >({
     mutationKey: chatKeys.sendMessages(chatId),
-    mutationFn: async ({ content, files }) => {
+    mutationFn: async ({ content, files, replyMessage }) => {
       const res = await edenClient.chat({ chatId }).messages.post({
         content,
-        files
+        files,
+        replyToMessageId: replyMessage ? replyMessage.id : null
       })
 
       if (!res.data) {
@@ -34,7 +50,7 @@ export function useSendMessage(chatId: string) {
       return mapAPIMessageToUI(res.data, "sent", false)
     },
 
-    onMutate: async ({ content, files }) => {
+    onMutate: async ({ content, files, replyMessage }) => {
       await queryClient.cancelQueries({
         queryKey: chatKeys.messages(chatId)
       })
@@ -46,7 +62,6 @@ export function useSendMessage(chatId: string) {
         ]) ?? []
 
       const tempId = crypto.randomUUID()
-
       const optimisticMessage: ChatUIMessage = {
         id: tempId,
         content,
@@ -55,6 +70,13 @@ export function useSendMessage(chatId: string) {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         status: "loading",
+        replyToMessage: replyMessage
+          ? {
+              id: replyMessage.id,
+              content: replyMessage.content,
+              sender: replyMessage.sender
+            }
+          : undefined,
         attachments: files
           ? files.map(_ => ({
               key: `temp-${Date.now()}-missingAttachment`,
@@ -103,4 +125,13 @@ export function useSendMessage(chatId: string) {
       toast.error(error.message)
     }
   })
+
+  return {
+    mutate,
+    setReplyMessage,
+    setIsReplyMessage,
+    clearReplyMessage,
+    isReplyMessage,
+    replyMessage
+  }
 }

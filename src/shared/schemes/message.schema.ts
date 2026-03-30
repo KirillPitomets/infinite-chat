@@ -6,7 +6,18 @@ export const MessageAttachmentSchema = z.object({
   key: z.string(),
   name: z.string(),
   size: z.number(),
-  type: z.string(),
+  type: z.string()
+})
+
+export const ReplyPreviewMessage = z.object({
+  id: z.string(),
+  content: z.string(),
+  sender: z.object({
+    id: z.string(),
+    name: z.string(),
+    imageUrl: z.string(),
+    tag: z.string()
+  })
 })
 
 export const ChatMessageSchema = z.object({
@@ -18,6 +29,7 @@ export const ChatMessageSchema = z.object({
     tag: z.string(),
     imageUrl: z.string()
   }),
+  replyToMessage: ReplyPreviewMessage.optional(),
   attachments: z.array(MessageAttachmentSchema),
   isDeleted: z.boolean(),
   createdAt: z.string().datetime(),

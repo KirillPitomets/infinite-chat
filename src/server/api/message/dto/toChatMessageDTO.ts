@@ -17,6 +17,18 @@ export const toChatMessageDTO = (
       tag: message.sender.tag,
       imageUrl: message.sender.imageUrl
     },
+    replyToMessage: message.replyToMessage
+      ? {
+          id: message.replyToMessage.id,
+          content: message.replyToMessage.content,
+          sender: {
+            id: message.replyToMessage.sender.id,
+            imageUrl: message.replyToMessage.sender.imageUrl,
+            name: message.replyToMessage.sender.name,
+            tag: message.replyToMessage.sender.tag
+          }
+        }
+      : undefined,
     attachments: messageAttachmentsMapper(message.attachments) || [],
     createdAt: message.createdAt.toISOString(),
     updatedAt: message.updatedAt.toISOString()

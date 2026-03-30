@@ -12,6 +12,7 @@ export const MessageApiSchema = {
     body: z
       .object({
         content: z.string().max(2000),
+        replyToMessageId: z.union([z.string(), z.null()]),
         files: z.union([
           z.array(z.instanceof(File)).default([]),
           z.instanceof(File)

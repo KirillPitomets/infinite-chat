@@ -16,17 +16,32 @@ class MessageService {
     senderId,
     chatId,
     content,
+    replyToMessageId,
     files
   }: {
     senderId: string
     chatId: string
     content: string
     files?: File[]
+    replyToMessageId?: string | null | undefined
   }): Promise<ChatMessagePrismaType> {
-    const chat = await chatService.assertUserInChat(senderId, chatId,)
+    const chat = await chatService.assertUserInChat(senderId, chatId)
 
     if (!content && (!files || files.length === 0)) {
       throw new ConflictError("Message must have content or files")
+    }
+    let replyMessage = null
+
+    if (replyToMessageId) {
+      replyMessage = await prisma.message.findUnique({
+        where: {
+          id: replyToMessageId
+        }
+      })
+
+      if (replyMessage && replyMessage.chatId !== chatId) {
+        throw new ConflictError("Cannot reply to message from another chat")
+      }
     }
 
     const message = await prisma.$transaction(async tx => {
@@ -34,7 +49,8 @@ class MessageService {
         data: {
           chatId: chat.id,
           senderId,
-          content
+          content,
+          replyToMessageId: replyMessage ? replyMessage.id : null
         }
       })
 

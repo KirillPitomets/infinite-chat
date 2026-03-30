@@ -13,11 +13,13 @@ type MessageListProps = {
   isEditMessage: boolean
   isLoading: boolean
   currentUser: User
+  isReplyToMessage: boolean,
   handleUpdate: (
     id: string,
     initialValue: string,
     initialAttachments?: UIAttachment[]
   ) => void
+  handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void
 }
@@ -25,9 +27,11 @@ type MessageListProps = {
 export const MessageList = ({
   messages,
   isEditMessage,
+  isReplyToMessage,
   isLoading,
   currentUser,
   handleUpdate,
+  handleReplyToMessage,
   onDelete,
   onPreviewImage
 }: MessageListProps) => {
@@ -37,7 +41,7 @@ export const MessageList = ({
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView()
     }
-  }, [messages.length, isEditMessage])
+  }, [isEditMessage, isReplyToMessage, messages.length])
 
   return (
     <div className="relative flex-1 p-4 space-y-5 overflow-y-auto scrollbar-thin">
@@ -51,6 +55,7 @@ export const MessageList = ({
             onDelete={onDelete}
             isMine={currentUser.id === msg.sender.id}
             onPreviewImage={onPreviewImage}
+            handleReplyToMessage={handleReplyToMessage}
             {...msg}
           />
         ))
