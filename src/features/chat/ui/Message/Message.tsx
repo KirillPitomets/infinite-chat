@@ -94,14 +94,14 @@ export const Message = ({
 
         <div className="relative px-3 py-1 rounded-xl bg-zinc-700 dark:bg-gray-200 ">
           {replyToMessage && (
-            <div className="bg-zinc-800 dark:bg-gray-300 rounedd-xl p-1 border-l border-black text-sm">
+            <div className="p-1 pl-2 text-sm border-l-2 border-black bg-zinc-800 dark:bg-gray-300 rounedd-xl">
               <p>{replyToMessage.sender.name}</p> 
-              <p>{replyToMessage.content}</p>
+              <p className="opacity-80">{replyToMessage.content}</p>
             </div>
           )}
 
           <div
-            className="flex justify-between items-end flex-wrap gap-3"
+            className="flex flex-wrap items-end justify-between gap-3"
             onContextMenu={handleContextMenu}
           >
             <MessageContextMenu
