@@ -31,13 +31,13 @@ export const PreviewFiles = ({ files, removeFile }: PreviewFilesProps) => {
   }, [previewFiles])
 
   return (
-    <ul className="flex flex-wrap items-end gap-2">
+    <ul className="flex flex-wrap items-end gap-2 border-t border-zinc-300" >
       {previewFiles.map((file, indx) => (
         <li key={`${file.data.name}-${indx}`} className="relative group">
           <div className="">
             {file.isImg ? (
               <img
-                className="max-w-[200px] max-h-[290px] object-contain"
+                className="max-w-[150px] max-h-[290px] object-contain"
                 src={file.preview}
                 alt={file.data.name}
               />
