@@ -1,3 +1,4 @@
+import Linkify from "linkify-react"
 import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
 import { Attachments } from "./Attachments"
 
@@ -26,7 +27,16 @@ export const MessageContent = ({
             }
           />
         )}
-        <p className="dark:text-zinc-700">{content}</p>
+        <Linkify
+          as="p"
+          options={{
+            target: "_blank",
+            rel: "noopener noreference",
+            className: "text-green-700 hover:underline"
+          }}
+        >
+          {content}
+        </Linkify>
       </div>
     </div>
   )
