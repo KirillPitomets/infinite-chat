@@ -1,32 +1,39 @@
 "use client"
 
+import { useChatData } from "@/features/chat/chat/api/useChatData"
+import { useDeleteChat } from "@/features/chat/chat/api/useDeleteChat"
+import { useDeleteMessage } from "@/features/chat/message/api/mutate/useDeleteMessage"
+import {
+  SubmitMessageArgs,
+  useSendMessage
+} from "@/features/chat/message/api/mutate/useSendMessage"
+import { useUpdateMessage } from "@/features/chat/message/api/mutate/useUpdateMessage"
+import { useGetMessages } from "@/features/chat/message/api/query/useGetMessages"
+import { useRealtimeChat } from "@/features/chat/realtime/useRealtimeChat"
+import { ChatTypingBanner } from "@/features/chat/ui/ChatTypingBanner/ChatTypingBanner"
 import { ChatHeader } from "@/features/chat/ui/Header/Header"
 import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
 import { UploadIcon } from "@/shared/components/ui/icons"
 import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
 import { useCurrentUser } from "@/shared/context/CurrentUserContext"
-import { useCallback, useEffect, useState } from "react"
+import { useFiles } from "@/shared/hooks/useFiles"
+import { usePreviewImageDialog } from "@/shared/hooks/usePreviewImage"
+import { useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
-import { useChatData } from "../chat/api/useChatData"
-import { useDeleteChat } from "../chat/api/useDeleteChat"
-import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
-import { useSendMessage } from "../message/api/mutate/useSendMessage"
-import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
-import { useGetMessages } from "../message/api/query/useGetMessages"
-import { useRealtimeChat } from "../realtime/useRealtimeChat"
-import { ChatTypingBanner } from "../ui/ChatTypingBanner/ChatTypingBanner"
+
+const MAX_FILES = 4;
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
-  const [files, setFiles] = useState<File[]>([])
-  const [previewImage, setPreviewImage] = useState<{
-    alt: string
-    url: string
-  }>({ alt: "", url: "" })
-  const [isOpenImagePreview, setIsOpenImagePreview] = useState(false)
-
+  const { files, addFiles, clearFiles, removePreviewFile } = useFiles({maxFiles: MAX_FILES})
+  const {
+    previewImage,
+    isOpenImagePreview,
+    closePreviewImageDialog,
+    handleImagePreviewDialog
+  } = usePreviewImageDialog()
   const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
   const { data: messages = [], isLoading } = useGetMessages(chatId)
   const {
@@ -42,47 +49,40 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     updateMessage,
     cancelUpdate,
     editingMessage,
-    handleEdditingMessage,
+    handleEditingMessage,
     isEditMessage
   } = useUpdateMessage(chatId)
   const { mutate: deleteMessage } = useDeleteMessage(chatId)
   const { mutate: deleteChat } = useDeleteChat(chatId)
 
-  const handleImagePreviewDialog = (image: { alt: string; url: string }) => {
-    setPreviewImage(image)
-    setIsOpenImagePreview(true)
-  }
-
-  const onUpdateMessage = (id: string, value: string, files?: File[]) => {
-    updateMessage({
-      messageId: id,
-      content: value,
-      files: files
-    })
-  }
-
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
-      const totalFiles = files.length + acceptedFiles.length
-
-      if (totalFiles > 4) {
-        toast.error("You can upload only 4 files")
-        return
-      }
-      console.log("echo upload button")
-      setFiles(prev => [...prev, ...acceptedFiles])
+      addFiles(acceptedFiles)
     },
-    [files]
+    [addFiles]
   )
 
   const { getInputProps, getRootProps, isDragActive } = useDropzone({
     noClick: true,
     onDrop,
-    maxFiles: 4,
+    maxFiles: MAX_FILES,
     multiple: true
   })
 
   useRealtimeChat(chatId, currentUser.id)
+
+  const handleMessageUpdate = (id: string, value: string) => {
+    updateMessage({ messageId: id, content: value, files })
+    clearFiles()
+  }
+
+  const handleMessageSubmit = ({
+    content,
+    replyMessage
+  }: SubmitMessageArgs) => {
+    sendMessage({ content, files, replyMessage })
+    clearFiles()
+  }
 
   useEffect(() => {
     toast.dismissAll()
@@ -93,23 +93,18 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
       <ImagePreviewDialog
         isOpen={isOpenImagePreview}
         image={previewImage}
-        onClose={() => setIsOpenImagePreview(false)}
+        onClose={closePreviewImageDialog}
       />
       <ChatHeader
         chatId={chatId}
         chatData={
           chatData?.type === "DIRECT"
-            ? {
-                type: "DIRECT",
-                otherUser: chatData.otherUser
-              }
+            ? { type: "DIRECT", otherUser: chatData.otherUser }
             : chatData?.type === "GROUP"
-              ? {
-                  ...chatData
-                }
+              ? chatData
               : undefined
         }
-        onDelete={() => deleteChat()}
+        onDelete={deleteChat}
         isLoading={isChatDataLoading}
       />
 
@@ -133,7 +128,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
           handleUpdate={(id, value, attachments) =>
-            handleEdditingMessage({
+            handleEditingMessage({
               id,
               initialValue: value,
               initialAttachments: attachments
@@ -144,7 +139,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
             setReplyMessage(replyMessage)
           }}
           onDelete={deleteMessage}
-          onPreviewImage={image => handleImagePreviewDialog(image)}
+          onPreviewImage={handleImagePreviewDialog}
         />
 
         <div className="relative">
@@ -156,21 +151,13 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
             replyMessage={replyMessage}
             previewFiles={files}
             mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
-            removePreviewFile={filename => {
-              setFiles(prev => prev.filter(file => file.name !== filename))
-            }}
+            removePreviewFile={removePreviewFile}
             inputDropZoneProps={getInputProps()}
             editingMessage={editingMessage}
-            onUpdate={(id, value) => {
-              onUpdateMessage(id, value, files)
-              setFiles([])
-            }}
+            onUpdate={handleMessageUpdate}
             onCancelUpdate={cancelUpdate}
             onCancelReplyToMessage={clearReplyMessage}
-            onSubmit={({ content, replyMessage }) => {
-              sendMessage({ content, files, replyMessage })
-              setFiles([])
-            }}
+            onSubmit={handleMessageSubmit}
           />
         </div>
       </div>

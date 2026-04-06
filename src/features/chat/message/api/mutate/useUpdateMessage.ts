@@ -26,9 +26,9 @@ export function useUpdateMessage(chatId: string) {
     initialValue: ""
   })
 
-  const handleIsEditMessage = () => setIsEditMessage(prev => !prev)
+  const toggleIsEditMessage = () => setIsEditMessage(prev => !prev)
 
-  const handleEdditingMessage = (message: EditingMessage) => {
+  const handleEditingMessage = (message: EditingMessage) => {
     setEditingMessage(message)
     setIsEditMessage(true)
   }
@@ -98,9 +98,9 @@ export function useUpdateMessage(chatId: string) {
   return {
     updateMessage: mutate,
     isEditMessage,
-    handleIsEditMessage,
+    toggleIsEditMessage,
     editingMessage,
-    handleEdditingMessage,
+    handleEditingMessage,
     cancelUpdate
   }
 }
