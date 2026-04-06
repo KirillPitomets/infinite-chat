@@ -7,8 +7,11 @@ import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { useQuery } from "@tanstack/react-query"
 import { chatKeys } from "../../chat/model/chat.keys"
 import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
+import { useState } from "react"
 
 export function ChatInbox() {
+  const [search, setSearch] = useState("")
+
   const {
     data: chats,
     isLoading,
@@ -31,15 +34,38 @@ export function ChatInbox() {
 
   useRealtimeInbox(chats, () => refetch())
 
+  const filterdChats = chats.filter(chat => {
+    const query = search.toLowerCase().trim()
+
+    if (!query) return true
+
+    if (chat.type === "DIRECT") {
+      return (
+        chat.otherUser.name.toLowerCase().includes(query) ||
+        chat.otherUser.tag.toLowerCase().includes(query) ||
+        chat.latestMessage?.content.toLowerCase().includes(query)
+      )
+    }
+
+    if (chat.type === "GROUP") {
+      return (
+        chat.name.toLowerCase().includes(query) ||
+        chat.latestMessage?.content.toLowerCase().includes(query)
+      )
+    }
+
+    return false
+  })
+
   return (
     <div className="basis-75 shrink-0 max-w-full py-7.5 h-screen flex flex-col border-r border-zinc-300">
       <div className="px-5 mb-5">
         <h2 className="mb-2 text-xl font-bold">Messages</h2>
-        <SearchInput />
+        <SearchInput value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        <ChatInboxList chats={chats} isLoadingSkeleton={isLoading} />
+        <ChatInboxList chats={filterdChats} isLoadingSkeleton={isLoading} />
       </div>
     </div>
   )
