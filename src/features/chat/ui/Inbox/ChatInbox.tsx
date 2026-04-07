@@ -8,8 +8,13 @@ import { useQuery } from "@tanstack/react-query"
 import { chatKeys } from "../../chat/model/chat.keys"
 import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
 import { useState } from "react"
+import { useParams, usePathname } from "next/navigation"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 
 export function ChatInbox() {
+  const pathname = usePathname()
+  const { chatId } = useParams()
+
   const [search, setSearch] = useState("")
 
   const {
@@ -23,7 +28,6 @@ export function ChatInbox() {
 
       return res.data ?? []
     },
-    initialData: [],
     select: chats =>
       [...chats].sort(
         (a, b) =>
@@ -32,40 +36,52 @@ export function ChatInbox() {
       )
   })
 
-  useRealtimeInbox(chats, () => refetch())
+  useRealtimeInbox(chats || [], () => refetch())
 
-  const filterdChats = chats.filter(chat => {
-    const query = search.toLowerCase().trim()
+  const filterdChats = (chats?: UserChatPreview[]): UserChatPreview[] => {
+    if (!chats) return []
 
-    if (!query) return true
+    return chats.filter(chat => {
+      const query = search.toLowerCase().trim()
 
-    if (chat.type === "DIRECT") {
-      return (
-        chat.otherUser.name.toLowerCase().includes(query) ||
-        chat.otherUser.tag.toLowerCase().includes(query) ||
-        chat.latestMessage?.content.toLowerCase().includes(query)
-      )
-    }
+      if (!query) return true
 
-    if (chat.type === "GROUP") {
-      return (
-        chat.name.toLowerCase().includes(query) ||
-        chat.latestMessage?.content.toLowerCase().includes(query)
-      )
-    }
+      if (chat.type === "DIRECT") {
+        return (
+          chat.otherUser.name.toLowerCase().includes(query) ||
+          chat.otherUser.tag.toLowerCase().includes(query) ||
+          chat.latestMessage?.content.toLowerCase().includes(query)
+        )
+      }
 
-    return false
-  })
+      if (chat.type === "GROUP") {
+        return (
+          chat.name.toLowerCase().includes(query) ||
+          chat.latestMessage?.content.toLowerCase().includes(query)
+        )
+      }
+
+      return false
+    })
+  }
 
   return (
-    <div className="basis-75 shrink-0 max-w-full py-7.5 h-screen flex flex-col border-r border-zinc-300">
+    <div
+      className={`basis-75 shrink-0 max-w-full 
+        ${
+          pathname.includes(ACCOUNT_PAGES.CHAT) && chatId
+            ? "block max-sm:hidden"
+            : "block"
+        } 
+        max-sm:basis-full max-sm:w-full py-7.5 h-screen flex flex-col border-r border-zinc-300`}
+    >
       <div className="px-5 mb-5">
         <h2 className="mb-2 text-xl font-bold">Messages</h2>
         <SearchInput value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        <ChatInboxList chats={filterdChats} isLoadingSkeleton={isLoading} />
+        <ChatInboxList chats={filterdChats(chats)} isLoadingSkeleton={isLoading} />
       </div>
     </div>
   )
