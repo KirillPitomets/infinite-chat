@@ -11,7 +11,11 @@ export const ChatPage = () => {
 
   return (
     <ChatLayout>
-      {chatId ? <ChatRoomPage chatId={chatId} /> : <ChatEmptyState />}
+      <div
+        className={` ${params ? "max-sm:block" : "max-sm:hidden "} w-full min-h-screen`}
+      >
+        {chatId ? <ChatRoomPage chatId={chatId} /> : <ChatEmptyState />}
+      </div>
     </ChatLayout>
   )
 }

@@ -3,10 +3,13 @@ import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
 import { HeaderSkeleton } from "./HeaderSkeleton"
 import {
+  ArrowIcon,
   CameraIcon,
   InformationIcon,
   TrashIcon
 } from "@/shared/components/ui/icons"
+import Link from "next/link"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 
 type DirectChat = {
   type: "DIRECT"
@@ -37,6 +40,12 @@ export function ChatHeader({ isLoading, chatData, onDelete }: ChatHeaderProps) {
   return (
     <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
       <div className="flex items-center gap-2">
+        <Link
+          href={ACCOUNT_PAGES.CHAT}
+          className="hidden rotate-180 max-sm:block"
+        >
+          <ArrowIcon className="w-8 h-8 text-green-600" />
+        </Link>
         {chatData.type === "DIRECT" && (
           <DirectInfo
             memberId={chatData.otherUser.id}

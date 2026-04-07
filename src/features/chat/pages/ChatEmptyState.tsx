@@ -15,7 +15,6 @@ export const ChatEmptyState = () => {
   const router = useRouter()
 
   const handleMemberTag = (e: ChangeEvent<HTMLInputElement>) => {
-    // const tag = 
     setMemberTag(e.target.value)
   }
 
@@ -48,7 +47,7 @@ export const ChatEmptyState = () => {
   })
 
   return (
-    <div className="flex flex-col items-center justify-center flex-1 w-full space-y-10">
+    <div className="flex flex-col items-center justify-center flex-1 w-full h-full space-y-10">
       <h1 className="text-4xl">Welcome, <b>{user?.username || ""}</b>❤️😉</h1>
       <label className="flex items-center p-2 border border-zinc-600 rounded-2xl">
         <input

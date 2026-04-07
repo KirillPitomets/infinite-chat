@@ -18,6 +18,7 @@ import { ReloadIcon } from "./ReloadIcon"
 import { UploadIcon } from "./UploadIcon"
 import {LightIcon} from "./LightIcon"
 import {ReplyIcon} from './ReplyIcon'
+import { ArrowIcon } from "./ArrowIcon"
 
 export {
   NetworkIcon,
@@ -39,5 +40,6 @@ export {
   ReloadIcon,
   UploadIcon,
   LightIcon,
-  ReplyIcon
+  ReplyIcon,
+  ArrowIcon
 }
