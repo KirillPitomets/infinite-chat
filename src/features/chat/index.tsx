@@ -6,13 +6,12 @@ import { ChatRoomPage } from "./pages/ChatRoomPage"
 import { ChatEmptyState } from "./pages/ChatEmptyState"
 
 export const ChatPage = () => {
-  const params = useParams()
-  const chatId = params?.chatId as string | undefined
+  const {chatId} = useParams<{chatId: string}>()
 
   return (
     <ChatLayout>
       <div
-        className={` ${params ? "max-sm:block" : "max-sm:hidden "} w-full min-h-screen`}
+        className={` ${chatId ? "max-sm:block" : "max-sm:hidden "} w-full min-h-screen`}
       >
         {chatId ? <ChatRoomPage chatId={chatId} /> : <ChatEmptyState />}
       </div>
