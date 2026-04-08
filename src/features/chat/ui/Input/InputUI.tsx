@@ -59,7 +59,7 @@ export function ChatInputUI({
   }
 
   const onSubmitMessage = () => {
-    if (value.trim().length > 0 && value.trim().length < 1000) {
+    if ( value.trim() || previewFiles.length) {
       onSubmit(value)
       textareaRef.current?.focus()
       setValue("")
@@ -156,7 +156,10 @@ export function ChatInputUI({
           </div>
         </div>
 
-        <button onClick={onSubmitMessage} disabled={!value.trim()}>
+        <button
+          onClick={onSubmitMessage}
+          disabled={!value.trim() && !previewFiles.length}
+        >
           <IconButtonBase>
             <SendIcon />
           </IconButtonBase>

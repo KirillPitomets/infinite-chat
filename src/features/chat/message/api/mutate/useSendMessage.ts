@@ -11,9 +11,9 @@ import { useState } from "react"
 import toast from "react-hot-toast"
 
 export type SubmitMessageArgs = {
-  content: string
-  replyMessage?: ChatUIMessage
+  content?: string
   files?: File[]
+  replyMessage?: ChatUIMessage
 }
 
 export function useSendMessage(chatId: string) {
@@ -37,6 +37,11 @@ export function useSendMessage(chatId: string) {
   >({
     mutationKey: chatKeys.sendMessages(chatId),
     mutationFn: async ({ content, files, replyMessage }) => {
+
+      if (!content && !files ) {
+        throw new Error("Failed to send message")
+      }
+   
       const res = await edenClient.chat({ chatId }).messages.post({
         content,
         files,
@@ -64,7 +69,7 @@ export function useSendMessage(chatId: string) {
       const tempId = crypto.randomUUID()
       const optimisticMessage: ChatUIMessage = {
         id: tempId,
-        content,
+        content: content ? content : "",
         sender: currentUser,
         isDeleted: false,
         createdAt: new Date().toISOString(),

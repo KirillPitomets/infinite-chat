@@ -67,7 +67,7 @@ model Message {
   id               String        @id @default(cuid())
   senderId         String
   chatId           String
-  content          String
+  content          String?
 
   replyToMessageId String?
   replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])

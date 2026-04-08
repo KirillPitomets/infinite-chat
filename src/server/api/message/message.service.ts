@@ -21,7 +21,7 @@ class MessageService {
   }: {
     senderId: string
     chatId: string
-    content: string
+    content?: string
     files?: File[]
     replyToMessageId?: string | null | undefined
   }): Promise<ChatMessagePrismaType> {

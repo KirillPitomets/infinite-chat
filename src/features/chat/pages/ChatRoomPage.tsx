@@ -23,11 +23,13 @@ import { useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
 
-const MAX_FILES = 4;
+const MAX_FILES = 4
 
 export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   const currentUser = useCurrentUser()
-  const { files, addFiles, clearFiles, removePreviewFile } = useFiles({maxFiles: MAX_FILES})
+  const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
+    maxFiles: MAX_FILES
+  })
   const {
     previewImage,
     isOpenImagePreview,
@@ -62,14 +64,20 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     [addFiles]
   )
 
-  const { getInputProps, getRootProps, isDragActive } = useDropzone({
-    noClick: true,
-    onDrop,
-    maxFiles: MAX_FILES,
-    multiple: true
-  })
-
-  useRealtimeChat(chatId, currentUser.id)
+  const { getInputProps, getRootProps, isDragActive, fileRejections } =
+    useDropzone({
+      accept: {
+        "image/jpeg": [],
+        "image/png": [],
+        "image/webp": [],
+        "image/heic": [],
+        "image/jfif": []
+      },
+      noClick: true,
+      onDrop,
+      maxFiles: MAX_FILES,
+      multiple: true
+    })
 
   const handleMessageUpdate = (id: string, value: string) => {
     updateMessage({ messageId: id, content: value, files })
@@ -84,9 +92,18 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     clearFiles()
   }
 
+  useRealtimeChat(chatId, currentUser.id)
   useEffect(() => {
     toast.dismissAll()
   }, [])
+
+  useEffect(() => {
+    fileRejections.forEach(file => {
+      if (file.errors) {
+        file.errors.forEach(err => toast.error(err.message))
+      }
+    })
+  }, [fileRejections, fileRejections.length])
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -127,13 +144,13 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           messages={messages}
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
-          handleUpdate={(id, value, attachments) =>
+          handleUpdate={(id, value, attachments) => {
             handleEditingMessage({
               id,
               initialValue: value,
               initialAttachments: attachments
             })
-          }
+          }}
           handleReplyToMessage={replyMessage => {
             setIsReplyMessage(true)
             setReplyMessage(replyMessage)
