@@ -59,7 +59,7 @@ export function ChatInputUI({
   }
 
   const onSubmitMessage = () => {
-    if ( value.trim() || previewFiles.length) {
+    if (value.trim() || previewFiles.length) {
       onSubmit(value)
       textareaRef.current?.focus()
       setValue("")
@@ -136,7 +136,7 @@ export function ChatInputUI({
             >
               {latestEmoji}
             </button>
-            <div className="absolute right-0 bottom-full z-101">
+            <div className="absolute right-0 bottom-full z-101 max-sm:scale-70 max-sm:-right-30 max-sm:bottom-0">
               <EmojiPicker
                 open={isOpenEmojiPicker}
                 onEmojiClick={handleEmojiClick}
