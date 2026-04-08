@@ -27,16 +27,17 @@ export const MessageContent = ({
             }
           />
         )}
-        <Linkify
-          as="p"
-          options={{
-            target: "_blank",
-            rel: "noopener noreference",
-            className: "text-green-700 hover:underline"
-          }}
-        >
-          {content}
-        </Linkify>
+        <p style={{wordBreak: "break-word"}} className="whitespace-pre-wrap leading-relaxed">
+          <Linkify
+            options={{
+              target: "_blank",
+              rel: "noopener noreference",
+              className: "text-green-700 break-all hover:underline"
+            }}
+          >
+            {content}
+          </Linkify>
+        </p>
       </div>
     </div>
   )
