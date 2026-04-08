@@ -160,9 +160,9 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         />
 
         <div className="relative">
-          <div className="absolute left-0 bottom-full">
+          {/* <div className="absolute left-0 bottom-full">
             <ChatTypingBanner chatId={chatId} />
-          </div>
+          </div> */}
           <ChatInputController
             chatId={chatId}
             replyMessage={replyMessage}

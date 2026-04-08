@@ -34,7 +34,7 @@ type ChatHeaderProps = {
   onDelete: () => void
 }
 
-export function ChatHeader({ isLoading, chatData, onDelete }: ChatHeaderProps) {
+export function ChatHeader({ chatId, isLoading, chatData, onDelete }: ChatHeaderProps) {
   if (isLoading || !chatData) return <HeaderSkeleton />
 
   return (
@@ -48,6 +48,7 @@ export function ChatHeader({ isLoading, chatData, onDelete }: ChatHeaderProps) {
         </Link>
         {chatData.type === "DIRECT" && (
           <DirectInfo
+            chatId={chatId}
             memberId={chatData.otherUser.id}
             avatarUrl={chatData.otherUser.imageUrl}
             name={chatData.otherUser.name}

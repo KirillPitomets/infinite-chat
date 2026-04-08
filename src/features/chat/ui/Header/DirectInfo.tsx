@@ -1,18 +1,26 @@
 import { usePresenceUserStatus } from "@/shared/hooks/useUserPresence"
 import Image from "next/image"
+import { useRealtimeTyping } from "../../realtime/useRealtimeTyping"
+import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
 
-export const DirectInfo = ({
-  memberId,
-  avatarUrl,
-  tag,
-  name
-}: {
+type DirectInfoProps = {
+  chatId: string
   memberId: string
   avatarUrl: string
   tag: string
   name: string
-}) => {
+}
+
+export const DirectInfo = ({
+  chatId,
+  memberId,
+  avatarUrl,
+  tag,
+  name
+}: DirectInfoProps) => {
   const { isOnline } = usePresenceUserStatus(memberId)
+
+  const { isMemberTyping } = useRealtimeTyping(chatId)
 
   return (
     <>
@@ -26,9 +34,14 @@ export const DirectInfo = ({
       </div>
       <div>
         <p className="font-semibold">{name}</p>
-        <span className={`${isOnline ? "text-green-700" : "text-zinc-400"}`}>
-          {isOnline ? "online" : "offline"}
-        </span>
+
+        {isMemberTyping ? (
+          <TypingIndicator />
+        ) : (
+          <span className={`${isOnline ? "text-green-700" : "text-zinc-400"}`}>
+            {isOnline ? "online" : "offline"}
+          </span>
+        )}
       </div>
     </>
   )
