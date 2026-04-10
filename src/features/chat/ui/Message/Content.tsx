@@ -5,7 +5,7 @@ import { Attachments } from "./Attachments"
 type MessageContentProps = {
   messageStatus: ChatUIMessage["status"]
   attachments: UIAttachment[]
-  content: string
+  content?: string | null | undefined
   onPreviewImage: ({ url, alt }: { url: string; alt: string }) => void
 }
 

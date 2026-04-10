@@ -10,9 +10,9 @@ import { chatKeys } from "../../../chat/model/chat.keys"
 import { useChangeMessageStatus } from "../useChangeMessageStatus"
 import { useState } from "react"
 
-type EditingMessage = {
+export type EditingMessage = {
   id: string
-  initialValue: string
+  initialValue?: string | null
   initialAttachments?: UIAttachment[]
 }
 

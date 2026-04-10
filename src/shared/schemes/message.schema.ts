@@ -11,7 +11,7 @@ export const MessageAttachmentSchema = z.object({
 
 export const ReplyPreviewMessage = z.object({
   id: z.string(),
-  content: z.string().optional(),
+  content: z.union([z.string(), z.null()]),
   sender: z.object({
     id: z.string(),
     name: z.string(),
@@ -22,7 +22,7 @@ export const ReplyPreviewMessage = z.object({
 
 export const ChatMessageSchema = z.object({
   id: z.string(),
-  content: z.string(),
+  content: z.union([z.string(), z.null()]),
   sender: z.object({
     id: z.string(),
     name: z.string(),

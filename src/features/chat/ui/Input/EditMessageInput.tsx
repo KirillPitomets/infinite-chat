@@ -1,10 +1,10 @@
 import { DropzoneInputProps } from "react-dropzone"
 import { ChatInputUI } from "./InputUI"
 import { InputHeader } from "./Header"
+import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 
 type EditMessageInputProps = {
-  messageId: string
-  initialValue: string
+  editingMessage: EditingMessage
   onCancelUpdate: () => void
   onUpdate: (messageId: string, value: string) => void
   inputDropZoneProps?: DropzoneInputProps
@@ -13,8 +13,7 @@ type EditMessageInputProps = {
 }
 
 export const EditMessageInput = ({
-  initialValue,
-  messageId,
+  editingMessage,
   previewFiles = [],
   removePreviewFile,
   onCancelUpdate,
@@ -25,16 +24,16 @@ export const EditMessageInput = ({
     <div>
       <InputHeader
         title="Edit"
-        content={initialValue}
+        content={editingMessage.initialValue ||  `Attachments: ${editingMessage.initialAttachments?.length}`}
         onCancel={onCancelUpdate}
       />
       <ChatInputUI
         previewFiles={previewFiles}
         removePreviewFile={removePreviewFile}
-        onSubmit={value => onUpdate(messageId, value)}
+        onSubmit={value => onUpdate(editingMessage.id, value)}
         inputDropZoneProps={inputDropZoneProps}
         isEditInput={true}
-        initialValue={initialValue}
+        initialValue={editingMessage.initialValue || ""}
       />
     </div>
   )

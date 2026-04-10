@@ -7,15 +7,12 @@ import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
 import { EditMessageInput } from "./EditMessageInput"
 import { SubmitMessageArgs } from "../../message/api/mutate/useSendMessage"
 import { ReplyMessageInput } from "./ReplyMessageInput"
+import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 
 type ChatinputControllerProps = {
   chatId: string
   mode?: "edit" | "reply"
-  editingMessage: {
-    id: string
-    initialValue: string
-    initialAttachments?: UIAttachment[]
-  }
+  editingMessage: EditingMessage
   replyMessage?: ChatUIMessage
   previewFiles: File[]
   onCancelUpdate: () => void
@@ -52,8 +49,7 @@ export const ChatInputController = ({
   if (mode === "edit") {
     return (
       <EditMessageInput
-        messageId={editingMessage.id}
-        initialValue={editingMessage.initialValue}
+        editingMessage={editingMessage}
         onCancelUpdate={onCancelUpdate}
         onUpdate={onUpdate}
         previewFiles={previewFiles}

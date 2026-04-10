@@ -6,6 +6,7 @@ import { Message } from "@/features/chat/ui/Message/Message"
 import { User } from "@/shared/types/User.type"
 import { useEffect, useRef } from "react"
 import { MessageListSkeleton } from "./Skeleton"
+import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 
 type MessageListProps = {
   chatId: string
@@ -13,12 +14,8 @@ type MessageListProps = {
   isEditMessage: boolean
   isLoading: boolean
   currentUser: User
-  isReplyToMessage: boolean,
-  handleUpdate: (
-    id: string,
-    initialValue: string,
-    initialAttachments?: UIAttachment[]
-  ) => void
+  isReplyToMessage: boolean
+  handleUpdate: (editingMessage: EditingMessage) => void
   handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void

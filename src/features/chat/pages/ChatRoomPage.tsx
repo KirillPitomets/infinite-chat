@@ -93,6 +93,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   }
 
   useRealtimeChat(chatId, currentUser.id)
+
   useEffect(() => {
     toast.dismissAll()
   }, [])
@@ -144,11 +145,11 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           messages={messages}
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
-          handleUpdate={(id, value, attachments) => {
+          handleUpdate={({ id, initialAttachments, initialValue }) => {
             handleEditingMessage({
               id,
-              initialValue: value,
-              initialAttachments: attachments
+              initialValue,
+              initialAttachments
             })
           }}
           handleReplyToMessage={replyMessage => {
@@ -160,9 +161,6 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
         />
 
         <div className="relative">
-          {/* <div className="absolute left-0 bottom-full">
-            <ChatTypingBanner chatId={chatId} />
-          </div> */}
           <ChatInputController
             chatId={chatId}
             replyMessage={replyMessage}

@@ -50,14 +50,14 @@ export function ChatInbox() {
         return (
           chat.otherUser.name.toLowerCase().includes(query) ||
           chat.otherUser.tag.toLowerCase().includes(query) ||
-          chat.latestMessage?.content.toLowerCase().includes(query)
+          chat.latestMessage?.content?.toLowerCase().includes(query)
         )
       }
 
       if (chat.type === "GROUP") {
         return (
           chat.name.toLowerCase().includes(query) ||
-          chat.latestMessage?.content.toLowerCase().includes(query)
+          chat.latestMessage?.content?.toLowerCase().includes(query)
         )
       }
 

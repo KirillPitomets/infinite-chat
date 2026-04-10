@@ -11,14 +11,11 @@ import { useMessageContextMenu } from "../../message/model/useMessageContextMenu
 import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
 import { MessageStatus } from "./Status"
+import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
-  handleUpdate: (
-    id: string,
-    initialValue: string,
-    initialAttachments?: UIAttachment[]
-  ) => void
+  handleUpdate: (editingMessage: EditingMessage) => void
   handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void
@@ -50,14 +47,23 @@ export const Message = ({
   const contextMenu = useMessageContextMenu({
     closeContext: () => setIsVisibleContextMenu(false),
     copyMessage: () => {
-      navigator.clipboard.writeText(content)
-      toast.success("Message copied :)")
+      if (content) {
+        navigator.clipboard.writeText(content)
+        toast.success("Message copied :)")
+      } else {
+        toast.error("No text contetn for copy")
+      }
     },
     deleteMessage() {
       onDelete(id)
     },
     updateMessage() {
-      handleUpdate(id, content, attachments)
+      // handleUpdate(id, content, attachments)
+      handleUpdate({
+        id,
+        initialValue: content,
+        initialAttachments: attachments
+      })
     },
     replyMessage() {
       handleReplyToMessage({
@@ -95,7 +101,7 @@ export const Message = ({
         <div className="relative px-3 py-1 rounded-xl bg-zinc-700 dark:bg-gray-200 ">
           {replyToMessage && (
             <div className="p-1 pl-2 text-sm border-l-2 border-black bg-zinc-800 dark:bg-gray-300 rounedd-xl">
-              <p>{replyToMessage.sender.name}</p> 
+              <p>{replyToMessage.sender.name}</p>
               <p className="opacity-80">{replyToMessage.content}</p>
             </div>
           )}
