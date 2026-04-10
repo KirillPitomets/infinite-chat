@@ -1,6 +1,4 @@
-import {
-  ChatUIMessage
-} from "@/features/chat/message/model/message.types"
+import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
 import { User } from "@/shared/types/User.type"
 import { useEffect, useRef } from "react"
@@ -9,6 +7,7 @@ import { MessageListSkeleton } from "./Skeleton"
 
 type MessageListProps = {
   chatId: string
+  selectedMessageId?: string
   messages: ChatUIMessage[]
   isEditMessage: boolean
   isLoading: boolean
@@ -23,6 +22,7 @@ type MessageListProps = {
 export const MessageList = ({
   messages,
   isEditMessage,
+  selectedMessageId,
   isReplyToMessage,
   isLoading,
   currentUser,
@@ -31,22 +31,27 @@ export const MessageList = ({
   onDelete,
   onPreviewImage
 }: MessageListProps) => {
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView()
-    }
-  }, [isEditMessage, isReplyToMessage, messages.length])
+    const el = containerRef.current
+    if (!el) return
+
+    el.scrollTop = el.scrollHeight
+  }, [isEditMessage, isReplyToMessage, messages])
 
   return (
-    <div className="relative flex-1 p-4 space-y-5 overflow-y-auto scrollbar-thin">
+    <div
+      ref={containerRef}
+      className="relative flex-1 p-4 space-y-5 overflow-y-auto scrollbar-thin"
+    >
       {isLoading ? (
         <MessageListSkeleton />
       ) : (
         messages.map(msg => (
           <Message
             key={msg.id}
+            selectedMessageId={selectedMessageId}
             handleUpdate={handleUpdate}
             onDelete={onDelete}
             isMine={currentUser.id === msg.sender.id}
@@ -56,7 +61,6 @@ export const MessageList = ({
           />
         ))
       )}
-      <div ref={messagesEndRef}></div>
     </div>
   )
 }

@@ -92,6 +92,11 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     clearFiles()
   }
 
+  const disenableAllInputStates = () => {
+    cancelUpdate()
+    setIsReplyMessage(false)
+  }
+
   useRealtimeChat(chatId, currentUser.id)
 
   useEffect(() => {
@@ -132,7 +137,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
       >
         {isDragActive && (
           <div className="absolute inset-0 flex items-center justify-center w-full h-full bg-black/50 z-1001">
-            <div className="p-4 border-4 rounded-xl border-black/50">
+            <div className="p-4 border-4 rounded-sm border-black/50">
               <UploadIcon className="w-40 h-40 opacity-60" />
             </div>
           </div>
@@ -140,13 +145,18 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
 
         <MessageList
           chatId={chatId}
+          selectedMessageId={editingMessage.id || replyMessage?.id}
           currentUser={currentUser}
           isLoading={isLoading}
           messages={messages}
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
-          handleUpdate={handleEditingMessage}
+          handleUpdate={editingMessage => {
+            disenableAllInputStates()
+            handleEditingMessage(editingMessage)
+          }}
           handleReplyToMessage={replyMessage => {
+            disenableAllInputStates()
             setIsReplyMessage(true)
             setReplyMessage(replyMessage)
           }}

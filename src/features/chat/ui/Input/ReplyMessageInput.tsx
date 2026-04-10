@@ -25,7 +25,8 @@ export const ReplyMessageInput = ({
     <div>
       <InputHeader
         title="Reply to"
-        content={replyMessage.content || `Attachments: ${replyMessage.attachments.length}`}
+        content={replyMessage.content}
+        countAttachments={replyMessage.attachments.length}
         onCancel={onCancelReplyToMessage}
       />
       <ChatInputUI

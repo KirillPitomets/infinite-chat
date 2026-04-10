@@ -117,7 +117,7 @@ export function ChatInputUI({
           icon={isEditInput ? "reload" : "clip"}
           inputDropZoneProps={inputDropZoneProps}
         />
-        <div className="flex items-center flex-1 transition-colors bg-zinc-800 dark:bg-zinc-300 rounded-2xl focus:bg-zinc-400">
+        <div className="flex items-center flex-1 transition-colors bg-zinc-800 dark:bg-zinc-300 rounded-sm focus:bg-zinc-400">
           <textarea
             ref={textareaRef}
             onKeyDown={onSubmitMessageViaEnter}

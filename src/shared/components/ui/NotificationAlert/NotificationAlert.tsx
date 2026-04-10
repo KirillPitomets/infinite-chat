@@ -41,7 +41,7 @@ export const NotificationAlert = ({
         e.stopPropagation()
         handleCloseNotification()
       }}
-      className="flex flex-col items-end p-4 pt-2 border border-green-400 bg-background rounded-xl"
+      className="flex flex-col items-end p-4 pt-2 border border-green-400 bg-background rounded-sm"
     >
       <button
         className="p-1 cursor-pointer hover:opacity-70"

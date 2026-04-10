@@ -15,6 +15,7 @@ import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
+  selectedMessageId?: string
   handleUpdate: (editingMessage: EditingMessage) => void
   handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
@@ -23,6 +24,7 @@ interface IMessageProps extends ChatUIMessage {
 
 export const Message = ({
   id,
+  selectedMessageId,
   isMine,
   content,
   sender,
@@ -98,7 +100,13 @@ export const Message = ({
           <MessageSender avatarUrl={sender.imageUrl} name={sender.name} />
         )}
 
-        <div className="relative px-3 py-1 rounded-xl bg-zinc-700 dark:bg-gray-200 ">
+        <div
+          className={`relative px-3 py-1 rounded-sm 
+            ${id === selectedMessageId 
+              ? "bg-green-700 dark:bg-green-200" 
+              : "bg-zinc-700 dark:bg-gray-200 "} 
+            `}
+        >
           {replyToMessage && (
             <div className="p-1 pl-2 text-sm border-l-2 border-black bg-zinc-800 dark:bg-gray-300 rounedd-xl">
               <p>{replyToMessage.sender.name}</p>

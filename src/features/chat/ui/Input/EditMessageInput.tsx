@@ -24,7 +24,8 @@ export const EditMessageInput = ({
     <div>
       <InputHeader
         title="Edit"
-        content={editingMessage.initialValue ||  `Attachments: ${editingMessage.initialAttachments?.length}`}
+        content={editingMessage.initialValue}
+        countAttachments={editingMessage.initialAttachments?.length}
         onCancel={onCancelUpdate}
       />
       <ChatInputUI
