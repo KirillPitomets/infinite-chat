@@ -19,6 +19,7 @@ import { UploadIcon } from "./UploadIcon"
 import {LightIcon} from "./LightIcon"
 import {ReplyIcon} from './ReplyIcon'
 import { ArrowIcon } from "./ArrowIcon"
+import { LogoIcon } from "./LogoIcon"
 
 export {
   NetworkIcon,
@@ -41,5 +42,6 @@ export {
   UploadIcon,
   LightIcon,
   ReplyIcon,
-  ArrowIcon
+  ArrowIcon,
+  LogoIcon
 }

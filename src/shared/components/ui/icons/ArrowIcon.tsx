@@ -13,28 +13,27 @@ export function ArrowIcon(props: SVGProps<SVGSVGElement>) {
       <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
       <g
         id="SVGRepo_tracerCarrier"
-        stroke-linecap="round"
-        stroke-linejoin="round"
+        strokeLinecap="round"
+        strokeLinejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
         <title>Arrow-Left</title>{" "}
         <g
           id="Page-1"
           stroke="none"
-          stroke-width="1"
+          strokeWidth="1"
           fill="none"
-          fill-rule="evenodd"
+          fillRule="evenodd"
         >
           <g id="Arrow-Left">
             <rect
               id="Rectangle"
-              fill-rule="nonzero"
+              fillRule="nonzero"
               x="0"
               y="0"
               width="24"
               height="24"
-            >
-            </rect>
+            ></rect>
             <line
               x1="6"
               y1="12"
@@ -42,8 +41,8 @@ export function ArrowIcon(props: SVGProps<SVGSVGElement>) {
               y2="12"
               id="Path"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
+              strokeWidth="2"
+              strokeLinecap="round"
             >
               {" "}
             </line>{" "}
@@ -51,8 +50,8 @@ export function ArrowIcon(props: SVGProps<SVGSVGElement>) {
               d="M14,8 L17.2929,11.2929 C17.6834,11.6834 17.6834,12.3166 17.2929,12.7071 L14,16"
               id="Path"
               stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
+              strokeWidth="2"
+              strokeLinecap="round"
             >
               {" "}
             </path>{" "}

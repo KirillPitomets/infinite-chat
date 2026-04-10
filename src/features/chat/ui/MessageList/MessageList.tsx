@@ -1,12 +1,11 @@
 import {
-  ChatUIMessage,
-  UIAttachment
+  ChatUIMessage
 } from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
 import { User } from "@/shared/types/User.type"
 import { useEffect, useRef } from "react"
-import { MessageListSkeleton } from "./Skeleton"
 import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
+import { MessageListSkeleton } from "./Skeleton"
 
 type MessageListProps = {
   chatId: string

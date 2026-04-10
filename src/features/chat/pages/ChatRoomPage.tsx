@@ -145,13 +145,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           messages={messages}
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
-          handleUpdate={({ id, initialAttachments, initialValue }) => {
-            handleEditingMessage({
-              id,
-              initialValue,
-              initialAttachments
-            })
-          }}
+          handleUpdate={handleEditingMessage}
           handleReplyToMessage={replyMessage => {
             setIsReplyMessage(true)
             setReplyMessage(replyMessage)

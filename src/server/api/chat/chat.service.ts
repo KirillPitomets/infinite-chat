@@ -39,12 +39,11 @@ class ChatService {
           { memberships: { some: { userId: userId } } },
           { memberships: { some: { userId: member.id } } }
         ]
-      }
+      },
+      include: chatInclude
     })
 
-    if (existsChat) {
-      throw new ConflictError(`You already have chat with ${memberTag}`)
-    }
+    if (existsChat) return existsChat
 
     const chat = await prisma.chat.create({
       data: {
