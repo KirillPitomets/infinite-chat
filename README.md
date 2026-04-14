@@ -3,7 +3,7 @@
 A modern fullstack real-time chat application built with a cutting-edge stack.  
 Focused on performance, scalability, and smooth user experience.
 
-🔗 **Live Demo:** https://infinite-chat-tan.vercel.app/
+🔗 **Live Demo:** https://infinite-chat-itvi.vercel.app/
 
 ---
 
