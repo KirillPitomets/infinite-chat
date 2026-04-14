@@ -16,6 +16,7 @@ import {
   ChatPrismaType
 } from "@/server/api/chat/types/chat.prisma"
 import { userService } from "@/server/api/user/user.services"
+import { UpdateLastReadAt } from "./types/chat.service"
 
 class ChatService {
   async createDirectChat(
@@ -104,6 +105,11 @@ class ChatService {
 
     return Promise.all(
       memberships.map(async membership => {
+        console.log({
+          membership: membership.userId,
+          chatid: membership.chatId,
+          lastread: membership.lastReadAt
+        })
         return {
           ...membership.chat,
           unreadCount: await this.getCountUnreadMessages(
@@ -172,6 +178,33 @@ class ChatService {
     }
 
     return participants.memberships
+  }
+
+  async updateLastReadAt({ chatId, userId, lastReadAt }: UpdateLastReadAt) {
+    const chatUser = await prisma.chatUser.findUnique({
+      where: {
+        userId_chatId: { chatId, userId }
+      }
+    })
+
+    if (!chatUser) {
+      throw new NotFoundError("Chat user")
+    }
+
+    if (!lastReadAt || lastReadAt <= chatUser.lastReadAt) {
+      return null
+    }
+
+    return await prisma.chatUser.update({
+      where: {
+        userId_chatId: { chatId, userId }
+      },
+      data: {
+        lastReadAt: lastReadAt
+      }
+    })
+
+  
   }
 
   async delete(userId: string, chatId: string): Promise<ChatDeletePrismaType> {

@@ -10,7 +10,7 @@ export const toChatDetailsDTO = (
     case "DIRECT":
       const otherUser = chat.memberships.find(
         member => member.user.id != userId
-      )?.user
+      )
 
       if (!otherUser) {
         throw new ConflictError("Invalid DIRECT chat")
@@ -21,10 +21,11 @@ export const toChatDetailsDTO = (
         type: chat.type,
         createdAt: chat.createdAt.toISOString(),
         otherUser: {
-          id: otherUser.id,
-          name: otherUser.name,
-          tag: otherUser.tag,
-          imageUrl: otherUser.imageUrl
+          id: otherUser.user.id,
+          name: otherUser.user.name,
+          tag: otherUser.user.tag,
+          imageUrl: otherUser.user.imageUrl,
+          lastReadAt: otherUser.lastReadAt.toISOString()
         }
       }
     case "GROUP":

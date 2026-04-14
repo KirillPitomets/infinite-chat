@@ -21,7 +21,11 @@ const schema = {
       created: z.object({ message: ChatMessageSchema, chatId: z.string() }),
       updated: z.object({ message: ChatMessageSchema, chatId: z.string() }),
       deleted: z.object({ message: ChatMessageSchema, chatId: z.string() }),
-      readed: z.object({ userId: z.string(), chatId: z.string() })
+      readed: z.object({
+        userId: z.string(),
+        chatId: z.string(),
+        lastReadAt: z.iso.datetime()
+      })
     }
   },
   user: {

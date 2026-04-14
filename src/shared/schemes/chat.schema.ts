@@ -24,7 +24,8 @@ const DirectChatDetailsSchema = BaseChatDetailsSchema.extend({
     id: z.string(),
     name: z.string(),
     tag: z.string(),
-    imageUrl: z.string()
+    imageUrl: z.string(),
+    lastReadAt: z.string().datetime()
   })
 })
 

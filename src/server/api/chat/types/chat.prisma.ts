@@ -34,16 +34,15 @@ export const chatPreviewInclude = {
   }
 } satisfies Prisma.ChatInclude
 
-export type ChatPreviewPrismaType =
-  | Prisma.ChatGetPayload<{
-      include: typeof chatPreviewInclude
-    }>
-  & { unreadCount: number }
+export type ChatPreviewPrismaType = Prisma.ChatGetPayload<{
+  include: typeof chatPreviewInclude
+}> & { unreadCount: number }
 
 export const chatDetailsInclude = {
   memberships: {
     select: {
       role: true,
+      lastReadAt: true,
       user: {
         select: {
           id: true,

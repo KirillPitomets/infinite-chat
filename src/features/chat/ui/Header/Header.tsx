@@ -20,6 +20,7 @@ type DirectChat = {
     imageUrl: string
   }
 }
+
 type GroupChat = {
   type: "GROUP"
   name: string

@@ -25,6 +25,28 @@ export const chatApi = new Elysia({ prefix: "/chat" })
       response: ChatApiSchema.create.response
     }
   )
+  .put(
+    "/:chatId/read",
+    async ({ params, body, userId }) => {
+      const { chatId } = params
+      const { lastReadAt } = body
+
+      const updatedUser = await chatService.updateLastReadAt({
+        chatId,
+        userId,
+        lastReadAt: new Date(lastReadAt)
+      })
+
+      if (updatedUser) {
+        await realtime
+          .channel(chatId)
+          .emit("chat.message.readed", { userId, chatId: chatId, lastReadAt })
+      }
+    },
+    {
+      body: ChatApiSchema.updateLastReadAt.body
+    }
+  )
   .get(
     "/:chatId",
     async ({ userId, params }) => {
@@ -32,10 +54,6 @@ export const chatApi = new Elysia({ prefix: "/chat" })
         userId,
         params.chatId
       )
-
-      await realtime
-        .channel(chat.id)
-        .emit("chat.message.readed", { userId, chatId: chat.id })
 
       return toChatDetailsDTO(chat, userId)
     },

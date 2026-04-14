@@ -6,7 +6,7 @@ export type UIAttachment = MessageAttachment & {
 
 export type ChatUIMessage = ChatMessage & {
   attachments: UIAttachment[]
-  status: "loading" | "sent" | "error" | "deleted"
+  status: "loading" | "sent" | "error" | "deleted" | "readed"
 }
 
 export const mapAPIMessageToUI = (

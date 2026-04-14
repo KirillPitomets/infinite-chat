@@ -151,6 +151,9 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           messages={messages}
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
+          otherUserReadAt={
+            chatData?.type === "DIRECT" ? chatData.otherUser.lastReadAt : ""
+          }
           handleUpdate={editingMessage => {
             disenableAllInputStates()
             handleEditingMessage(editingMessage)

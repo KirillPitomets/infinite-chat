@@ -7,8 +7,11 @@ export const ChatApiSchema = {
     body: z.object({ memberTag: z.string() }),
     response: ChatSchema
   },
+  updateLastReadAt: {
+    body: z.object({ lastReadAt: z.iso.datetime() })
+  },
   get: {
     response: ChatDetailsSchema
   },
-  preview: { response: z.array(UserChatPreviewSchema) },
+  preview: { response: z.array(UserChatPreviewSchema) }
 } as const

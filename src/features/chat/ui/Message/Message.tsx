@@ -16,6 +16,7 @@ import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 interface IMessageProps extends ChatUIMessage {
   isMine: boolean
   selectedMessageId?: string
+  isRead: boolean
   handleUpdate: (editingMessage: EditingMessage) => void
   handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
@@ -34,6 +35,7 @@ export const Message = ({
   updatedAt,
   createdAt,
   replyToMessage,
+  isRead,
   handleReplyToMessage,
   handleUpdate,
   onDelete,
@@ -102,9 +104,11 @@ export const Message = ({
 
         <div
           className={`relative px-3 py-1 rounded-sm 
-            ${id === selectedMessageId 
-              ? "bg-green-700 dark:bg-green-200" 
-              : "bg-zinc-700 dark:bg-gray-200 "} 
+            ${
+              id === selectedMessageId
+                ? "bg-green-700 dark:bg-green-200"
+                : "bg-zinc-700 dark:bg-gray-200 "
+            } 
             `}
         >
           {replyToMessage && (
@@ -128,7 +132,7 @@ export const Message = ({
               attachments={attachments}
               onPreviewImage={onPreviewImage}
               content={content}
-              messageStatus={status}
+              messageStatus={isRead ? "readed" : status}
             />
 
             <div className="flex justify-end space-x-2">
@@ -136,7 +140,7 @@ export const Message = ({
                 {formatDate(createdAt, "HH:mm")}
               </p>
 
-              <MessageStatus status={status} />
+              <MessageStatus status={isRead ? "readed" : status} />
             </div>
           </div>
         </div>
