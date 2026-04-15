@@ -78,23 +78,6 @@ export function useRealtimeChat(chatId: string, currentUserId: string) {
               return old
             }
           )
-          // ========= Change lastReadAt for inbox Chats =========
-          queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
-            old
-              ? old.map(previewChat =>
-                  previewChat.id === data.chatId &&
-                  previewChat.type === "DIRECT"
-                    ? {
-                        ...previewChat,
-                        otherUser: {
-                          ...previewChat.otherUser,
-                          lastReadAt: data.lastReadAt
-                        }
-                      }
-                    : previewChat
-                )
-              : old
-          )
           break
         }
 

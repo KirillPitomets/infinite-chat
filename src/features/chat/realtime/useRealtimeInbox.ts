@@ -64,11 +64,32 @@ export const useRealtimeInbox = (
       }
 
       if (event === "chat.message.readed") {
+        // ========= Clear unreadedCount messages =========
         if (data.userId === user.id) {
           queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
             old
               ? old.map(chat =>
                   chat.id === data.chatId ? { ...chat, unreadCount: 0 } : chat
+                )
+              : old
+          )
+        }
+
+        // ========= Change lastReadAt for inbox Chats =========
+        if (data.userId !== user.id) {
+          queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
+            old
+              ? old.map(previewChat =>
+                  previewChat.id === data.chatId &&
+                  previewChat.type === "DIRECT"
+                    ? {
+                        ...previewChat,
+                        otherUser: {
+                          ...previewChat.otherUser,
+                          lastReadAt: data.lastReadAt
+                        }
+                      }
+                    : previewChat
                 )
               : old
           )
