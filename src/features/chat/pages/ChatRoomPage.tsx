@@ -8,9 +8,7 @@ import {
   useSendMessage
 } from "@/features/chat/message/api/mutate/useSendMessage"
 import { useUpdateMessage } from "@/features/chat/message/api/mutate/useUpdateMessage"
-import { useGetMessages } from "@/features/chat/message/api/query/useGetMessages"
 import { useRealtimeChat } from "@/features/chat/realtime/useRealtimeChat"
-import { ChatTypingBanner } from "@/features/chat/ui/ChatTypingBanner/ChatTypingBanner"
 import { ChatHeader } from "@/features/chat/ui/Header/Header"
 import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
@@ -146,8 +144,6 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           chatId={chatId}
           selectedMessageId={editingMessage.id || replyMessage?.id}
           currentUser={currentUser}
-          isEditMessage={isEditMessage}
-          isReplyToMessage={isReplyMessage}
           otherUserLastReadAt={
             chatData?.type === "DIRECT"
               ? chatData.otherUser.lastReadAt

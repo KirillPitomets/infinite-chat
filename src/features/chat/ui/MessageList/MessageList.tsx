@@ -1,28 +1,20 @@
 import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
-import { User } from "@/shared/types/User.type"
-import { useEffect, useRef } from "react"
-import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
-import { MessageListSkeleton } from "./Skeleton"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
-import { edenClient } from "@/shared/lib/eden"
 import { useThrottle } from "@/shared/hooks/useThrottle"
-import { ChatDetails } from "@/shared/schemes/chat.schema"
-import { chatKeys } from "../../chat/model/chat.keys"
-import { useGetMessages } from "../../message/api/query/useGetMessages"
-import { useChatData } from "../../chat/api/useChatData"
-import { useRealtime } from "@/shared/lib/realtime-client"
-import { useChatScroll } from "../../hooks/useChatScroll"
+import { edenClient } from "@/shared/lib/eden"
+import { User } from "@/shared/types/User.type"
 import { isReadMessage } from "@/shared/utils/isReadMessage"
+import { useMutation } from "@tanstack/react-query"
+import { useRef } from "react"
+import { useChatScroll } from "../../hooks/useChatScroll"
+import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
+import { useGetMessages } from "../../message/api/query/useGetMessages"
+import { MessageListSkeleton } from "./Skeleton"
 
 type MessageListProps = {
   chatId: string
   selectedMessageId?: string
-  // messages: ChatUIMessage[]
-  // isLoading: boolean
-  isEditMessage: boolean
   currentUser: User
-  isReplyToMessage: boolean
   otherUserLastReadAt?: string
   handleUpdate: (editingMessage: EditingMessage) => void
   handleReplyToMessage: (message: ChatUIMessage) => void
@@ -32,11 +24,7 @@ type MessageListProps = {
 
 export const MessageList = ({
   chatId,
-  // messages,
-  // isLoading,
-  isEditMessage,
   selectedMessageId,
-  isReplyToMessage,
   currentUser,
   otherUserLastReadAt,
   handleUpdate,

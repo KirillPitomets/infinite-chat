@@ -27,7 +27,10 @@ export const MessageContent = ({
             }
           />
         )}
-        <p style={{wordBreak: "break-word"}} className="whitespace-pre-wrap leading-relaxed">
+        <p
+          style={{ wordBreak: "break-word" }}
+          className="whitespace-pre-wrap leading-relaxed"
+        >
           <Linkify
             options={{
               target: "_blank",
