@@ -18,7 +18,7 @@ export const Attachments = ({
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-1">
+    <div className="flex flex-wrap items-start gap-1">
       {attachments.map(file => (
         <div
           className="flex justify-center items-center rounded-2xl"
