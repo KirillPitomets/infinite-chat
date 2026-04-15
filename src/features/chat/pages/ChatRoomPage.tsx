@@ -37,7 +37,6 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
     handleImagePreviewDialog
   } = usePreviewImageDialog()
   const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
-  const { data: messages = [], isLoading } = useGetMessages(chatId)
   const {
     mutate: sendMessage,
     setIsReplyMessage,
@@ -147,12 +146,12 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
           chatId={chatId}
           selectedMessageId={editingMessage.id || replyMessage?.id}
           currentUser={currentUser}
-          isLoading={isLoading}
-          messages={messages}
           isEditMessage={isEditMessage}
           isReplyToMessage={isReplyMessage}
-          otherUserReadAt={
-            chatData?.type === "DIRECT" ? chatData.otherUser.lastReadAt : ""
+          otherUserLastReadAt={
+            chatData?.type === "DIRECT"
+              ? chatData.otherUser.lastReadAt
+              : undefined
           }
           handleUpdate={editingMessage => {
             disenableAllInputStates()

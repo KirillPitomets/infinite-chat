@@ -31,17 +31,17 @@ export const chatApi = new Elysia({ prefix: "/chat" })
       const { chatId } = params
       const { lastReadAt } = body
 
-      const updatedUser = await chatService.updateLastReadAt({
+      const updated = await chatService.updateLastReadAt({
         chatId,
         userId,
         lastReadAt: new Date(lastReadAt)
       })
 
-      if (updatedUser) {
-        await realtime
-          .channel(chatId)
-          .emit("chat.message.readed", { userId, chatId: chatId, lastReadAt })
-      }
+      await realtime.channel(chatId).emit("chat.message.readed", {
+        userId,
+        chatId: chatId,
+        lastReadAt: updated.chatUser.lastReadAt.toISOString()
+      })
     },
     {
       body: ChatApiSchema.updateLastReadAt.body

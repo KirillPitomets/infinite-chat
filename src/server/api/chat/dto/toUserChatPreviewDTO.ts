@@ -45,7 +45,7 @@ export const toUserChatPreviewDTO = (
             imageUrl: otherUser.user.imageUrl,
             name: otherUser.user.name,
             tag: otherUser.user.tag,
-            lastSeen: otherUser.user.lastSeen.toISOString()
+            lastReadAt: otherUser.lastReadAt.toISOString()
           },
           unreadCount: chat.unreadCount
         } satisfies UserChatPreview

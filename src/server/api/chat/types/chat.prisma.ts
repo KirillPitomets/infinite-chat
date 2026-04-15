@@ -16,12 +16,12 @@ export type ChatPrismaType = Prisma.ChatGetPayload<{
 export const chatPreviewInclude = {
   memberships: {
     select: {
+      lastReadAt: true,
       user: {
         select: {
           id: true,
           name: true,
           tag: true,
-          lastSeen: true,
           imageUrl: true
         }
       }

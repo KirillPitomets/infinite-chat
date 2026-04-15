@@ -4,20 +4,26 @@ import { User } from "@/shared/types/User.type"
 import { useEffect, useRef } from "react"
 import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 import { MessageListSkeleton } from "./Skeleton"
-import { isAtElementBottom } from "@/shared/utils/isAtElementBottom"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
 import { edenClient } from "@/shared/lib/eden"
-import { useDebounce } from "@/shared/hooks/useDebounce"
+import { useThrottle } from "@/shared/hooks/useThrottle"
+import { ChatDetails } from "@/shared/schemes/chat.schema"
+import { chatKeys } from "../../chat/model/chat.keys"
+import { useGetMessages } from "../../message/api/query/useGetMessages"
+import { useChatData } from "../../chat/api/useChatData"
+import { useRealtime } from "@/shared/lib/realtime-client"
+import { useChatScroll } from "../../hooks/useChatScroll"
+import { isReadMessage } from "@/shared/utils/isReadMessage"
 
 type MessageListProps = {
   chatId: string
   selectedMessageId?: string
-  messages: ChatUIMessage[]
+  // messages: ChatUIMessage[]
+  // isLoading: boolean
   isEditMessage: boolean
-  isLoading: boolean
   currentUser: User
   isReplyToMessage: boolean
-  otherUserReadAt?: string
+  otherUserLastReadAt?: string
   handleUpdate: (editingMessage: EditingMessage) => void
   handleReplyToMessage: (message: ChatUIMessage) => void
   onDelete: (id: string) => void
@@ -26,13 +32,13 @@ type MessageListProps = {
 
 export const MessageList = ({
   chatId,
-  messages,
+  // messages,
+  // isLoading,
   isEditMessage,
   selectedMessageId,
   isReplyToMessage,
-  isLoading,
   currentUser,
-  otherUserReadAt,
+  otherUserLastReadAt,
   handleUpdate,
   handleReplyToMessage,
   onDelete,
@@ -40,37 +46,30 @@ export const MessageList = ({
 }: MessageListProps) => {
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const { data: messages = [], isLoading } = useGetMessages(chatId)
+
   const { mutate: updateLastReadAt } = useMutation({
     mutationFn: async () => {
+      const lastIncommingMessage = [...messages]
+        .slice()
+        .reverse()
+        .find(msg => msg.sender.id !== currentUser.id)
+
+      if (
+        !lastIncommingMessage ||
+        lastIncommingMessage.sender.id === currentUser.id
+      ) {
+        return
+      }
       await edenClient.chat({ chatId }).read.put({
-        lastReadAt: messages[messages.length - 1].createdAt
+        lastReadAt: lastIncommingMessage.createdAt
       })
     }
   })
 
-  const debounceHandleScroll = useDebounce(() => updateLastReadAt(), 1000)
+  const throttledHandleScroll = useThrottle(() => updateLastReadAt(), 1000)
 
-  useEffect(() => {
-    const el = containerRef.current
-    if (!el) return
-
-    el.scrollTop = el.scrollHeight
-  }, [isEditMessage, isReplyToMessage, messages])
-
-  useEffect(() => {
-    const el = containerRef.current
-
-    if (!el) return
-
-    const handleScroll = () => {
-      if (isAtElementBottom(el)) {
-        debounceHandleScroll()
-      }
-    }
-
-    el.addEventListener("scroll", handleScroll)
-    return () => el.removeEventListener("scroll", handleScroll)
-  }, [debounceHandleScroll])
+  useChatScroll(containerRef, messages, () => throttledHandleScroll())
 
   return (
     <div
@@ -90,9 +89,8 @@ export const MessageList = ({
             onPreviewImage={onPreviewImage}
             handleReplyToMessage={handleReplyToMessage}
             isRead={
-              otherUserReadAt
-                ? new Date(msg.createdAt).getTime() <=
-                  new Date(otherUserReadAt).getTime()
+              otherUserLastReadAt
+                ? isReadMessage(msg.createdAt, otherUserLastReadAt)
                 : false
             }
             {...msg}

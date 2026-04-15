@@ -105,11 +105,6 @@ class ChatService {
 
     return Promise.all(
       memberships.map(async membership => {
-        console.log({
-          membership: membership.userId,
-          chatid: membership.chatId,
-          lastread: membership.lastReadAt
-        })
         return {
           ...membership.chat,
           unreadCount: await this.getCountUnreadMessages(
@@ -191,20 +186,30 @@ class ChatService {
       throw new NotFoundError("Chat user")
     }
 
-    if (!lastReadAt || lastReadAt <= chatUser.lastReadAt) {
-      return null
+    const incoming = new Date(lastReadAt).getTime()
+    const current = new Date(chatUser.lastReadAt).getTime()
+    if (incoming <= current) {
+      return {
+        updated: false,
+        chatUser
+      }
     }
 
-    return await prisma.chatUser.update({
+    const safeIncoming = new Date(Math.min(incoming, Date.now()))
+
+    const updatedUser = await prisma.chatUser.update({
       where: {
         userId_chatId: { chatId, userId }
       },
       data: {
-        lastReadAt: lastReadAt
+        lastReadAt: safeIncoming
       }
     })
 
-  
+    return {
+      updated: true,
+      chatUser: updatedUser
+    }
   }
 
   async delete(userId: string, chatId: string): Promise<ChatDeletePrismaType> {

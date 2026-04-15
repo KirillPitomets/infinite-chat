@@ -7,6 +7,12 @@ import { usePresenceUserStatus } from "@/shared/hooks/useUserPresence"
 import { useRealtimeTyping } from "@/features/chat/realtime/useRealtimeTyping"
 import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
 import { format } from "date-fns"
+import { MessageStatus } from "../../../Message/Status"
+import { useCurrentUser } from "@/shared/context/CurrentUserContext"
+
+export interface InboxLatestMessage extends ChatMessage {
+  isRead: boolean
+}
 
 type ChatInboxItemProps = {
   chatId: string
@@ -14,7 +20,7 @@ type ChatInboxItemProps = {
   avatarUrl: string
   memberId: string
   unreadConut: number
-  latestMessage?: ChatMessage | null | undefined
+  latestMessage?: InboxLatestMessage
 }
 
 export const ChatInboxItem = ({
@@ -25,6 +31,7 @@ export const ChatInboxItem = ({
   memberId,
   unreadConut = 0
 }: ChatInboxItemProps) => {
+  const user = useCurrentUser()
   const { isOnline } = usePresenceUserStatus(memberId)
   const { isMemberTyping, member } = useRealtimeTyping(chatId)
 
@@ -51,7 +58,7 @@ export const ChatInboxItem = ({
 
       <div className="flex justify-between w-full">
         <div>
-          <p className="font-semibold">{name}</p>
+          <p className="font-semibold  first-letter:uppercase">{name}</p>
           {isMemberTyping && member.id === memberId ? (
             <TypingIndicator />
           ) : (
@@ -59,11 +66,18 @@ export const ChatInboxItem = ({
           )}
         </div>
 
-        <div className="flex flex-col items-end">
+        <div className="flex flex-col justify-between items-end">
           {latestMessage && (
-            <p className="opacity-60">
-              {format(latestMessage.createdAt, "HH:mm")}
-            </p>
+            <>
+              <p className="opacity-60">
+                {format(latestMessage.createdAt, "HH:mm")}
+              </p>
+              {user.id === latestMessage.sender.id && (
+                <MessageStatus
+                  status={latestMessage.isRead ? "readed" : "sent"}
+                />
+              )}
+            </>
           )}
 
           {unreadConut > 0 && (

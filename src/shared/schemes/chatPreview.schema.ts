@@ -14,7 +14,7 @@ const DirectUserChatPreviewSchema = BaseUserChatPreviewSchema.extend({
     id: z.string(),
     name: z.string(),
     tag: z.string(),
-    lastSeen: z.string().datetime(),
+    lastReadAt: z.string().datetime(),
     imageUrl: z.string()
   })
 })

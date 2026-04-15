@@ -26,6 +26,7 @@ interface IMessageProps extends ChatUIMessage {
 export const Message = ({
   id,
   selectedMessageId,
+  isRead,
   isMine,
   content,
   sender,
@@ -35,7 +36,6 @@ export const Message = ({
   updatedAt,
   createdAt,
   replyToMessage,
-  isRead,
   handleReplyToMessage,
   handleUpdate,
   onDelete,
@@ -48,6 +48,7 @@ export const Message = ({
     e.preventDefault()
     setIsVisibleContextMenu(prev => !prev)
   }
+
   const contextMenu = useMessageContextMenu({
     closeContext: () => setIsVisibleContextMenu(false),
     copyMessage: () => {
@@ -55,14 +56,13 @@ export const Message = ({
         navigator.clipboard.writeText(content)
         toast.success("Message copied :)")
       } else {
-        toast.error("No text contetn for copy")
+        toast.error("No content for copy")
       }
     },
     deleteMessage() {
       onDelete(id)
     },
     updateMessage() {
-      // handleUpdate(id, content, attachments)
       handleUpdate({
         id,
         initialValue: content,
@@ -132,15 +132,14 @@ export const Message = ({
               attachments={attachments}
               onPreviewImage={onPreviewImage}
               content={content}
-              messageStatus={isRead ? "readed" : status}
+              messageStatus={status}
             />
 
             <div className="flex justify-end space-x-2">
               <p className={`text-sm opacity-50 ${isMine && "text-end"}`}>
                 {formatDate(createdAt, "HH:mm")}
               </p>
-
-              <MessageStatus status={isRead ? "readed" : status} />
+              {isMine && <MessageStatus status={isRead ? "readed" : status} />}
             </div>
           </div>
         </div>

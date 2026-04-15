@@ -18,7 +18,16 @@ const LatestMessage = ({ latestMessage }: LatestMessageProps) => {
                 ? "you: "
                 : `${latestMessage.sender.name}: `}
             </span>
-            {latestMessage.content}
+            {latestMessage.content ? (
+              latestMessage.content
+            ) : latestMessage.attachments.length ? (
+              <>
+                {latestMessage.attachments.length}
+                <span className="text-sm"> FILES</span>
+              </>
+            ) : (
+              ""
+            )}
           </>
         ) : (
           <>No message yet</>
