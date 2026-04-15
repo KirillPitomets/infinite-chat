@@ -7,10 +7,7 @@ import { useParams } from "next/navigation"
 import { chatKeys } from "../chat/model/chat.keys"
 import { messageKeys } from "../message/model/message.keys"
 
-export const useRealtimeInbox = (
-  chats: UserChatPreview[],
-  refetchChats: () => void
-) => {
+export const useRealtimeInbox = (chats: UserChatPreview[]) => {
   const queryClient = useQueryClient()
   const params = useParams<{ chatId: string }>()
   const user = useCurrentUser()
@@ -25,10 +22,24 @@ export const useRealtimeInbox = (
       "chat.message.readed"
     ],
     onData: ({ data, event }) => {
-      if (event === "chat.created" || event === "chat.deleted") {
+      if (event === "chat.created") {
         if (data.memberships.find(member => member.userId === user.id)) {
-          refetchChats()
+          queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
+            old
+              ? old.map(previewChat =>
+                  previewChat.id === data.preview.id
+                    ? data.preview
+                    : previewChat
+                )
+              : old
+          )
         }
+      }
+
+      if (event === "chat.deleted") {
+        queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
+          old ? old.filter(chat => chat.id !== data.chatId) : old
+        )
       }
 
       if (event === "chat.message.updated") {

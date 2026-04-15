@@ -59,6 +59,33 @@ class ChatService {
     return chat
   }
 
+  async getPreviewChat(
+    chatId: string,
+    userId: string
+  ): Promise<ChatPreviewPrismaType> {
+    const chatUser = await prisma.chatUser.findUnique({
+      where: { userId_chatId: { chatId, userId } },
+      include: {
+        chat: { include: chatPreviewInclude }
+      }
+    })
+
+    if (!chatUser) {
+      throw new NotFoundError("Chat")
+    }
+
+    const chat = chatUser.chat
+
+    return {
+      ...chat,
+      unreadCount: await this.getCountUnreadMessages(
+        userId,
+        chatId,
+        chatUser.lastReadAt
+      )
+    }
+  }
+
   async getChatDetailsForUser(
     userId: string,
     chatId: string

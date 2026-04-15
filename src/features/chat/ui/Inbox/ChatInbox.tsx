@@ -17,11 +17,7 @@ export function ChatInbox() {
 
   const [search, setSearch] = useState("")
 
-  const {
-    data: chats,
-    isLoading,
-    refetch
-  } = useQuery<UserChatPreview[]>({
+  const { data: chats, isLoading } = useQuery<UserChatPreview[]>({
     queryKey: chatKeys.inbox(),
     queryFn: async () => {
       const res = await edenClient.chat.preview.get()
@@ -36,7 +32,7 @@ export function ChatInbox() {
       )
   })
 
-  useRealtimeInbox(chats || [], () => refetch())
+  useRealtimeInbox(chats ?? [])
 
   const filterdChats = (chats?: UserChatPreview[]): UserChatPreview[] => {
     if (!chats) return []
@@ -81,7 +77,10 @@ export function ChatInbox() {
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        <ChatInboxList chats={filterdChats(chats)} isLoadingSkeleton={isLoading} />
+        <ChatInboxList
+          chats={filterdChats(chats)}
+          isLoadingSkeleton={isLoading}
+        />
       </div>
     </div>
   )

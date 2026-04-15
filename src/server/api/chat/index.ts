@@ -14,9 +14,12 @@ export const chatApi = new Elysia({ prefix: "/chat" })
     async ({ userId, body }) => {
       const chat = await chatService.createDirectChat(userId, body.memberTag)
 
-      await realtime
-        .channel("chats")
-        .emit("chat.created", { memberships: chat.memberships })
+      const previewChat = await chatService.getPreviewChat(chat.id, userId)
+
+      await realtime.channel("chats").emit("chat.created", {
+        memberships: chat.memberships,
+        preview: toUserChatPreviewDTO(previewChat, userId)
+      })
 
       return toChatDTO(chat)
     },
@@ -65,7 +68,12 @@ export const chatApi = new Elysia({ prefix: "/chat" })
     "/preview",
     async ({ userId }) => {
       const previewChats = await chatService.getUserChatsPreview(userId)
-      return toUserChatPreviewDTO(previewChats, userId)
+
+      const previewChatsDTO = previewChats.map(previewChat =>
+        toUserChatPreviewDTO(previewChat, userId)
+      )
+
+      return previewChatsDTO
     },
     {
       response: ChatApiSchema.preview.response
@@ -76,5 +84,8 @@ export const chatApi = new Elysia({ prefix: "/chat" })
     const deletedChat = await chatService.delete(userId, chatId)
     await realtime
       .channel("chats")
-      .emit("chat.deleted", { memberships: deletedChat.memberships })
+      .emit("chat.deleted", {
+        memberships: deletedChat.memberships,
+        chatId: deletedChat.id
+      })
   })
