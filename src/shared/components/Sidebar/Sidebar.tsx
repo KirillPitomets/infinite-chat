@@ -36,13 +36,11 @@ export default function Sidebar() {
           <SettingsIcon />
         </IconButtonBase>
 
-        {/* <SignOutButton signOutOptions={{redirectUrl: ACCOUNT_PAGES.HOME}}> */}
         <button onClick={() => signOut({ redirectUrl: ACCOUNT_PAGES.HOME })}>
           <IconButtonBase tone="muted">
             <LogoutIcon />
           </IconButtonBase>
         </button>
-        {/* </SignOutButton> */}
       </div>
     </aside>
   )
