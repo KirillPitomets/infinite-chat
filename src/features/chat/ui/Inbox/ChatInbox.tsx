@@ -7,7 +7,7 @@ import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { useQuery } from "@tanstack/react-query"
 import { chatKeys } from "../../chat/model/chat.keys"
 import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { useParams, usePathname } from "next/navigation"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 
@@ -32,16 +32,14 @@ export function ChatInbox() {
       )
   })
 
-  useRealtimeInbox(chats ?? [])
-
-  const filterdChats = (chats?: UserChatPreview[]): UserChatPreview[] => {
+  useRealtimeInbox(chats || [])
+  const filteredChats = useMemo(() => {
     if (!chats) return []
 
+    const query = search.toLowerCase().trim()
+    if (!query) return chats
+
     return chats.filter(chat => {
-      const query = search.toLowerCase().trim()
-
-      if (!query) return true
-
       if (chat.type === "DIRECT") {
         return (
           chat.otherUser.name.toLowerCase().includes(query) ||
@@ -59,8 +57,7 @@ export function ChatInbox() {
 
       return false
     })
-  }
-
+  }, [chats, search])
   return (
     <div
       className={`basis-75 shrink-0 max-w-full 
@@ -77,10 +74,7 @@ export function ChatInbox() {
       </div>
 
       <div className="overflow-y-auto scroll-bar-thin">
-        <ChatInboxList
-          chats={filterdChats(chats)}
-          isLoadingSkeleton={isLoading}
-        />
+        <ChatInboxList chats={filteredChats} isLoadingSkeleton={isLoading} />
       </div>
     </div>
   )

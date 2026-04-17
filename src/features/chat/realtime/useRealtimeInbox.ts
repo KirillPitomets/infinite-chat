@@ -48,7 +48,8 @@ export const useRealtimeInbox = (chats: UserChatPreview[]) => {
           data.message
         )
       }
-      // Move chat to top when It got a new message
+
+      // set a new value for urnead messages
       if (event === "chat.message.created") {
         queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old => {
           if (!old) return old
