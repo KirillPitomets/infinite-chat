@@ -4,12 +4,14 @@ import { ChatUIMessage } from "../message/model/message.types"
 export const useChatScroll = (
   containerRef: RefObject<HTMLDivElement | null>,
   messages: ChatUIMessage[],
-  cb: () => void
+  markAsRead: () => void
 ) => {
   const isAtElementBottomRef = useRef(false)
   const hasUserInteractedRef = useRef(false)
   const isFirstLoad = useRef(true)
-  // ========= AUTOSCROLL FOR FIRST LOAD=========
+  const isScrollable = useRef(false)
+
+  // ========= AUTOSCROLL FOR FIRST LOAD =========
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
@@ -24,15 +26,25 @@ export const useChatScroll = (
     }
   }, [messages])
 
+  // ========= MARK AS READ IF USER CAN'T SCROLL =========
+  useEffect(() => {
+    const el = containerRef.current
+    if (!el) return
+
+    isScrollable.current = el.scrollHeight > el.clientHeight
+
+    if (!isScrollable.current) {
+      markAsRead()
+    }
+  }, [messages.length])
+
   // ========= AUTOSCROLL =========
   useEffect(() => {
     const el = containerRef.current
 
     if (!el || !isAtElementBottomRef.current) return
 
-    if (isAtElementBottomRef.current) {
-      el.scrollTop = el.scrollHeight
-    }
+    el.scrollTop = el.scrollHeight
   }, [messages])
 
   // ========= SCROLL LISTENER =========
@@ -44,12 +56,14 @@ export const useChatScroll = (
     const handleScroll = () => {
       hasUserInteractedRef.current = true
 
+      isScrollable.current = el.scrollHeight > el.clientHeight
+
       isAtElementBottomRef.current =
         el.scrollHeight - el.scrollTop - el.clientHeight < 50
 
       if (!isAtElementBottomRef.current) return
 
-      cb()
+      markAsRead()
     }
 
     el.addEventListener("scroll", handleScroll)
