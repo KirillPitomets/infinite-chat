@@ -207,5 +207,3 @@ This structure improves scalability, maintainability, and code organization.
     
 
 ---
-
-<img width="1277" height="898" alt="image" src="https://github.com/user-attachments/assets/885e0a4e-6813-43a9-97b7-b898c8552f0d" />
