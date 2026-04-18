@@ -185,11 +185,11 @@ This structure improves scalability, maintainability, and code organization.
 
 ## 📸 Screenshots
 
-<img width="1281" height="898" alt="image" src="https://github.com/user-attachments/assets/c746a3c2-08ce-4c99-9ac0-693858e4f861" />
-<img width="1276" height="899" alt="2" src="https://github.com/user-attachments/assets/edce89e9-326d-4cfc-8e75-d82daa482aee" />
-<img width="1280" height="894" alt="3" src="https://github.com/user-attachments/assets/83797807-c188-4430-9935-4f03c740fd05" />
-<img width="1150" height="886" alt="mobile" src="https://github.com/user-attachments/assets/6aa05cba-5211-47e1-8bd2-9e83070c3785" />
-
+<p align="center">
+<img width="700"  alt="mobile" src="https://github.com/user-attachments/assets/6aa05cba-5211-47e1-8bd2-9e83070c3785" />
+<img width="700"  alt="image" src="https://github.com/user-attachments/assets/44895213-ed85-4fa5-be39-aeaca50a2303" />
+<img width="700"  alt="2" src="https://github.com/user-attachments/assets/edce89e9-326d-4cfc-8e75-d82daa482aee" />
+</p>
 
 ---
 
@@ -208,3 +208,4 @@ This structure improves scalability, maintainability, and code organization.
 
 ---
 
+<img width="1277" height="898" alt="image" src="https://github.com/user-attachments/assets/885e0a4e-6813-43a9-97b7-b898c8552f0d" />
