@@ -34,7 +34,10 @@ export const messagesApi = new Elysia()
       // =====================================
       // Create notification for users in chat
       // =====================================
-      const participants = await chatService.getParticants(userId, params.chatId)
+      const participants = await chatService.getParticants(
+        userId,
+        params.chatId
+      )
 
       for (const participant of participants) {
         await realtime
@@ -90,7 +93,7 @@ export const messagesApi = new Elysia()
           : [body.files]
         : undefined
 
-      const { updatedMessage, chatId } = await messageService.update({
+      const updatedMessage = await messageService.update({
         userId,
         messageId: params.messageId,
         content: body.content,
@@ -99,16 +102,41 @@ export const messagesApi = new Elysia()
 
       const dto = toChatMessageDTO(updatedMessage)
 
-      await realtime.channel(chatId).emit("chat.message.updated", {
-        chatId: updatedMessage.chatId,
-        message: dto
-      })
+      await realtime
+        .channel(updatedMessage.chatId)
+        .emit("chat.message.updated", {
+          chatId: updatedMessage.chatId,
+          message: dto
+        })
 
       return dto
     },
     {
       body: MessageApiSchema.put.body,
       response: MessageApiSchema.put.response
+    }
+  )
+  .post(
+    "/messages/restore/:messageId",
+    async ({ userId, params }) => {
+      const restoredMessage = await messageService.restoreMessage(
+        params.messageId,
+        userId
+      )
+
+      const dto = toChatMessageDTO(restoredMessage)
+
+      await realtime
+        .channel(restoredMessage.chatId)
+        .emit("chat.message.restored", {
+          chatId: restoredMessage.chatId,
+          message: dto
+        })
+
+      return dto
+    },
+    {
+      response: MessageApiSchema.restoreMessage
     }
   )
   .delete(

@@ -40,5 +40,6 @@ export const MessageApiSchema = {
     response: ChatMessageSchema
   },
   preview: { response: z.array(UserChatPreviewSchema) },
-  delete: { response: ChatMessageSchema }
+  delete: { response: ChatMessageSchema },
+  restoreMessage: { response: ChatMessageSchema }
 } as const

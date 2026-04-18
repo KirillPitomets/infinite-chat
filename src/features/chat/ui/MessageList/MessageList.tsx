@@ -70,6 +70,7 @@ export const MessageList = ({
         messages.map(msg => (
           <Message
             key={msg.id}
+            chatId={chatId}
             selectedMessageId={selectedMessageId}
             handleUpdate={handleUpdate}
             onDelete={onDelete}

@@ -14,6 +14,7 @@ import { MessageStatus } from "./Status"
 import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 
 interface IMessageProps extends ChatUIMessage {
+  chatId: string
   isMine: boolean
   selectedMessageId?: string
   isRead: boolean
@@ -25,6 +26,7 @@ interface IMessageProps extends ChatUIMessage {
 
 export const Message = ({
   id,
+  chatId,
   selectedMessageId,
   isRead,
   isMine,
@@ -86,6 +88,8 @@ export const Message = ({
   if (isDeleted || status === "deleted") {
     return (
       <DeletedMessage
+        id={id}
+        chatId={chatId}
         isMine={isMine}
         senderImageUrl={sender.imageUrl}
         senderName={sender.name}

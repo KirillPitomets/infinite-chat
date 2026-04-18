@@ -103,7 +103,10 @@ class MessageService {
     return chat.messages[0] || null
   }
 
-  async delete(messageId: string, userId: string) {
+  async delete(
+    messageId: string,
+    userId: string
+  ): Promise<ChatMessagePrismaType> {
     const existingMessage = await prisma.message.findUnique({
       where: { id: messageId }
     })
@@ -143,7 +146,7 @@ class MessageService {
     userId: string
     content?: string
     files?: File[]
-  }): Promise<{ updatedMessage: ChatMessagePrismaType; chatId: string }> {
+  }): Promise<ChatMessagePrismaType> {
     const existingMessage = await prisma.message.findUnique({
       where: { id: messageId }
     })
@@ -205,7 +208,40 @@ class MessageService {
       })
     })
 
-    return { updatedMessage, chatId: updatedMessage.id }
+    return updatedMessage
+  }
+
+  async restoreMessage(
+    messageId: string,
+    userId: string
+  ): Promise<ChatMessagePrismaType> {
+    const existingMessage = await prisma.message.findUnique({
+      where: { id: messageId }
+    })
+
+    if (!existingMessage) {
+      throw new NotFoundError("Message")
+    }
+
+    if (existingMessage.senderId !== userId) {
+      throw new ForbiddenError("You can't delete not your message")
+    }
+
+    if (!existingMessage.isDeleted) {
+      throw new ConflictError("Message hadn't been deleted")
+    }
+
+    const restoredMessage = await prisma.message.update({
+      where: {
+        id: messageId
+      },
+      data: {
+        isDeleted: false
+      },
+      include: ChatMessageInclude
+    })
+
+    return restoredMessage
   }
 }
 

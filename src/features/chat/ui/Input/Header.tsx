@@ -15,12 +15,12 @@ export const InputHeader = ({
   onCancel
 }: InputHeaderProps) => {
   return (
-    <div className="flex justify-between items-center w-full p-4 border border-zinc-300">
+    <div className="flex justify-between items-end w-full p-4 border border-zinc-300">
       <div className="w-full space-y-2">
         <p className="font-semibold">{title}: </p>
         {content && (
           <p
-            className={`w-full bg-zinc-800 dark:bg-zinc-300 truncate max-w-175 px-2 py-1 ml-1 `}
+            className={`w-11/12 bg-zinc-800 dark:bg-zinc-300 truncate max-w-175 px-2 py-1 ml-1 `}
           >
             {content}
           </p>

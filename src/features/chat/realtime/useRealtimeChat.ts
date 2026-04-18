@@ -18,6 +18,7 @@ export function useRealtimeChat(chatId: string, currentUserId: string) {
     events: [
       "chat.message.created",
       "chat.message.deleted",
+      "chat.message.restored",
       "chat.message.updated",
       "chat.message.readed"
     ],
@@ -57,6 +58,18 @@ export function useRealtimeChat(chatId: string, currentUserId: string) {
             chatId: data.chatId,
             messageId: message.id,
             status: "deleted"
+          })
+
+          break
+        }
+
+        case "chat.message.restored": {
+          const message = data.message
+          if (message.sender.id === currentUserId) return
+          changeMessageStatus({
+            chatId: data.chatId,
+            messageId: message.id,
+            status: "sent"
           })
 
           break
