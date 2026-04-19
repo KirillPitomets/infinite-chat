@@ -27,7 +27,7 @@ export const useRealtimeInbox = (chats: UserChatPreview[]) => {
           queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old =>
             old
               ? old.map(previewChat =>
-                  previewChat.id === data.preview.id
+                  previewChat.id !== data.preview.id
                     ? data.preview
                     : previewChat
                 )
@@ -49,7 +49,7 @@ export const useRealtimeInbox = (chats: UserChatPreview[]) => {
         )
       }
 
-      // set a new value for urnead messages
+      // set a new value for latest messages
       if (event === "chat.message.created") {
         queryClient.setQueryData<UserChatPreview[]>(chatKeys.inbox(), old => {
           if (!old) return old
@@ -60,12 +60,7 @@ export const useRealtimeInbox = (chats: UserChatPreview[]) => {
 
           const updatedChat: UserChatPreview = {
             ...chat,
-            latestMessage: data.message,
-            unreadCount:
-              params.chatId !== data.chatId &&
-              data.message.sender.id !== user.id
-                ? chat.unreadCount + 1
-                : chat.unreadCount
+            latestMessage: data.message
           }
 
           return [

@@ -17,7 +17,7 @@ export function ChatInbox() {
 
   const [search, setSearch] = useState("")
 
-  const { data: chats, isLoading } = useQuery<UserChatPreview[]>({
+  const { data: chats = [], isLoading } = useQuery<UserChatPreview[]>({
     queryKey: chatKeys.inbox(),
     queryFn: async () => {
       const res = await edenClient.chat.preview.get()
@@ -32,7 +32,8 @@ export function ChatInbox() {
       )
   })
 
-  useRealtimeInbox(chats || [])
+  useRealtimeInbox(chats)
+
   const filteredChats = useMemo(() => {
     if (!chats) return []
 

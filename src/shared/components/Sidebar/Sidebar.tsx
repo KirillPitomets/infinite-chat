@@ -1,12 +1,12 @@
 import Image from "next/image"
 import Link from "next/link"
 
-import NavMenu from "./NavMenu"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 
 import { useClerk, UserButton } from "@clerk/nextjs"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { LogoutIcon, SettingsIcon } from "@/shared/components/ui/icons"
+import NavMenu from "../Navmenu/NavMenu"
 
 export default function Sidebar() {
   const { signOut } = useClerk()

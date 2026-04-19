@@ -3,12 +3,14 @@
 import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { edenClient } from "@/shared/lib/eden"
+import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { matchRoute } from "@/shared/utils/matchRoute"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { useMemo } from "react"
 import { navItems } from "./navItems.data"
-import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
+import { useRealtimeNav } from "./useRealtimeNav"
 
 export default function NavMenu() {
   const pathname = usePathname()
@@ -18,14 +20,15 @@ export default function NavMenu() {
     queryFn: async () => {
       const res = await edenClient.chat.preview.get()
       return res.data ?? []
-    },
-    
+    }
   })
 
-  const totalUnreadMessage = inboxChats.reduce(
-    (value, chat) => value + chat.unreadCount,
-    0
+  const totalUnreadMessage = useMemo(
+    () => inboxChats.reduce((value, chat) => value + chat.unreadCount, 0),
+    [inboxChats]
   )
+
+  useRealtimeNav(inboxChats)
 
   return (
     <div className="space-y-2">
