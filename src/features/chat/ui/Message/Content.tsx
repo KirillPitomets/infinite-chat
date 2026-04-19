@@ -35,7 +35,7 @@ export const MessageContent = ({
             options={{
               target: "_blank",
               rel: "noopener noreference",
-              className: "text-green-700 break-all hover:underline"
+              className: "text-blue-500 break-all hover:underline"
             }}
           >
             {content}

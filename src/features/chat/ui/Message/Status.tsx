@@ -8,7 +8,7 @@ export const MessageStatus = ({
   status: ChatUIMessage["status"]
 }) => {
   return (
-    <div className="flex justify-center items-center text-green-500">
+    <div className="flex justify-center items-center text-green-600">
       {status === "sent" ? (
         <TickIcon className="size-3.5" />
       ) : status === "loading" ? (

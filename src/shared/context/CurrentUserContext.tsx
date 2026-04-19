@@ -3,7 +3,7 @@ import { edenClient } from "@/shared/lib/eden"
 import { useQuery } from "@tanstack/react-query"
 import { ReactNode, createContext, useContext } from "react"
 import { User } from "@/shared/types/User.type"
-import { SkyLoader } from "../components/ui/SkyLoader"
+import { CloudLoader } from "../components/CloudLoader"
 
 const CurrentUserContext = createContext<User>(null!)
 
@@ -24,8 +24,8 @@ const CurrentUserProvider = ({ children }: { children: ReactNode }) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center w-full h-screen">
-        <h1 className="scale-150 animate-pulse">
-          <SkyLoader />
+        <h1 className="scale-150 animate-">
+          <CloudLoader />
         </h1>
       </div>
     )

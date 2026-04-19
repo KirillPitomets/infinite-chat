@@ -1,19 +1,6 @@
-type TypingIndicatorProps = {
-  colorMode?: "light" | "dark"
-}
-
-export const TypingIndicator = ({
-  colorMode = "light"
-}: TypingIndicatorProps) => {
+export const TypingIndicator = () => {
   return (
-    <div
-      className={`flex gap-1 
-        ${
-          colorMode === "light"
-            ? "text-white dark:text-black"
-            : "text-black dark:text-white"
-        }`}
-    >
+    <div className="flex gap-1 text-green-600">
       typing
       <div className=" animate-bounce">.</div>
       <div style={{ animationDelay: "200ms" }} className="animate-bounce">

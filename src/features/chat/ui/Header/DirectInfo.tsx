@@ -38,7 +38,7 @@ export const DirectInfo = ({
         {isMemberTyping ? (
           <TypingIndicator />
         ) : (
-          <span className={`${isOnline ? "text-green-700" : "text-zinc-400"}`}>
+          <span className={`${isOnline ? "text-green-600" : "text-zinc-400"}`}>
             {isOnline ? "online" : "offline"}
           </span>
         )}

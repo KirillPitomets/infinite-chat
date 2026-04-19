@@ -16,7 +16,7 @@ const LatestMessage = ({ latestMessage }: LatestMessageProps) => {
             <span>
               {latestMessage.sender.id === user.id
                 ? "you: "
-                : `${latestMessage.sender.name}: `}
+                : ""}
             </span>
             {latestMessage.content ? (
               latestMessage.content
