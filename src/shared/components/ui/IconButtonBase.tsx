@@ -17,7 +17,7 @@ export const IconButtonBase: FC<Props> = ({
     <div
       className={`
         flex justify-center items-center cursor-pointer
-        ${tone === "primary" ? "text-green-600" : "text-zinc-500 dark:text-gray-600/45 "}
+        ${tone === "primary" ? "text-green-600" : "dark:text-zinc-500 text-gray-600/45 "}
         ${isActive && "bg-green-600 text-white"}
         p-3 rounded-2xl transition-colors hover:bg-green-600 hover:text-white`}
     >

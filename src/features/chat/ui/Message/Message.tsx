@@ -110,13 +110,13 @@ export const Message = ({
           className={`relative px-3 py-1 rounded-sm 
             ${
               id === selectedMessageId
-                ? "bg-green-700 dark:bg-green-200"
-                : "bg-zinc-700 dark:bg-gray-200 "
+                ? "dark:bg-green-700 bg-green-400"
+                : "dark:bg-zinc-700 bg-gray-200 "
             } 
             `}
         >
           {replyToMessage && (
-            <div className="p-1 pl-2 text-sm border-l-2 border-black bg-zinc-800 dark:bg-gray-300 rounedd-xl">
+            <div className="p-1 pl-2 text-sm border-l-2 border-black dark:bg-zinc-800 bg-gray-300 rounedd-xl">
               <p>{replyToMessage.sender.name}</p>
               <p className="opacity-80">{replyToMessage.content}</p>
             </div>

@@ -14,7 +14,7 @@ const MessageContextMenu = ({
   if (!isVisible) return null
 
   return (
-    <ul className="absolute right-0 bottom-full flex rounded-sm bg-zinc-900 dark:bg-zinc-300 z-1">
+    <ul className="absolute right-0 bottom-full flex rounded-sm dark:bg-zinc-900 bg-zinc-300 z-1">
       {isMineMessage
         ? buttons.map((item, indx) => (
             <li key={`contextMenuItem-${indx}`}>

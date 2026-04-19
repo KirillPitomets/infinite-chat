@@ -122,13 +122,13 @@ export function ChatInputUI({
           />
         </div>
 
-        <div className="flex items-center flex-1 transition-colors bg-zinc-800 dark:bg-zinc-300 rounded-sm focus:bg-zinc-400">
+        <div className="flex items-center flex-1 transition-colors dark:bg-zinc-800 bg-zinc-300 rounded-sm focus:bg-zinc-400">
           <textarea
             ref={textareaRef}
             onKeyDown={onSubmitMessageViaEnter}
             onChange={onChange}
             value={value}
-            className="w-full max-h-62.5 px-4 py-2.5 text-white dark:text-black outline-none resize-none"
+            className="w-full max-h-62.5 px-4 py-2.5 dark:text-white text-black outline-none resize-none"
             autoFocus
             rows={1}
             placeholder="Message..."

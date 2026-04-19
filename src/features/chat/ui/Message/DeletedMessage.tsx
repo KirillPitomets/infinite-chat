@@ -67,7 +67,7 @@ const DeletedMessage = ({
             <p>{senderName}</p>
           </div>
         )}
-        <div className="p-3 rounded-2xl dark:bg-gray-200 bg-zinc-700 relative group">
+        <div className="p-3 rounded-2xl bg-gray-200 dark:bg-zinc-700 relative group">
           {isMine && (
             <button
               onClick={() => restoreMessage()}
@@ -78,7 +78,7 @@ const DeletedMessage = ({
               </IconButtonBase>
             </button>
           )}
-          <p className="dark:text-zinc-800 text-white">Message had deleted</p>
+          <p className="text-zinc-800 dark:text-white">Message had deleted</p>
         </div>
       </div>
     </div>

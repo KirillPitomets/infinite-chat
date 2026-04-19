@@ -20,7 +20,7 @@ export const InputHeader = ({
         <p className="font-semibold">{title}: </p>
         {content && (
           <p
-            className={`w-11/12 bg-zinc-800 dark:bg-zinc-300 truncate max-w-175 px-2 py-1 ml-1 `}
+            className={`w-11/12 dark:bg-zinc-800 bg-zinc-300 truncate max-w-175 px-2 py-1 ml-1 `}
           >
             {content}
           </p>
