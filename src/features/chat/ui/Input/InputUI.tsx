@@ -113,10 +113,15 @@ export function ChatInputUI({
         removeFile={filename => removePreviewFile(filename)}
       />
       <div className="relative flex items-center gap-2 p-5 space-x-2 border-t border-zinc-300">
-        <UploadButton
-          icon={isEditInput ? "reload" : "clip"}
-          inputDropZoneProps={inputDropZoneProps}
-        />
+        <div
+          className={`${value && `max-sm:hidden `} transition-all transition-discrete`}
+        >
+          <UploadButton
+            icon={isEditInput ? "reload" : "clip"}
+            inputDropZoneProps={inputDropZoneProps}
+          />
+        </div>
+
         <div className="flex items-center flex-1 transition-colors bg-zinc-800 dark:bg-zinc-300 rounded-sm focus:bg-zinc-400">
           <textarea
             ref={textareaRef}
