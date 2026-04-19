@@ -185,7 +185,11 @@ This structure improves scalability, maintainability, and code organization.
 
 ## 📸 Screenshots
 
-> Add GIFs or screenshots here (very important for portfolio)
+<p align="center">
+<img width="700"  alt="mobile" src="https://github.com/user-attachments/assets/6aa05cba-5211-47e1-8bd2-9e83070c3785" />
+<img width="700"  alt="image" src="https://github.com/user-attachments/assets/44895213-ed85-4fa5-be39-aeaca50a2303" />
+<img width="700"  alt="2" src="https://github.com/user-attachments/assets/edce89e9-326d-4cfc-8e75-d82daa482aee" />
+</p>
 
 ---
 
@@ -203,4 +207,3 @@ This structure improves scalability, maintainability, and code organization.
     
 
 ---
-
