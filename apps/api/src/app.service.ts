@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { type CreateLinkDto } from '@infinite-chat/shared';
+import { PrismaService } from './infra/prisma/prisma.service';
 
 @Injectable()
 export class AppService {
-  getHello(): string {
-    return 'Hello World!';
+  constructor(private readonly prismaService: PrismaService) {}
+  async getHello(): Promise<Array<unknown>> {
+    const users = await this.prismaService.user.findMany();
+    return users;
   }
 }
