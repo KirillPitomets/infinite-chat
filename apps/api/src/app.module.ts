@@ -9,6 +9,7 @@ import { InfraMoule } from './infra/infta.module';
     InfraMoule,
     ConfigModule.forRoot({
       isGlobal: true,
+      expandVariables: true,
     }),
   ],
   controllers: [AppController],
