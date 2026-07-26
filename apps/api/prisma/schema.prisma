@@ -1,99 +1,16 @@
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
+  moduleFormat = "cjs"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-
 model User {
-  id          String      @id @default(cuid())
-  authId      String      @unique
-
-  tag         String      @unique
-  email       String      @unique
-  name        String
-  imageUrl    String
-
-  // Last date when user was online
-  lastSeen    DateTime    @default(now())
-  createdAt   DateTime    @default(now())
-
-  memberships ChatUser[]
-  messages    Message[]
-}
-
-model ChatUser {
-  id         String    @id @default(cuid())
-  userId     String
-  chatId     String
-
-  lastReadAt DateTime  @default(now())
-
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
-
-  role       Role      @default(USER)
-  @@unique([userId, chatId])
-}
-
-model Chat {
-  id          String      @id @default(cuid())
-  createdAt   DateTime    @default(now())
-  type        ChatTpye
-  name        String      @default("Group Chat")
-  imageUrl    String      @default("")
-
-  memberships ChatUser[]
-  messages    Message[]
-}
-
-model Message {
-  id               String        @id @default(cuid())
-  senderId         String
-  chatId           String
-  content          String?
-
-  replyToMessageId String?
-  replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
-  replies          Message[]    @relation("MessageReply")
-
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  isDeleted        Boolean       @default(false)
-
-  attachments      Attachment[]
-
-  chat             Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
-  sender           User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
-
-  @@index([chatId, createdAt])
-  @@index([senderId])
-}
-
-model Attachment  {
-  id        String    @id @default(cuid())
-  messageId String
-  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
-
-  url       String
-  key       String    @unique
+  id        String   @id @default(uuid())
   name      String
-  size      Int
-  type      String
+  email     String   @unique
 
-  createdAt DateTime  @default(now())
-}
-
-enum Role {
-  OWNER
-  ADMIN
-  USER
-}
-
-enum ChatTpye {
-  DIRECT
-  GROUP
 }

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../infra/prisma/prisma.service';
+import { PrismaService } from './infra/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
@@ -9,6 +9,7 @@ export class AppService {
     private readonly configService: ConfigService,
   ) {}
   async getHello() {
-    return await this.prismaService.user.findMany();
+  return await this.prismaService.user.findMany();
+
   }
 }

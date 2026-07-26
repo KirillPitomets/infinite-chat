@@ -4,9 +4,8 @@ import {
   VersioningType,
 } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
-import { AppModule } from './app/app.module';
+import { AppModule } from './app.module';
 import { setupSwagger } from 'src/utils/setupSwagger.util';
-import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,8 +19,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   setupSwagger(app);
-
-  app.use(cookieParser());
 
   await app.listen(process.env.PORT ?? 3001);
 }
