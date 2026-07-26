@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common';
-import { DevService } from './dev.service';
-import { DevController } from './dev.controller';
-import { ClerkClientProvider } from 'src/providers/clerk-client.provider';
+import { ClerkModule } from 'src/infra/clerk/clerk.module';
 import { IS_DEV } from 'src/utils/is-dev.util';
+import { DevController } from './dev.controller';
 
 @Module({
   controllers: IS_DEV ? [DevController] : [],
-  providers: [DevService, ClerkClientProvider],
+  imports: [ClerkModule],
 })
 export class DevModule {}

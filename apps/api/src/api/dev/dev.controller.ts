@@ -6,18 +6,16 @@ import {
   Inject,
   Query,
 } from '@nestjs/common';
-import { Public } from 'src/auth/decorators';
-import { CLERK_PROVIDE_NAME } from 'src/providers/clerk-client.provider';
-import { DevService } from './dev.service';
 import { ConfigService } from '@nestjs/config';
+import { Public } from 'src/auth/decorators';
+import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
 import { isDev } from 'src/utils/is-dev.util';
 
 @Controller('dev')
 export class DevController {
   constructor(
-    @Inject(CLERK_PROVIDE_NAME)
+    @Inject(CLERK_CLIENT)
     private readonly clerkClient: ClerkClient,
-    private readonly devService: DevService,
     private readonly configService: ConfigService,
   ) {}
 
