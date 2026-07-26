@@ -8,7 +8,7 @@ import { Strategy } from 'passport-custom';
 export const CLERK_STRATEGY_NAME = 'clerk';
 
 @Injectable()
-export class ClekrStrategy extends PassportStrategy(
+export class ClerkStrategy extends PassportStrategy(
   Strategy,
   CLERK_STRATEGY_NAME,
 ) {

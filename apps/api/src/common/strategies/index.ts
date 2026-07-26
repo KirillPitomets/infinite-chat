@@ -1,1 +1,1 @@
-export { ClekrStrategy } from './clerk.strategy';
+export { ClerkStrategy, CLERK_STRATEGY_NAME } from './clerk.strategy';
