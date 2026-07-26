@@ -6,65 +6,64 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-
 }
 
 
 model User {
-  id          String      @id @default(cuid())
-  clerkId      String      @unique
+  id          String                        @id @default(cuid())
+  clerkId     String     @map("clerk_id")   @unique
 
-  tag         String      @unique
-  email       String      @unique
+  tag         String                        @unique
+  email       String                        @unique
   name        String
-  imageUrl    String
+  imageUrl    String     @map("image_url")
 
   // Last date when user was online
-  lastSeen    DateTime    @default(now())
-  createdAt   DateTime    @default(now())
+  lastSeen    DateTime   @map("last_seen")  @default(now())
+  createdAt   DateTime   @map("created_at") @default(now())
 
   memberships ChatUser[]
   messages    Message[]
 }
 
 model ChatUser {
-  id         String    @id @default(cuid())
-  userId     String
-  chatId     String
+  id         String                        @id @default(cuid())
+  userId     String   @map("user_id")
+  chatId     String   @map("chat_id")
 
-  lastReadAt DateTime  @default(now())
+  lastReadAt DateTime @map("last_read_at") @default(now())
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
 
-  role       Role      @default(USER)
+  role       Role                          @default(USER)
   @@unique([userId, chatId])
 }
 
 model Chat {
-  id          String      @id @default(cuid())
-  createdAt   DateTime    @default(now())
-  type        ChatTpye
-  name        String      @default("Group Chat")
-  imageUrl    String      @default("")
+  id          String                        @id @default(cuid())
+  createdAt   DateTime   @map("created_at") @default(now())
+  type        ChatType
+  name        String                        @default("Group Chat")
+  imageUrl    String     @map("image_url")  @default("")
 
   memberships ChatUser[]
   messages    Message[]
 }
 
 model Message {
-  id               String        @id @default(cuid())
-  senderId         String
-  chatId           String
+  id               String                                   @id @default(cuid())
+  senderId         String       @map("sender_id")
+  chatId           String       @map("chat_id")
   content          String?
 
-  replyToMessageId String?
+  replyToMessageId String?      @map("reply_to_message_id")
   replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
   replies          Message[]    @relation("MessageReply")
 
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
-  isDeleted        Boolean       @default(false)
+  createdAt        DateTime     @map("created_at")          @default(now())
+  updatedAt        DateTime     @map("updated_at")          @updatedAt
+  isDeleted        Boolean      @map("is_deleted")          @default(false)
 
   attachments      Attachment[]
 
@@ -76,17 +75,17 @@ model Message {
 }
 
 model Attachment  {
-  id        String    @id @default(cuid())
-  messageId String
+  id        String                      @id @default(cuid())
+  messageId String   @map("message_id")
   message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   url       String
-  key       String    @unique
+  key       String                      @unique
   name      String
   size      Int
   type      String
 
-  createdAt DateTime  @default(now())
+  createdAt DateTime                    @default(now())
 }
 
 enum Role {
@@ -95,7 +94,7 @@ enum Role {
   USER
 }
 
-enum ChatTpye {
+enum ChatType {
   DIRECT
   GROUP
 }
