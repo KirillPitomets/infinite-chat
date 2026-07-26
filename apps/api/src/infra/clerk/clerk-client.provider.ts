@@ -1,10 +1,10 @@
 import { createClerkClient } from '@clerk/backend';
 import { ConfigService } from '@nestjs/config';
 
-export const CLERK_PROVIDE_NAME = 'ClearkClient';
+export const CLERK_CLIENT = 'ClerkClient';
 
 export const ClerkClientProvider = {
-  provide: CLERK_PROVIDE_NAME,
+  provide: CLERK_CLIENT,
   useFactory: (configService: ConfigService) => {
     return createClerkClient({
       publishableKey: configService.getOrThrow<string>('CLERK_PUBLISHABLE_KEY'),
