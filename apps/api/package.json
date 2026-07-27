@@ -39,7 +39,8 @@
     "passport-custom": "^1.1.1",
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.2",
-    "rxjs": "^7.8.1"
+    "rxjs": "^7.8.1",
+    "svix": "^1.99.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
