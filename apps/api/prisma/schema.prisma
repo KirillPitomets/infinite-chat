@@ -8,9 +8,95 @@ datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
 
+model User {
+  id          String                        @id @default(cuid())
+  clerkId     String     @map("clerk_id")   @unique
+
+  // tag         String                        @unique
+  email       String                        @unique
+  firstName   String     @map("first_name")
+  lastName    String     @map("last_name")
+  username    String
+  imageUrl    String     @map("image_url")
+
+  // Last date when user was online
+  lastSeen    DateTime   @map("last_seen")  @default(now())
+  createdAt   DateTime   @map("created_at") @default(now())
+
+  memberships ChatUser[]
+  messages    Message[]
+}
+
+model ChatUser {
+  id         String                        @id @default(cuid())
+  userId     String   @map("user_id")
+  chatId     String   @map("chat_id")
+
+  lastReadAt DateTime @map("last_read_at") @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  chat       Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+
+  role       Role                          @default(USER)
+  @@unique([userId, chatId])
+}
+
+model Chat {
+  id          String                        @id @default(cuid())
+  createdAt   DateTime   @map("created_at") @default(now())
+  type        ChatType
+  name        String                        @default("Group Chat")
+  imageUrl    String     @map("image_url")  @default("")
+
+  memberships ChatUser[]
+  messages    Message[]
+}
+
+model Message {
+  id               String                                   @id @default(cuid())
+  senderId         String       @map("sender_id")
+  chatId           String       @map("chat_id")
+  content          String?
+
+  replyToMessageId String?      @map("reply_to_message_id")
+  replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
+  replies          Message[]    @relation("MessageReply")
+
+  createdAt        DateTime     @map("created_at")          @default(now())
+  updatedAt        DateTime     @map("updated_at")          @updatedAt
+  isDeleted        Boolean      @map("is_deleted")          @default(false)
+
+  attachments      Attachment[]
+
+  chat             Chat         @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  sender           User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([chatId, createdAt])
+  @@index([senderId])
+}
+
+model Attachment  {
+  id        String                      @id @default(cuid())
+  messageId String   @map("message_id")
+  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  url       String
+  key       String                      @unique
+  name      String
+  size      Int
+  type      String
+
+  createdAt DateTime                    @default(now())
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  USER
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
 }
