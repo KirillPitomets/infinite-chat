@@ -35,12 +35,14 @@
     "class-validator": "^0.15.1",
     "cookie-parser": "^1.4.7",
     "dotenv": "^17.4.2",
+    "nestjs-zod": "^5.5.0",
     "passport": "^0.7.0",
     "passport-custom": "^1.1.1",
     "pg": "^8.22.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
-    "svix": "^1.99.1"
+    "svix": "^1.99.1",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",

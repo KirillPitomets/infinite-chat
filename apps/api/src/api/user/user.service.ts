@@ -1,7 +1,8 @@
-import { type User, type ClerkClient } from '@clerk/backend';
-import { Inject, Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/infra/prisma/prisma.service';
+import { type ClerkClient } from '@clerk/backend';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
+import { PrismaService } from 'src/infra/prisma/prisma.service';
+import { GetUserByIdResponse } from './dto/getUserByIdResponse.dto';
 
 @Injectable()
 export class UserService {
@@ -11,21 +12,15 @@ export class UserService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async sync(userId: string) {
-    const user: User = await this.clerkClient.users.getUser(userId);
+  async getById(id: string): Promise<GetUserByIdResponse> {
+    const user = await this.prismaService.user.findUnique({ where: { id } });
 
-    return user;
+    if (user) return user;
+
+    throw new NotFoundException('User not found');
   }
+
+  async getByClerkId(id: string) {}
+
+  async getAll() {}
 }
-
-/*
-generateTag(name: string) {}
-
-syncUser
-
-getDbUserByClerkId
-
-getById
-
-getAllUsers
-*/

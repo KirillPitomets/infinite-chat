@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app/app.module';
-import { setupSwagger } from 'src/utils/setupSwagger.util';
+import { setupSwagger } from 'src/config/swagger';
 import cookieParser from 'cookie-parser';
 
 async function bootstrap() {

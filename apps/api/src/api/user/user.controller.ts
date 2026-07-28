@@ -1,7 +1,8 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { UserId } from 'src/common/decorators/user-id.decorator';
 import { UserService } from './user.service';
+import { GetUserByIdResponse } from './dto/getUserByIdResponse.dto';
+import { ZodResponse } from 'nestjs-zod';
 
 @Controller('user')
 export class UserController {
@@ -10,9 +11,17 @@ export class UserController {
     private readonly userService: UserService,
   ) {}
 
-  // @Public()
-  @Get()
-  async syncUser(@UserId() userId: string) {
-    return await this.userService.sync(userId);
+  @Get('/:id')
+  @ZodResponse({
+    type: GetUserByIdResponse,
+  })
+  async getById(@Param() id: string): Promise<GetUserByIdResponse> {
+    return this.userService.getById(id);
   }
+
+  @Get('/clerk/:id')
+  async getByClerkId(@Param() id: string) {}
+
+  @Get('/')
+  async getAll() {}
 }
