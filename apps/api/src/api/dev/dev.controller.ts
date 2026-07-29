@@ -28,7 +28,11 @@ export class DevController {
     if (!userId) return 'Invalid user id';
 
     const session = await this.clerkClient.sessions.createSession({ userId });
-    const { jwt } = await this.clerkClient.sessions.getToken(session.id);
+
+    const { jwt } = await this.clerkClient.sessions.getToken(
+      session.id,
+      'jwt-testing',
+    );
 
     return { jwt };
   }
