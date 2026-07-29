@@ -1,19 +1,17 @@
 {
-  "name": "@infinite-chat/web",
+  "name": "infinite-chat-web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint",
     "postinstall": "prisma generate"
   },
   "overrides": {
     "effect": "3.18.4"
   },
   "dependencies": {
-    "@infinite-chat/shared": "*",
     "@clerk/nextjs": "^6.36.8",
     "@elysiajs/eden": "^1.4.6",
     "@elysiajs/node": "^1.4.3",
@@ -44,8 +42,6 @@
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.1.1",
     "prisma": "^7.4.2",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

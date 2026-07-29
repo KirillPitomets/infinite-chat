@@ -1,23 +1,7 @@
-import { ZodError } from 'zod';
-import {
-  ArgumentsHost,
-  Catch,
-  HttpException,
-  Logger,
-  Module,
-} from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import {
-  APP_GUARD,
-  APP_INTERCEPTOR,
-  APP_PIPE,
-  BaseExceptionFilter,
-} from '@nestjs/core';
-import {
-  ZodSerializationException,
-  ZodSerializerInterceptor,
-  ZodValidationPipe,
-} from 'nestjs-zod';
+import { APP_GUARD } from '@nestjs/core';
+
 import { ApiModule } from 'src/api/api.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { ClerkAuthGuard } from 'src/auth/guards/auth.guard';
@@ -36,28 +20,6 @@ import { AppService } from './app.service';
     AuthModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    { provide: APP_GUARD, useClass: ClerkAuthGuard },
-    { provide: APP_PIPE, useClass: ZodValidationPipe },
-    { provide: APP_INTERCEPTOR, useClass: ZodSerializerInterceptor },
-  ],
+  providers: [AppService, { provide: APP_GUARD, useClass: ClerkAuthGuard }],
 })
 export class AppModule {}
-
-// http-exception.filter
-@Catch(HttpException)
-export class HttpExceptionFilter extends BaseExceptionFilter {
-  private readonly logger = new Logger(HttpExceptionFilter.name);
-
-  catch(exception: HttpException, host: ArgumentsHost) {
-    if (exception instanceof ZodSerializationException) {
-      const zodError = exception.getZodError();
-      if (zodError instanceof ZodError) {
-        this.logger.error(`ZodSerializationException: ${zodError.message}`);
-      }
-    }
-
-    super.catch(exception, host);
-  }
-}

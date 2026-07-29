@@ -1,8 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from './user.service';
-import { GetUserByIdResponse } from './dto/getUserByIdResponse.dto';
-import { ZodResponse } from 'nestjs-zod';
 
 @Controller('user')
 export class UserController {
@@ -12,10 +10,7 @@ export class UserController {
   ) {}
 
   @Get('/:id')
-  @ZodResponse({
-    type: GetUserByIdResponse,
-  })
-  async getById(@Param() id: string): Promise<GetUserByIdResponse> {
+  async getById(@Param() id: string) {
     return this.userService.getById(id);
   }
 
