@@ -6,5 +6,6 @@ import { ClerkClientProvider } from 'src/infra/clerk/clerk-client.provider';
 @Module({
   controllers: [UserController],
   providers: [UserService, ClerkClientProvider],
+  exports: [UserService],
 })
 export class UserModule {}

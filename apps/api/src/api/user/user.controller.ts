@@ -1,7 +1,13 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { ApiExtraModels } from '@nestjs/swagger';
+import { ApiGetAll } from './docs/get-all.doc';
+import { ApiGetById } from './docs/get-by-id.doc';
+import { LimitQueryDto } from './dto/limit-query.dto';
+import { UserEntity } from './entity/user.entity';
 import { UserService } from './user.service';
 
+@ApiExtraModels(UserEntity)
 @Controller('user')
 export class UserController {
   constructor(
@@ -9,14 +15,15 @@ export class UserController {
     private readonly userService: UserService,
   ) {}
 
+  @ApiGetById()
   @Get('/:id')
-  async getById(@Param() id: string) {
-    return this.userService.getById(id);
+  async findById(@Param('id') id: string): Promise<UserEntity> {
+    return this.userService.findById(id);
   }
 
-  @Get('/clerk/:id')
-  async getByClerkId(@Param() id: string) {}
-
+  @ApiGetAll()
   @Get('/')
-  async getAll() {}
+  async findAll(@Query() query: LimitQueryDto): Promise<UserEntity[]> {
+    return this.userService.findAll(query.limit);
+  }
 }

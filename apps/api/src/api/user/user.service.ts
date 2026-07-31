@@ -2,7 +2,7 @@ import { type ClerkClient } from '@clerk/backend';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
-import { UserEntity } from './entity/User.entity';
+import { UserEntity } from './entity/user.entity';
 
 @Injectable()
 export class UserService {
@@ -12,15 +12,33 @@ export class UserService {
     private readonly prismaService: PrismaService,
   ) {}
 
-  async getById(id: string): Promise<UserEntity> {
+  async findById(id: string): Promise<UserEntity> {
     const user = await this.prismaService.user.findUnique({ where: { id } });
 
-    if (user) return new UserEntity(user);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    throw new NotFoundException('User not found');
+    return new UserEntity(user);
   }
 
-  async getByClerkId(id: string) {}
+  async findByClerkId(clerkId: string) {
+    const user = await this.prismaService.user.findUnique({
+      where: { clerkId },
+    });
 
-  async getAll() {}
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return new UserEntity(user);
+  }
+
+  async findAll(limit: number): Promise<UserEntity[]> {
+    const users = await this.prismaService.user.findMany({
+      take: limit,
+    });
+
+    return users;
+  }
 }
