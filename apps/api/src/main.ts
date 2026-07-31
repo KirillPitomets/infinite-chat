@@ -16,11 +16,16 @@ async function bootstrap() {
     defaultVersion: '1',
     type: VersioningType.URI,
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: { enableImplicitConversion: true },
+    }),
+  );
+
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 
   setupSwagger(app);
-
   app.use(cookieParser());
 
   await app.listen(process.env.PORT ?? 3001);
