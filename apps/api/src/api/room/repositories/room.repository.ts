@@ -33,13 +33,13 @@ export class RoomRepository {
     userId,
     name,
     memberships,
-    imageUrl,
+    avatarUrl,
   }: createGroupRoomArgs) {
     return this.prisma.room.create({
       data: {
         type: 'GROUP',
         name,
-        imageUrl,
+        avatarUrl,
         createdByUserId: userId,
         memberships: {
           createMany: {

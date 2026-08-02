@@ -1,6 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { UserEntity } from '../entity/user.entity';
+import { UserEntity } from '../entity';
 
 export function ApiGetAll() {
   return applyDecorators(

@@ -6,27 +6,24 @@ import {
   HttpCode,
   HttpStatus,
   Param,
-  Patch,
   Post,
-  Put,
   UseGuards,
 } from '@nestjs/common';
-import { RoomService } from './room.service';
-
 import { ClerkUserId } from 'src/common/decorators';
 import { UserByIdPipe } from 'src/common/pipes/user-by-id.pipe';
 import { type User } from 'src/generated/prisma/client';
 import { Role } from './decorators/role.decorator';
 import {
-  ApiCreateGroupRoom,
   ApiDeleteRoom,
   ApiFindOrCreateDirectRoom,
   ApiFindRoomById,
   ApiFindUserRooms,
 } from './docs';
-import { CreateGroupRoomDto, FindOrCreateDirectRoomDto } from './dto';
+import { FindOrCreateDirectRoomDto } from './dto';
 import { RoomEntity } from './entities';
 import { RoleGuard } from './guards/role.guard';
+import { RoomService } from './room.service';
+
 @UseGuards(RoleGuard)
 @Controller('room')
 export class RoomController {
@@ -39,15 +36,6 @@ export class RoomController {
     @Body() dto: FindOrCreateDirectRoomDto,
   ): Promise<RoomEntity> {
     return this.roomService.findOrCreateDirect(user.id, dto);
-  }
-
-  @ApiCreateGroupRoom()
-  @Post('/group')
-  async findOrCreateGroup(
-    @ClerkUserId(UserByIdPipe) user: User,
-    @Body() dto: CreateGroupRoomDto,
-  ): Promise<RoomEntity> {
-    return this.roomService.createGroup(user.id, dto);
   }
 
   @ApiFindRoomById()
@@ -67,33 +55,6 @@ export class RoomController {
 
   // @Put(':roomId/read')
   // async updateUserLastRead() {}
-
-  @Role('ADMIN')
-  @Put(':roomId/name')
-  async updateName(@ClerkUserId(UserByIdPipe) user: User) {}
-
-  @Role('ADMIN')
-  @Put(':roomId/image')
-  async updateImage(@ClerkUserId(UserByIdPipe) user: User) {}
-
-  @Role('ADMIN')
-  @Delete(':roomId/kick/:memberId')
-  async kickMember(
-    @Param('roomId') roomId: string,
-    @Param('memberId') memberId: string,
-  ) {
-    return this.roomService.kickMember(roomId, memberId);
-  }
-
-  // todo docs
-  @Delete('/leave/:roomId')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  async leave(
-    @ClerkUserId(UserByIdPipe) user: User,
-    @Param('roomId') roomId: string,
-  ) {
-    return this.roomService.leave(user.id, roomId);
-  }
 
   @ApiDeleteRoom()
   @Role('OWNER')

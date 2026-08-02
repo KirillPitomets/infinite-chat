@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
+import { Exclude, Type } from 'class-transformer';
 import { Room, RoomType } from 'src/generated/prisma/client';
 import { RoomGetPayload } from 'src/generated/prisma/models';
 import { RoomMemberEntity } from './room-member.entity';
@@ -30,7 +30,12 @@ export class RoomEntity implements Room {
     description: 'URL of the room image',
     example: 'https://example.com/images/room1.jpg',
   })
-  imageUrl: string;
+  avatarUrl: string;
+
+  @ApiProperty({
+    description: 'Id of the room image',
+  })
+  avatarPublicId: string;
 
   @Type(() => RoomMemberEntity)
   memberships: RoomMemberEntity[];

@@ -6,7 +6,7 @@ import {
   ApiParam,
   ApiResponse,
 } from '@nestjs/swagger';
-import { UserEntity } from '../entity/user.entity';
+import { UserEntity } from '../entity';
 
 export function ApiGetById() {
   return applyDecorators(

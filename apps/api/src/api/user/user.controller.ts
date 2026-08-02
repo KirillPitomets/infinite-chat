@@ -4,8 +4,8 @@ import { ApiExtraModels } from '@nestjs/swagger';
 import { ApiGetAll } from './docs/get-all.doc';
 import { ApiGetById } from './docs/get-by-id.doc';
 import { LimitQueryDto } from './dto/limit-query.dto';
-import { UserEntity } from './entity/user.entity';
 import { UserService } from './user.service';
+import { UserEntity } from './entity';
 
 @ApiExtraModels(UserEntity)
 @Controller('user')

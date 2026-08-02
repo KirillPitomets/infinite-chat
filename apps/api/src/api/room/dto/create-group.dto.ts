@@ -1,12 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 import {
+  ArrayMaxSize,
   ArrayMinSize,
+  ArrayUnique,
   IsArray,
-  IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
   Length,
+  Matches,
 } from 'class-validator';
 
 export class CreateGroupRoomDto {
@@ -21,7 +23,9 @@ export class CreateGroupRoomDto {
   @IsArray()
   @IsString({ each: true })
   @IsUUID('4', { each: true })
+  @ArrayUnique()
   @ArrayMinSize(1)
+  @ArrayMaxSize(100)
   memberIds: string[];
 
   @ApiProperty({
@@ -29,15 +33,8 @@ export class CreateGroupRoomDto {
     example: 'Project Team Chat',
   })
   @IsString()
-  @Length(2, 16)
+  @Transform(({ value }) => value.trim())
+  @Matches(/^[\p{L}\p{N}_ -]+$/u)
+  @Length(2, 32)
   name: string;
-
-  @ApiPropertyOptional({
-    description: 'URL of the group chat avatar',
-    example: 'https://example.com/images/group.jpg',
-  })
-  @IsString()
-  @IsOptional()
-  @IsUrl()
-  imageUrl?: string;
 }

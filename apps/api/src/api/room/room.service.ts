@@ -8,6 +8,9 @@ import { UserService } from '../user/user.service';
 import { FindOrCreateDirectRoomDto, CreateGroupRoomDto } from './dto';
 import { RoomEntity } from './entities';
 import { RoomRepository } from './repositories/room.repository';
+import { UpdateGroupNameDto } from './dto/update-group-name.dto';
+import { UpdateGroupImageDto } from './dto/update-group-image.dto';
+import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
 
 @Injectable()
 export class RoomService {
@@ -15,6 +18,7 @@ export class RoomService {
     private readonly prismaService: PrismaService,
     private readonly roomRepo: RoomRepository,
     private readonly userService: UserService,
+    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findOrCreateDirect(
@@ -24,7 +28,7 @@ export class RoomService {
     const member = await this.userService.findById(dto.memberId);
 
     if (member.id === userId) {
-      throw new BadRequestException('You can not create chat with yourself');
+      throw new BadRequestException('You cannot create room with yourself');
     }
 
     const existingRoom = await this.roomRepo.findDirectRoom(userId, member.id);
@@ -40,7 +44,11 @@ export class RoomService {
     userId: string,
     dto: CreateGroupRoomDto,
   ): Promise<RoomEntity> {
-    const { memberIds, name, imageUrl } = dto;
+    const { memberIds, name } = dto;
+
+    if (memberIds.includes(userId)) {
+      throw new BadRequestException('You cannot create room with yourself');
+    }
 
     const validMembers = await this.prismaService.user.findMany({
       where: { id: { in: memberIds } },
@@ -53,7 +61,6 @@ export class RoomService {
     const room = await this.roomRepo.createGroupRoom({
       userId,
       name,
-      imageUrl,
       memberships: validMembers,
     });
 
@@ -74,6 +81,68 @@ export class RoomService {
     const rooms = await this.roomRepo.findAllForUser(userId);
 
     return rooms.map((room) => new RoomEntity(room));
+  }
+
+  async updateGroupName(
+    userId: string,
+    roomId: string,
+    dto: UpdateGroupNameDto,
+  ): Promise<RoomEntity> {
+    const { name } = dto;
+
+    const room = await this.prismaService.room.update({
+      where: {
+        id: roomId,
+        type: 'GROUP',
+        memberships: { some: { userId } },
+      },
+      data: {
+        name,
+      },
+      include: {
+        memberships: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
+    return new RoomEntity(room);
+  }
+
+  async updateGroupImage(
+    userId: string,
+    roomId: string,
+    dto: UpdateGroupImageDto,
+  ): Promise<RoomEntity> {
+    const { avatarUrl, avatarPublicId } = dto;
+    const room = await this.prismaService.room.update({
+      where: {
+        id: roomId,
+        type: 'GROUP',
+        memberships: { some: { userId } },
+      },
+      data: {
+        avatarUrl,
+        avatarPublicId,
+      },
+      include: {
+        memberships: {
+          include: {
+            user: true,
+          },
+        },
+      },
+    });
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+    return new RoomEntity(room);
   }
 
   async kickMember(roomId: string, memberId: string) {

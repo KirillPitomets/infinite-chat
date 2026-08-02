@@ -2,7 +2,7 @@ import { type ClerkClient } from '@clerk/backend';
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
-import { UserEntity } from './entity/user.entity';
+import { UserEntity } from './entity';
 
 @Injectable()
 export class UserService {
