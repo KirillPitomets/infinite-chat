@@ -43,16 +43,17 @@ model RoomMember {
 }
 
 model Room {
-  id              String                          @id @default(uuid(4))
+  id              String                                @id @default(uuid(4))
   type            RoomType
-  name            String                          @default("Group room")
-  imageUrl        String       @map("image_url")  @default("")
+  name            String                                @default("Group room")
+  avatarUrl       String       @map("avatar_url")       @default("")
+  avatarPublicId  String       @map("avatar_public_id") @default("")
 
   createdByUserId String
   memberships     RoomMember[]
   messages        Message[]
 
-  createdAt       DateTime     @map("created_at") @default(now())
+  createdAt       DateTime     @map("created_at")       @default(now())
 }
 
 model Message {
