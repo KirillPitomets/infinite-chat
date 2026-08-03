@@ -1,4 +1,11 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RoomMemberRole } from 'src/generated/prisma/enums';
 import { ROLE_KEY } from '../decorators/role.decorator';
@@ -26,7 +33,13 @@ export class RoleGuard implements CanActivate {
     const auth = request.auth;
     const roomId = request.params.roomId as string;
 
-    if (!auth.clerkId || !roomId) return false;
+    if (!auth.clerkId) {
+      throw new UnauthorizedException('User not authorized');
+    }
+
+    if (!roomId) {
+      throw new BadRequestException('roomId param is missing');
+    }
 
     const membership = await this.prisma.roomMember.findFirst({
       where: {
@@ -36,11 +49,17 @@ export class RoleGuard implements CanActivate {
       include: { room: true, user: true },
     });
 
-    console.log(membership);
-    if (!membership) return false;
+    if (!membership) {
+      throw new ForbiddenException('Not a member in this room');
+    }
 
     if (membership.room.type === 'DIRECT') return true;
-    return this.hasRequiredRole(membership.role, requiresRole);
+
+    if (!this.hasRequiredRole(membership.role, requiresRole)) {
+      throw new ForbiddenException(`Requires role ${requiresRole} or higher`);
+    }
+
+    return true;
   }
 
   hasRequiredRole(actual: RoomMemberRole, required: RoomMemberRole): boolean {
