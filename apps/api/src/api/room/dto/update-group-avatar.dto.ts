@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsUrl } from 'class-validator';
+import { IsString, IsUrl, Matches } from 'class-validator';
+import * as dotenv from 'dotenv';
+dotenv.config();
+
+const cloudName = process.env['CLOUDINARY_KEY_NAME'];
 
 export class UpdateGroupAvatarDto {
   @ApiProperty({
@@ -7,6 +11,7 @@ export class UpdateGroupAvatarDto {
     example: 'https://example.com/images/group.jpg',
   })
   @IsUrl()
+  @Matches(new RegExp(`^https:\\/\\/res\\.cloudinary\\.com\\/${cloudName}\\/`))
   url: string;
 
   @ApiProperty({
