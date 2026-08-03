@@ -1,12 +1,13 @@
 import { v2 as cloudinary } from 'cloudinary';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PresignedUrlEntity } from './entity/PresignedUrl.entity';
 
 @Injectable()
 export class CloudinaryService {
   constructor(private readonly configService: ConfigService) {}
 
-  async getGroupRoomImageSignature(groupId: string) {
+  getGroupRoomAvatarSignature(groupId: string): PresignedUrlEntity {
     const timestamp = Math.round(Date.now() / 1000);
     const folder = `groups/${groupId}`;
     const publicId = 'avatar';
@@ -23,13 +24,13 @@ export class CloudinaryService {
       this.configService.getOrThrow('CLOUDINARY_API_SECRET'),
     );
 
-    return {
+    return new PresignedUrlEntity({
       signature,
-      timestamp,
+      timestamp: timestamp.toString(),
       folder,
       publicId,
       apiKey: this.configService.getOrThrow('CLOUDINARY_API_KEY'),
       cloudName: this.configService.getOrThrow('CLOUDINARY_KEY_NAME'),
-    };
+    });
   }
 }

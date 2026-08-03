@@ -1,27 +1,39 @@
 import {
-  UseGuards,
-  Controller,
   Body,
-  Post,
-  Param,
-  Patch,
+  Controller,
   Delete,
   HttpCode,
   HttpStatus,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
 } from '@nestjs/common';
-import { RoleGuard } from './guards/role.guard';
-import { RoomService } from './room.service';
+import { ApiTags } from '@nestjs/swagger';
 import { ClerkUserId } from 'src/common/decorators';
 import { UserByIdPipe } from 'src/common/pipes/user-by-id.pipe';
-import { ApiCreateGroupRoom } from './docs';
-import { CreateGroupRoomDto } from './dto';
-import { RoomEntity } from './entities';
 import { type User } from 'src/generated/prisma/client';
-import { Role } from './decorators/role.decorator';
-import { UpdateGroupImageDto } from './dto/update-group-image.dto';
-import { UpdateGroupNameDto } from './dto/update-group-name.dto';
 import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
+import { Role } from './decorators/role.decorator';
+import {
+  ApiCreateGroupRoom,
+  ApiKickMember,
+  ApiLeaveRoom,
+  ApiPresignGroupAvatar,
+  ApiUpdateGroupAvatar,
+  ApiUpdateGroupName,
+} from './docs';
+import {
+  CreateGroupRoomDto,
+  UpdateGroupAvatarDto,
+  UpdateGroupNameDto,
+} from './dto';
+import { RoomEntity } from './entities';
+import { RoleGuard } from './guards/role.guard';
+import { RoomService } from './room.service';
+import { ApiRoleGuardResponse } from './docs/api-role-guard.doc';
 
+@ApiTags('Room Group')
 @UseGuards(RoleGuard)
 @Controller('room/group')
 export class GroupRoomController {
@@ -39,6 +51,8 @@ export class GroupRoomController {
     return this.roomService.createGroup(user.id, dto);
   }
 
+  @ApiUpdateGroupName()
+  @ApiRoleGuardResponse('ADMIN')
   @Role('ADMIN')
   @Patch(':roomId/name')
   async updateName(
@@ -49,31 +63,40 @@ export class GroupRoomController {
     return this.roomService.updateGroupName(user.id, roomId, dto);
   }
 
-  @Role('ADMIN')
-  @Patch(':roomId/image')
-  async updateImage(
-    @ClerkUserId(UserByIdPipe) user: User,
-    @Param('roomId') roomId: string,
-    @Body() dto: UpdateGroupImageDto,
-  ) {
-    return this.roomService.updateGroupImage(user.id, roomId, dto);
-  }
-
+  @ApiPresignGroupAvatar()
+  @ApiRoleGuardResponse('ADMIN')
   @Role('ADMIN')
   @Post(':roomId/avatar/presign')
   async presignAvatar(@Param('roomId') roomId: string) {
-    return this.cloudinaryService.getGroupRoomImageSignature(roomId);
+    return this.cloudinaryService.getGroupRoomAvatarSignature(roomId);
   }
 
+  @ApiUpdateGroupAvatar()
+  @ApiRoleGuardResponse('ADMIN')
   @Role('ADMIN')
+  @Patch(':roomId/avatar')
+  async updateAvatar(
+    @ClerkUserId(UserByIdPipe) user: User,
+    @Param('roomId') roomId: string,
+    @Body() dto: UpdateGroupAvatarDto,
+  ) {
+    return this.roomService.updateGroupAvatar(user.id, roomId, dto);
+  }
+
+  @ApiKickMember()
+  @ApiRoleGuardResponse('ADMIN')
+  @Role('ADMIN')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':roomId/kick/:memberId')
   async kickMember(
+    @ClerkUserId(UserByIdPipe) user: User,
     @Param('roomId') roomId: string,
     @Param('memberId') memberId: string,
   ) {
-    return this.roomService.kickMember(roomId, memberId);
+    return this.roomService.kickMember(user.id, roomId, memberId);
   }
 
+  @ApiLeaveRoom()
   @Delete('/leave/:roomId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async leave(

@@ -1,16 +1,18 @@
 import { applyDecorators } from '@nestjs/common';
 import {
-  ApiOperation,
-  ApiParam,
+  ApiForbiddenResponse,
   ApiNoContentResponse,
   ApiNotFoundResponse,
+  ApiOperation,
+  ApiParam,
 } from '@nestjs/swagger';
 
 export function ApiDeleteRoom() {
   return applyDecorators(
     ApiOperation({
       summary: 'Delete room',
-      description: 'Deletes a room by its ID.',
+      description:
+        'Permanently deletes a room and all its messages. For GROUP rooms, only the OWNER can delete; for DIRECT rooms, either member can delete.',
     }),
     ApiParam({
       name: 'roomId',
@@ -22,7 +24,10 @@ export function ApiDeleteRoom() {
       description: 'Room successfully deleted',
     }),
     ApiNotFoundResponse({
-      description: 'Room not found',
+      description: 'Room not found, or user is not a member of this room',
+    }),
+    ApiForbiddenResponse({
+      description: 'User is not the owner of this GROUP room',
     }),
   );
 }

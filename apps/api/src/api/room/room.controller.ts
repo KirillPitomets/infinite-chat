@@ -12,7 +12,6 @@ import {
 import { ClerkUserId } from 'src/common/decorators';
 import { UserByIdPipe } from 'src/common/pipes/user-by-id.pipe';
 import { type User } from 'src/generated/prisma/client';
-import { Role } from './decorators/role.decorator';
 import {
   ApiDeleteRoom,
   ApiFindOrCreateDirectRoom,
@@ -57,7 +56,6 @@ export class RoomController {
   // async updateUserLastRead() {}
 
   @ApiDeleteRoom()
-  @Role('OWNER')
   @Delete(':roomId')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(

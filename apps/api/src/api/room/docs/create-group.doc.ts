@@ -9,17 +9,18 @@ import { RoomEntity } from '../entities';
 
 export function ApiCreateGroupRoom() {
   return applyDecorators(
-    ApiBearerAuth(),
     ApiOperation({
       summary: 'Create group room',
-      description: 'Creates a new group room with multiple members.',
+      description:
+        'Creates a new group room with the current user as OWNER and the specified members added to the group.',
     }),
     ApiCreatedResponse({
       description: 'Group room successfully created',
       type: RoomEntity,
     }),
     ApiBadRequestResponse({
-      description: 'Some provided member IDs do not exist',
+      description:
+        'The creator ID is included in memberIds, or one or more provided member IDs do not exist',
     }),
   );
 }

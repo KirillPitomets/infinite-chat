@@ -1,16 +1,20 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { UserService } from '../user/user.service';
-import { FindOrCreateDirectRoomDto, CreateGroupRoomDto } from './dto';
+import {
+  CreateGroupRoomDto,
+  FindOrCreateDirectRoomDto,
+  UpdateGroupAvatarDto,
+  UpdateGroupNameDto,
+} from './dto';
 import { RoomEntity } from './entities';
 import { RoomRepository } from './repositories/room.repository';
-import { UpdateGroupNameDto } from './dto/update-group-name.dto';
-import { UpdateGroupImageDto } from './dto/update-group-image.dto';
-import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
 
 @Injectable()
 export class RoomService {
@@ -115,12 +119,12 @@ export class RoomService {
     return new RoomEntity(room);
   }
 
-  async updateGroupImage(
+  async updateGroupAvatar(
     userId: string,
     roomId: string,
-    dto: UpdateGroupImageDto,
+    dto: UpdateGroupAvatarDto,
   ): Promise<RoomEntity> {
-    const { avatarUrl, avatarPublicId } = dto;
+    const { url, publicId } = dto;
     const room = await this.prismaService.room.update({
       where: {
         id: roomId,
@@ -128,8 +132,8 @@ export class RoomService {
         memberships: { some: { userId } },
       },
       data: {
-        avatarUrl,
-        avatarPublicId,
+        avatarUrl: url,
+        avatarPublicId: publicId,
       },
       include: {
         memberships: {
@@ -145,7 +149,15 @@ export class RoomService {
     return new RoomEntity(room);
   }
 
-  async kickMember(roomId: string, memberId: string) {
+  async kickMember(
+    userId: string,
+    roomId: string,
+    memberId: string,
+  ): Promise<void> {
+    if (userId === memberId) {
+      throw new BadRequestException('You cannot kick yourself');
+    }
+
     const roomMember = await this.prismaService.roomMember.findFirst({
       where: {
         userId: memberId,
@@ -156,19 +168,24 @@ export class RoomService {
     if (!roomMember) {
       throw new NotFoundException('Member are not in the room');
     }
+    // TODO: replace this condition on roleService.isOwner(roomMember.role)
+    if (roomMember.role === 'OWNER') {
+      throw new BadRequestException('You cannot kick room owner');
+    }
 
     await this.prismaService.roomMember.delete({
       where: { id: roomMember.id },
     });
-
-    return true;
   }
 
-  async leave(userId: string, roomId: string) {
+  async leave(userId: string, roomId: string): Promise<void> {
     const roomMember = await this.prismaService.roomMember.findFirst({
       where: {
         userId,
         roomId,
+      },
+      include: {
+        room: { select: { type: true } },
       },
     });
 
@@ -176,14 +193,21 @@ export class RoomService {
       throw new NotFoundException('You are not in this room');
     }
 
+    if (roomMember.room.type === 'DIRECT') {
+      throw new BadRequestException('You cannot leave from Direct room');
+    }
+
+    // TODO: replace this condition on roleService.isOwner(roomMember.role)
+    if (roomMember.role === 'OWNER') {
+      throw new BadRequestException('You cannot leave from your group');
+    }
+
     await this.prismaService.roomMember.delete({
       where: { id: roomMember.id },
     });
-
-    return true;
   }
 
-  async delete(userId: string, roomId: string) {
+  async delete(userId: string, roomId: string): Promise<void> {
     const roomMember = await this.prismaService.roomMember.findFirst({
       where: { roomId, userId },
       include: { room: true },
@@ -194,13 +218,11 @@ export class RoomService {
     }
 
     if (roomMember.room.type === 'GROUP' && roomMember.role !== 'OWNER') {
-      throw new BadRequestException('Only owner can delete room');
+      throw new ForbiddenException('Only the owner can delete group room');
     }
 
     await this.prismaService.room.delete({
       where: { id: roomMember.room.id },
     });
-
-    return true;
   }
 }

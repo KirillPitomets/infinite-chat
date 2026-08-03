@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 import { Room, RoomType } from 'src/generated/prisma/client';
 import { RoomGetPayload } from 'src/generated/prisma/models';
 import { RoomMemberEntity } from './room-member.entity';
