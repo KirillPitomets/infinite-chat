@@ -10,22 +10,23 @@ datasource db {
 
 
 model User {
-  id          String                          @id @default(uuid(4))
-  clerkId     String       @map("clerk_id")   @unique
+  id           String                          @id @default(uuid(4))
+  clerkId      String       @map("clerk_id")   @unique
 
   // tag         String                        @unique
-  email       String                          @unique
-  firstName   String       @map("first_name")
-  lastName    String       @map("last_name")
-  username    String
-  imageUrl    String       @map("image_url")
+  email        String                          @unique
+  firstName    String       @map("first_name")
+  lastName     String       @map("last_name")
+  username     String
+  imageUrl     String       @map("image_url")
 
   // Last date when user was online
-  lastSeen    DateTime     @map("last_seen")  @default(now())
-  createdAt   DateTime     @map("created_at") @default(now())
+  lastSeen     DateTime     @map("last_seen")  @default(now())
+  createdAt    DateTime     @map("created_at") @default(now())
 
-  memberships RoomMember[]
-  messages    Message[]
+  messages     Message[]
+  memberships  RoomMember[]
+  createdRooms Room[]       @relation("RoomCreator")
 }
 
 model RoomMember {
@@ -34,33 +35,35 @@ model RoomMember {
   roomId     String         @map("room_id")
 
   lastReadAt DateTime       @map("last_read_at") @default(now())
+  leftAt     DateTime?      @map("left_at")
 
   user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   room       Room           @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
   role       RoomMemberRole                      @default(MEMBER)
+
   @@unique([userId, roomId])
 }
 
 model Room {
-  id              String                                @id @default(uuid(4))
+  id              String                                  @id @default(uuid(4))
   type            RoomType
-  name            String                                @default("Group room")
-  avatarUrl       String       @map("avatar_url")       @default("")
-  avatarPublicId  String       @map("avatar_public_id") @default("")
+  name            String                                  @default("Group room")
+  avatarUrl       String       @map("avatar_url")         @default("")
+  avatarPublicId  String       @map("avatar_public_id")   @default("")
 
-  createdByUserId String
+  createdByUserId String?      @map("created_by_user_id")
+  createdBy       User?        @relation("RoomCreator", references: [id], fields: [createdByUserId], onDelete: SetNull)
+
   memberships     RoomMember[]
   messages        Message[]
 
-  createdAt       DateTime     @map("created_at")       @default(now())
+  createdAt       DateTime     @map("created_at")         @default(now())
 }
 
 model Message {
-  id               String                                   @id @default(uuid(4))
-  senderId         String       @map("sender_id")
-  roomId           String       @map("room_id")
-  content          String?
+  id               String                                   @id @default(uuid(7))
+  text             String?
 
   replyToMessageId String?      @map("reply_to_message_id")
   replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
@@ -72,25 +75,29 @@ model Message {
 
   attachments      Attachment[]
 
-  Room             Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  sender           User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  roomId           String       @map("room_id")
+  room             Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+
+  senderId         String       @map("sender_id")
+  sender           User         @relation(fields: [senderId], references: [id], onDelete: Restrict)
 
   @@index([roomId, createdAt])
   @@index([senderId])
+  @@index([replyToMessageId])
 }
 
 model Attachment  {
-  id        String                      @id @default(uuid(4))
-  messageId String   @map("message_id")
-  message   Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  id        String                            @id @default(uuid(4))
+  messageId String         @map("message_id")
+  message   Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   url       String
-  key       String                      @unique
+  key       String                            @unique
   name      String
   size      Int
-  type      String
+  type      AttachmentType
 
-  createdAt DateTime                    @default(now())
+  createdAt DateTime                          @default(now())
 }
 
 enum RoomMemberRole {
@@ -102,4 +109,11 @@ enum RoomMemberRole {
 enum RoomType {
   DIRECT
   GROUP
+}
+
+enum AttachmentType { 
+  VIDEO
+  IMAGE
+  AUDIO
+  FILE
 }
