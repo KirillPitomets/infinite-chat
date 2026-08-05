@@ -15,6 +15,7 @@ import {
 } from './dto';
 import { RoomEntity } from './entities';
 import { RoomRepository } from './repositories/room.repository';
+import { LimitPageQueryDto } from 'src/common/dto';
 
 @Injectable()
 export class RoomService {
@@ -71,8 +72,8 @@ export class RoomService {
     return new RoomEntity(room);
   }
 
-  async findByIdForUser(userId: string, roomId: string): Promise<RoomEntity> {
-    const room = await this.roomRepo.findByIdForUser(userId, roomId);
+  async findByIdUserRoom(userId: string, roomId: string): Promise<RoomEntity> {
+    const room = await this.roomRepo.findByIdUserRoom(userId, roomId);
 
     if (!room) {
       throw new NotFoundException('Room with ID not found');
@@ -81,9 +82,12 @@ export class RoomService {
     return new RoomEntity(room);
   }
 
-  async findAllForUser(userId: string): Promise<RoomEntity[]> {
-    const rooms = await this.roomRepo.findAllForUser(userId);
-
+  async findAllUserRooms(
+    userId: string,
+    query: LimitPageQueryDto,
+  ): Promise<RoomEntity[]> {
+    const { limit, page } = query;
+    const rooms = await this.roomRepo.findAllUserRooms(userId, limit, page);
     return rooms.map((room) => new RoomEntity(room));
   }
 
@@ -94,23 +98,7 @@ export class RoomService {
   ): Promise<RoomEntity> {
     const { name } = dto;
 
-    const room = await this.prismaService.room.update({
-      where: {
-        id: roomId,
-        type: 'GROUP',
-        memberships: { some: { userId } },
-      },
-      data: {
-        name,
-      },
-      include: {
-        memberships: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
+    const room = await this.roomRepo.updateGroupName(userId, roomId, name);
 
     if (!room) {
       throw new NotFoundException('Room not found');
@@ -125,27 +113,18 @@ export class RoomService {
     dto: UpdateGroupAvatarDto,
   ): Promise<RoomEntity> {
     const { url, publicId } = dto;
-    const room = await this.prismaService.room.update({
-      where: {
-        id: roomId,
-        type: 'GROUP',
-        memberships: { some: { userId } },
-      },
-      data: {
-        avatarUrl: url,
-        avatarPublicId: publicId,
-      },
-      include: {
-        memberships: {
-          include: {
-            user: true,
-          },
-        },
-      },
-    });
+
+    const room = await this.roomRepo.updateGroupAvatar(
+      userId,
+      roomId,
+      url,
+      publicId,
+    );
+
     if (!room) {
       throw new NotFoundException('Room not found');
     }
+
     return new RoomEntity(room);
   }
 
@@ -160,7 +139,7 @@ export class RoomService {
 
     const roomMember = await this.prismaService.roomMember.findFirst({
       where: {
-        userId: memberId,
+        id: memberId,
         roomId,
       },
     });
@@ -168,13 +147,15 @@ export class RoomService {
     if (!roomMember) {
       throw new NotFoundException('Member are not in the room');
     }
+
     // TODO: replace this condition on roleService.isOwner(roomMember.role)
     if (roomMember.role === 'OWNER') {
       throw new BadRequestException('You cannot kick room owner');
     }
 
-    await this.prismaService.roomMember.delete({
+    await this.prismaService.roomMember.update({
       where: { id: roomMember.id },
+      data: { leftAt: new Date() },
     });
   }
 
@@ -202,8 +183,9 @@ export class RoomService {
       throw new BadRequestException('You cannot leave from your group');
     }
 
-    await this.prismaService.roomMember.delete({
+    await this.prismaService.roomMember.update({
       where: { id: roomMember.id },
+      data: { leftAt: new Date() },
     });
   }
 

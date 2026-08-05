@@ -23,6 +23,9 @@ export class RoomMemberEntity implements RoomMember {
   })
   lastReadAt: Date;
 
+  @Exclude()
+  leftAt: Date | null;
+
   @ApiProperty({
     description: 'Role of the member within the room',
     enum: RoomMemberRole,

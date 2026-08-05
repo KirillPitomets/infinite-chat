@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { User } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { createGroupRoomArgs } from './types/room.repository.types';
+import { activeMembershipsInclude } from './constants/includes';
 
 @Injectable()
 export class RoomRepository {
@@ -11,10 +12,10 @@ export class RoomRepository {
     return this.prisma.room.findFirst({
       where: {
         type: 'DIRECT',
-        memberships: { some: { userId: userId } },
-        AND: { memberships: { some: { userId: memberId } } },
+        memberships: { some: { userId: userId, leftAt: null } },
+        AND: { memberships: { some: { userId: memberId, leftAt: null } } },
       },
-      include: { memberships: { include: { user: true } } },
+      include: { memberships: activeMembershipsInclude },
     });
   }
 
@@ -25,7 +26,7 @@ export class RoomRepository {
         createdByUserId: userId,
         memberships: { create: [{ userId: memberId }, { userId: userId }] },
       },
-      include: { memberships: { include: { user: true } } },
+      include: { memberships: activeMembershipsInclude },
     });
   }
 
@@ -50,33 +51,68 @@ export class RoomRepository {
         },
       },
       include: {
-        memberships: {
-          include: { user: true },
-        },
+        memberships: activeMembershipsInclude,
       },
     });
   }
 
-  async findByIdForUser(userId: string, roomId: string) {
-    return this.prisma.room.findUnique({
-      where: { id: roomId, memberships: { some: { userId } } },
+  async findByIdUserRoom(userId: string, roomId: string) {
+    return this.prisma.room.findFirst({
+      where: {
+        id: roomId,
+        memberships: { some: { userId, leftAt: null } },
+      },
       include: {
-        memberships: {
-          include: { user: true },
-        },
+        memberships: activeMembershipsInclude,
       },
     });
   }
 
-  async findAllForUser(userId: string) {
+  async findAllUserRooms(userId: string, limit: number, offset: number) {
     return this.prisma.room.findMany({
       where: {
-        memberships: { some: { userId } },
+        memberships: { some: { userId, leftAt: null } },
       },
       include: {
-        memberships: {
-          include: { user: true },
-        },
+        memberships: activeMembershipsInclude,
+      },
+      take: limit,
+      skip: offset * limit,
+    });
+  }
+
+  async updateGroupName(userId: string, roomId: string, name: string) {
+    return this.prisma.room.update({
+      where: {
+        id: roomId,
+        type: 'GROUP',
+        memberships: { some: { userId } },
+      },
+      data: {
+        name,
+      },
+      include: { memberships: activeMembershipsInclude },
+    });
+  }
+
+  async updateGroupAvatar(
+    userId: string,
+    roomId: string,
+    avatarUrl: string,
+    avatarPublicId: string,
+  ) {
+    return this.prisma.room.update({
+      where: {
+        id: roomId,
+        type: 'GROUP',
+        memberships: { some: { userId } },
+      },
+      data: {
+        avatarUrl,
+        avatarPublicId,
+      },
+      include: {
+        memberships: activeMembershipsInclude,
       },
     });
   }

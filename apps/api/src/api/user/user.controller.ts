@@ -3,9 +3,9 @@ import { ConfigService } from '@nestjs/config';
 import { ApiExtraModels } from '@nestjs/swagger';
 import { ApiGetAll } from './docs/get-all.doc';
 import { ApiGetById } from './docs/get-by-id.doc';
-import { LimitQueryDto } from './dto/limit-query.dto';
 import { UserService } from './user.service';
 import { UserEntity } from './entity';
+import { LimitPageQueryDto } from 'src/common/dto';
 
 @ApiExtraModels(UserEntity)
 @Controller('user')
@@ -23,7 +23,7 @@ export class UserController {
 
   @ApiGetAll()
   @Get('/')
-  async findAll(@Query() query: LimitQueryDto): Promise<UserEntity[]> {
-    return this.userService.findAll(query.limit);
+  async findAll(@Query() query: LimitPageQueryDto): Promise<UserEntity[]> {
+    return this.userService.findAll(query);
   }
 }

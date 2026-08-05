@@ -7,6 +7,7 @@ import {
   HttpStatus,
   Param,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { ClerkUserId } from 'src/common/decorators';
@@ -22,6 +23,7 @@ import { FindOrCreateDirectRoomDto } from './dto';
 import { RoomEntity } from './entities';
 import { RoleGuard } from './guards/role.guard';
 import { RoomService } from './room.service';
+import { LimitPageQueryDto } from 'src/common/dto';
 
 @UseGuards(RoleGuard)
 @Controller('room')
@@ -43,13 +45,16 @@ export class RoomController {
     @ClerkUserId(UserByIdPipe) user: User,
     @Param('roomId') roomId: string,
   ): Promise<RoomEntity> {
-    return this.roomService.findByIdForUser(user.id, roomId);
+    return this.roomService.findByIdUserRoom(user.id, roomId);
   }
 
   @ApiFindUserRooms()
   @Get()
-  async findAll(@ClerkUserId(UserByIdPipe) user: User): Promise<RoomEntity[]> {
-    return this.roomService.findAllForUser(user.id);
+  async findAll(
+    @ClerkUserId(UserByIdPipe) user: User,
+    @Query() query: LimitPageQueryDto,
+  ): Promise<RoomEntity[]> {
+    return this.roomService.findAllUserRooms(user.id, query);
   }
 
   // @Put(':roomId/read')

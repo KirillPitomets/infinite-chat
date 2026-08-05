@@ -3,6 +3,7 @@ import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { UserEntity } from './entity';
+import { LimitPageQueryDto } from 'src/common/dto';
 
 @Injectable()
 export class UserService {
@@ -34,9 +35,12 @@ export class UserService {
     return new UserEntity(user);
   }
 
-  async findAll(limit: number): Promise<UserEntity[]> {
+  async findAll(query: LimitPageQueryDto): Promise<UserEntity[]> {
+    const { limit, page } = query;
+
     const users = await this.prismaService.user.findMany({
       take: limit,
+      skip: page * limit,
     });
 
     return users;
