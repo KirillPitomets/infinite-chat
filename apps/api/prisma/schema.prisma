@@ -43,6 +43,7 @@ model RoomMember {
   role       RoomMemberRole                      @default(MEMBER)
 
   @@unique([userId, roomId])
+  @@map("room_member")
 }
 
 model Room {
@@ -62,42 +63,43 @@ model Room {
 }
 
 model Message {
-  id               String                                   @id @default(uuid(7))
+  id               String                                          @id @default(uuid(7)) // if you wanna uuid version also change it in ...-message.dto
   text             String?
 
-  replyToMessageId String?      @map("reply_to_message_id")
-  replyToMessage   Message?     @relation("MessageReply", fields: [replyToMessageId], references: [id])
-  replies          Message[]    @relation("MessageReply")
+  replyToMessageId String?             @map("reply_to_message_id")
+  replyToMessage   Message?            @relation("MessageReply", fields: [replyToMessageId], references: [id])
+  replies          Message[]           @relation("MessageReply")
 
-  createdAt        DateTime     @map("created_at")          @default(now())
-  updatedAt        DateTime     @map("updated_at")          @updatedAt
-  isDeleted        Boolean      @map("is_deleted")          @default(false)
+  createdAt        DateTime            @map("created_at")          @default(now())
+  updatedAt        DateTime            @map("updated_at")          @updatedAt
+  isDeleted        Boolean             @map("is_deleted")          @default(false)
 
-  attachments      Attachment[]
+  attachments      MessageAttachment[]
 
-  roomId           String       @map("room_id")
-  room             Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  roomId           String              @map("room_id")
+  room             Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
 
-  senderId         String       @map("sender_id")
-  sender           User         @relation(fields: [senderId], references: [id], onDelete: Restrict)
+  senderId         String              @map("sender_id")
+  sender           User                @relation(fields: [senderId], references: [id], onDelete: Restrict)
 
   @@index([roomId, createdAt])
   @@index([senderId])
   @@index([replyToMessageId])
 }
 
-model Attachment  {
-  id        String                            @id @default(uuid(4))
-  messageId String         @map("message_id")
-  message   Message        @relation(fields: [messageId], references: [id], onDelete: Cascade)
+model MessageAttachment  {
+  id        String                                   @id @default(uuid(4))
+  messageId String                @map("message_id")
+  message   Message               @relation(fields: [messageId], references: [id], onDelete: Cascade)
 
   url       String
-  key       String                            @unique
+  key       String                                   @unique
   name      String
   size      Int
-  type      AttachmentType
+  type      MessageAttachmentType
 
-  createdAt DateTime                          @default(now())
+  createdAt DateTime                                 @default(now())
+  @@map("message_attachment")
 }
 
 enum RoomMemberRole {
@@ -111,7 +113,7 @@ enum RoomType {
   GROUP
 }
 
-enum AttachmentType { 
+enum MessageAttachmentType { 
   VIDEO
   IMAGE
   AUDIO

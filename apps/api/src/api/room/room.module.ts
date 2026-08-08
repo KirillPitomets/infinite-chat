@@ -10,5 +10,6 @@ import { GroupRoomController } from './group-room.controller';
   controllers: [RoomController, GroupRoomController],
   providers: [RoomService, RoomRepository],
   imports: [UserModule, CloudinaryModule],
+  exports: [RoomService],
 })
 export class RoomModule {}

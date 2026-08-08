@@ -7,9 +7,9 @@ import {
   Query,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Public } from 'src/auth/decorators';
 import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
 import { isDev } from 'src/utils/is-dev.util';
+import { Public } from '../auth/decorators';
 
 @Controller('dev')
 export class DevController {

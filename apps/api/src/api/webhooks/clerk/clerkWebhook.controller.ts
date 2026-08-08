@@ -11,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import type { Request } from 'express';
-import { Public } from 'src/auth/decorators';
+import { Public } from 'src/api/auth/decorators';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { Webhook } from 'svix';
 

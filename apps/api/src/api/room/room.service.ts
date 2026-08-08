@@ -22,15 +22,19 @@ export class RoomService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly roomRepo: RoomRepository,
-    private readonly userService: UserService,
-    private readonly cloudinaryService: CloudinaryService,
   ) {}
 
   async findOrCreateDirect(
     userId: string,
     dto: FindOrCreateDirectRoomDto,
   ): Promise<RoomEntity> {
-    const member = await this.userService.findById(dto.memberId);
+    const member = await this.prismaService.user.findUnique({
+      where: { id: dto.memberId },
+    });
+
+    if (!member) {
+      throw new NotFoundException('Member not found');
+    }
 
     if (member.id === userId) {
       throw new BadRequestException('You cannot create room with yourself');
@@ -206,5 +210,20 @@ export class RoomService {
     await this.prismaService.room.delete({
       where: { id: roomMember.room.id },
     });
+  }
+
+  async assertUserInRoom(userId: string, roomId: string) {
+    const roomMember = await this.prismaService.roomMember.findFirst({
+      where: {
+        userId,
+        roomId,
+      },
+    });
+
+    if (!roomMember || roomMember.leftAt) {
+      throw new ForbiddenException('User are not room member');
+    }
+
+    return true;
   }
 }
