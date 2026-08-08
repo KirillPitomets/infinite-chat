@@ -22,10 +22,16 @@ import { WsAuthGuard } from '../auth/guards';
 import { UserService } from '../user/user.service';
 import { CreateMessageDto, JoinRoomDto } from './dto';
 import { MessagesService } from './messages.service';
-import type { MessageServer, MessageSocket } from './types/message-socket.type';
+import type {
+  MessageServer,
+  MessageSocket,
+  ServerToClientEvents,
+} from './types/message-socket.type';
 import { flattenValidationErrors } from 'src/utils/flattenValidationErrors.util';
 import { instanceToPlain } from 'class-transformer';
 import { MessageEntity } from './entity/message.entity';
+import { ClientMessageEvents } from './events/messages.events';
+import { ClientRoomEvents } from './events/room.events';
 
 @WebSocketGateway({
   namespace: 'messages',
@@ -85,7 +91,7 @@ export class MessagesGateway
     console.log('Client disconnected: ', client.id);
   }
 
-  @SubscribeMessage('room.join')
+  @SubscribeMessage(ClientRoomEvents.JOIN)
   async joinRoom(
     @ConnectedSocket() client: MessageSocket,
     @MessageBody() dto: JoinRoomDto,
@@ -109,8 +115,7 @@ export class MessagesGateway
     client.emit('room.joined', { success: true, roomId: dto.roomId });
   }
 
-  // Listening
-  @SubscribeMessage('message.send')
+  @SubscribeMessage(ClientMessageEvents.SEND)
   async save(
     @ConnectedSocket() client: MessageSocket,
     @MessageBody() dto: CreateMessageDto,
@@ -124,10 +129,18 @@ export class MessagesGateway
       throw new WsException('User not a member of this room');
     }
 
-    this.emitToRoom<MessageEntity>(dto.roomId, 'message.created', message);
+    this.emitToRoom(dto.roomId, 'message.created', message);
   }
 
-  private emitToRoom<T>(roomId: string, emitEvent: string, entity: T) {
-    this.server.to(roomId).emit(emitEvent, instanceToPlain(entity));
+  private emitToRoom<E extends keyof ServerToClientEvents>(
+    roomId: string,
+    event: E,
+    ...args: Parameters<ServerToClientEvents[E]>
+  ) {
+    const serialized = args.map((arg) =>
+      arg instanceof Object && '_isEntity' in arg ? instanceToPlain(arg) : arg,
+    ) as Parameters<ServerToClientEvents[E]>;
+
+    this.server.to(roomId).emit(event, ...serialized);
   }
 }
