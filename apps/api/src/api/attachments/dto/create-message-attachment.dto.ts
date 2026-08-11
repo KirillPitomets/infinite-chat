@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsInt, IsUrl } from 'class-validator';
+import { IsEnum, IsInt, IsString, IsUrl, Max } from 'class-validator';
 import { MessageAttachmentType } from 'src/generated/prisma/enums';
 
 export class CreateMessageAttachmentDto {
@@ -12,6 +12,7 @@ export class CreateMessageAttachmentDto {
   type: MessageAttachmentType;
 
   @IsInt()
+  @Max(20 * 1024 * 1024) // 20mb
   size: number;
 
   @IsUrl()

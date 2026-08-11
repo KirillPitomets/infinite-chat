@@ -226,4 +226,14 @@ export class RoomService {
 
     return true;
   }
+
+  async findUserRoomIds(userId: string) {
+    return this.prismaService.roomMember.findMany({
+      where: {
+        userId,
+        leftAt: null,
+      },
+      select: { roomId: true },
+    });
+  }
 }

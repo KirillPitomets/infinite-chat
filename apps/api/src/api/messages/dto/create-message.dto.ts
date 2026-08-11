@@ -1,18 +1,19 @@
 import { Type } from 'class-transformer';
 import {
   IsArray,
-  IsDecimal,
-  IsEnum,
-  IsInt,
   IsOptional,
   IsString,
-  IsUrl,
   IsUUID,
   Length,
   ValidateNested,
 } from 'class-validator';
-import { MessageAttachmentType } from 'src/generated/prisma/client';
-import { CreateMessageAttachmentDto } from './create-message-attachment.dto';
+import { CreateMessageAttachmentDto } from '../../attachments/dto/create-message-attachment.dto';
+
+/*
+undefined  = no field in dto = no change
+null       = client made data is empty (remove text or replyMessage)
+string     = change data from dto 
+*/
 
 export class CreateMessageDto {
   @IsUUID('4')
@@ -20,16 +21,16 @@ export class CreateMessageDto {
 
   @IsOptional()
   @IsString()
-  @Length(2, 160)
-  text?: string;
+  @Length(0, 160)
+  text?: string | null;
 
   @IsOptional()
   @IsUUID('7') // model Message using 7 version of UUID
-  replyToMessageId?: string;
+  replyToMessageId?: string | null;
 
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateMessageAttachmentDto)
-  attachments: CreateMessageAttachmentDto[];
+  attachments: CreateMessageAttachmentDto[] | null;
 }

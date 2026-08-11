@@ -34,7 +34,7 @@ export class CreateGroupRoomDto {
   })
   @IsString()
   @Transform(({ value }) => value.trim())
-  @Matches(/^[\p{L}\p{N}_ -]+$/u)
+  @Matches(/^[\p{L}\p{N}\p{Extended_Pictographic}\s\-_+#.,!?()]+$/u)
   @Length(2, 32)
   name: string;
 }

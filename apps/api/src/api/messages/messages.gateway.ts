@@ -20,7 +20,7 @@ import { WsExceptionFilter } from 'src/common/filters';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { WsAuthGuard } from '../auth/guards';
 import { UserService } from '../user/user.service';
-import { CreateMessageDto, JoinRoomDto } from './dto';
+import { CreateMessageDto, JoinRoomDto, UpdateMessageDto } from './dto';
 import { MessagesService } from './messages.service';
 import type {
   MessageServer,
@@ -32,6 +32,7 @@ import { instanceToPlain } from 'class-transformer';
 import { MessageEntity } from './entity/message.entity';
 import { ClientMessageEvents } from './events/messages.events';
 import { ClientRoomEvents } from './events/room.events';
+import { RoomService } from '../room/room.service';
 
 @WebSocketGateway({
   namespace: 'messages',
@@ -59,8 +60,7 @@ export class MessagesGateway
     private readonly userService: UserService,
     private readonly messagesService: MessagesService,
     private readonly configService: ConfigService,
-    // TODO remove prisma
-    private readonly prismaService: PrismaService,
+    private readonly roomService: RoomService,
   ) {}
 
   async handleConnection(client: MessageSocket) {
@@ -69,14 +69,21 @@ export class MessagesGateway
       if (!token) {
         throw new WsException('Token not provided');
       }
+
       const payload = await verifyToken(token, {
         secretKey: this.configService.getOrThrow('CLERK_SECRET_KEY'),
       });
+
       const user = await this.userService.findByClerkId(payload.sub);
+
       if (!user) {
         throw new WsException('User not found');
       }
+
       client.data.auth = { user };
+
+      const roomIds = await this.roomService.findUserRoomIds(user.id);
+      client.join(roomIds.map(({ roomId }) => roomId));
     } catch (error) {
       client.emit('exception', {
         status: 'error',
@@ -91,46 +98,73 @@ export class MessagesGateway
     console.log('Client disconnected: ', client.id);
   }
 
-  @SubscribeMessage(ClientRoomEvents.JOIN)
-  async joinRoom(
-    @ConnectedSocket() client: MessageSocket,
-    @MessageBody() dto: JoinRoomDto,
-  ) {
-    const { id: userId } = client.data.auth.user;
-    const { roomId } = dto;
-
-    const existUser = await this.prismaService.roomMember.findFirst({
-      where: {
-        roomId,
-        userId,
-      },
-    });
-
-    if (!existUser) {
-      throw new WsException('You are not a member of this room');
-    }
-
-    await client.join(dto.roomId);
-
-    client.emit('room.joined', { success: true, roomId: dto.roomId });
-  }
-
   @SubscribeMessage(ClientMessageEvents.SEND)
-  async save(
+  async create(
     @ConnectedSocket() client: MessageSocket,
     @MessageBody() dto: CreateMessageDto,
   ) {
     const { id: userId } = client.data.auth.user;
     const { roomId } = dto;
 
-    const message = await this.messagesService.create(userId, roomId, dto);
-
     if (!client.rooms.has(dto.roomId)) {
       throw new WsException('User not a member of this room');
     }
 
+    const message = await this.messagesService.create(userId, roomId, dto);
+
     this.emitToRoom(dto.roomId, 'message.created', message);
   }
+
+  @SubscribeMessage(ClientMessageEvents.UPDATE)
+  async update(
+    @ConnectedSocket() client: MessageSocket,
+    @MessageBody() dto: UpdateMessageDto,
+  ) {
+    const { id: userId } = client.data.auth.user;
+    const { roomId } = dto;
+
+    if (!client.rooms.has(roomId)) {
+      throw new WsException('User not a member of this room');
+    }
+
+    const message = await this.messagesService.update(userId, dto);
+
+    this.emitToRoom(dto.roomId, 'message.updated', message);
+  }
+
+  // @SubscribeMessage(ClientMessageEvents.DELETE)
+  // async delete(
+  //   @ConnectedSocket() client: MessageSocket,
+  //   @MessageBody() dto: CreateMessageDto,
+  // ) {
+  //   const { id: userId } = client.data.auth.user;
+  //   const { roomId } = dto;
+
+  //   if (!client.rooms.has(dto.roomId)) {
+  //     throw new WsException('User not a member of this room');
+  //   }
+
+  //   const message = await this.messagesService.create(userId, roomId, dto);
+
+  //   this.emitToRoom(dto.roomId, 'message.deleted', message);
+  // }
+
+  // @SubscribeMessage(ClientMessageEvents.RESTORE)
+  // async restore(
+  //   @ConnectedSocket() client: MessageSocket,
+  //   @MessageBody() dto: CreateMessageDto,
+  // ) {
+  //   const { id: userId } = client.data.auth.user;
+  //   const { roomId } = dto;
+
+  //   if (!client.rooms.has(dto.roomId)) {
+  //     throw new WsException('User not a member of this room');
+  //   }
+
+  //   const message = await this.messagesService.create(userId, roomId, dto);
+
+  //   this.emitToRoom(dto.roomId, 'message.restored', message);
+  // }
 
   private emitToRoom<E extends keyof ServerToClientEvents>(
     roomId: string,

@@ -5,6 +5,7 @@ import { ClerkWebhookModule } from './webhooks/clerk/clerkWebhook.module';
 import { RoomModule } from './room/room.module';
 import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
@@ -14,6 +15,7 @@ import { AuthModule } from './auth/auth.module';
     RoomModule,
     MessagesModule,
     AuthModule,
+    AttachmentsModule,
   ],
   exports: [DevModule],
 })

@@ -3,7 +3,7 @@ import { IsString, IsUrl, Matches } from 'class-validator';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const cloudName = process.env['CLOUDINARY_KEY_NAME'];
+const cloudName = process.env['CLOUDINARY_CLOUD_NAME'];
 
 export class UpdateGroupAvatarDto {
   @ApiProperty({

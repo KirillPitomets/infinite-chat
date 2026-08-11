@@ -1,1 +1,1 @@
-export * from './limit-query.dto';
+export * from './limit-page-query.dto';

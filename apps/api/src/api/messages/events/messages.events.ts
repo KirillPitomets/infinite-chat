@@ -5,6 +5,7 @@ export interface ServerToClientMessageEvents {
   'message.created': (message: MessageEntity) => void;
   'message.updated': (message: MessageEntity) => void;
   'message.deleted': (message: MessageEntity) => void;
+  'message.restored': (message: MessageEntity) => void;
 }
 
 export interface ClientToServerMessageEvents {
@@ -17,4 +18,5 @@ export const ClientMessageEvents = {
   SEND: 'message.send',
   UPDATE: 'message.update',
   DELETE: 'message.delete',
+  RESTORE: 'message.restore',
 };
