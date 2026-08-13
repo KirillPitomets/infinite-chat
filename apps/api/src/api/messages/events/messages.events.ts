@@ -1,17 +1,32 @@
-import { CreateMessageDto } from '../dto';
+import { CreateMessageDto, UpdateMessageDto } from '../dto';
+import { DeleteMessageDto } from '../dto/delete-message.dto';
+import { RestoreMessageDto } from '../dto/restore-message.dto';
 import { MessageEntity } from '../entity';
 
+export type MessagePayload = Omit<
+  MessageEntity,
+  'senderId' | 'roomId' | 'replyToMessageId'
+>;
+
+export interface ExceptionPayload {
+  status: string;
+  error: unknown;
+  timestamp: string;
+}
 export interface ServerToClientMessageEvents {
-  'message.created': (message: MessageEntity) => void;
-  'message.updated': (message: MessageEntity) => void;
-  'message.deleted': (message: MessageEntity) => void;
-  'message.restored': (message: MessageEntity) => void;
+  'message.created': (message: MessagePayload) => void;
+  'message.updated': (message: MessagePayload) => void;
+  'message.deleted': (message: MessagePayload) => void;
+  'message.restored': (message: MessagePayload) => void;
+
+  exception: (payload: ExceptionPayload) => void;
 }
 
 export interface ClientToServerMessageEvents {
   'message.send': (dto: CreateMessageDto) => void;
-  'message.update': (dto: CreateMessageDto) => void;
-  'message.delete': (dto: CreateMessageDto) => void;
+  'message.update': (dto: UpdateMessageDto) => void;
+  'message.delete': (dto: DeleteMessageDto) => void;
+  'message.restore': (dto: RestoreMessageDto) => void;
 }
 
 export const ClientMessageEvents = {
@@ -20,3 +35,9 @@ export const ClientMessageEvents = {
   DELETE: 'message.delete',
   RESTORE: 'message.restore',
 };
+
+export type MessageEvent =
+  | 'message.created'
+  | 'message.updated'
+  | 'message.deleted'
+  | 'message.restored';

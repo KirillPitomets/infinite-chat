@@ -1,5 +1,5 @@
 import { User } from 'src/generated/prisma/client';
 
-export type socketAuthData = {
+export type SocketAuthData = {
   auth: { user: User };
 };

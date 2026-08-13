@@ -6,6 +6,7 @@ import { RoomModule } from './room/room.module';
 import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { AttachmentsModule } from './attachments/attachments.module';
     MessagesModule,
     AuthModule,
     AttachmentsModule,
+    NotificationModule,
   ],
   exports: [DevModule],
 })

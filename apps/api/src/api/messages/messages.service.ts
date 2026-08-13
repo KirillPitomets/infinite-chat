@@ -91,6 +91,7 @@ export class MessagesService {
     }
 
     const updatedMessage = await this.messageRepo.updateMessage(
+      userId,
       messageId,
       text,
       replyToMessageId === null ? null : replyMessage?.id,
@@ -100,14 +101,33 @@ export class MessagesService {
     return new MessageEntity(updatedMessage);
   }
 
-  async delete(
+  async softDelete(
     userId: string,
     roomId: string,
     messageId: string,
   ): Promise<MessageEntity> {
     await this.roomService.assertUserInRoom(userId, roomId);
 
-    const message = await this.messageRepo.delete(userId, roomId, messageId);
+    const existMessage = await this.prismaService.message.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!existMessage) {
+      throw new NotFoundException('Message not found');
+    }
+
+    if (existMessage.isDeleted) {
+      throw new BadRequestException('Message already deleted');
+    }
+
+    const message = await this.messageRepo.softDelete(
+      userId,
+      roomId,
+      messageId,
+    );
+
+    message.text = null;
+    message.attachments = [];
 
     return new MessageEntity(message);
   }
@@ -118,6 +138,18 @@ export class MessagesService {
     messageId: string,
   ): Promise<MessageEntity> {
     await this.roomService.assertUserInRoom(userId, roomId);
+
+    const existMessage = await this.prismaService.message.findUnique({
+      where: { id: messageId },
+    });
+
+    if (!existMessage) {
+      throw new NotFoundException('Message not found');
+    }
+
+    if (!existMessage.isDeleted) {
+      throw new BadRequestException('Message already restored');
+    }
 
     const message = await this.messageRepo.restore(userId, roomId, messageId);
 

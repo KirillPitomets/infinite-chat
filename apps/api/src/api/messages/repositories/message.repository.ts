@@ -25,7 +25,7 @@ export class MessageRepository {
     });
   }
 
-  async delete(userId: string, roomId: string, messageId: string) {
+  async softDelete(userId: string, roomId: string, messageId: string) {
     return this.prisma.message.update({
       where: {
         id: messageId,
@@ -75,6 +75,7 @@ export class MessageRepository {
   }
 
   async updateMessage(
+    userId: string,
     messageId: string,
     text?: string | null,
     replyToMessageId?: string | null,
@@ -83,7 +84,7 @@ export class MessageRepository {
     return this.prisma.$transaction(async (tx) => {
       if (text === null || text) {
         await tx.message.update({
-          where: { id: messageId },
+          where: { id: messageId, senderId: userId },
           data: { text },
         });
       }

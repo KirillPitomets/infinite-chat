@@ -16,23 +16,27 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
+import { instanceToPlain } from 'class-transformer';
 import { WsExceptionFilter } from 'src/common/filters';
-import { PrismaService } from 'src/infra/prisma/prisma.service';
+import { flattenValidationErrors } from 'src/utils/flattenValidationErrors.util';
 import { WsAuthGuard } from '../auth/guards';
+import { RoomService } from '../room/room.service';
 import { UserService } from '../user/user.service';
-import { CreateMessageDto, JoinRoomDto, UpdateMessageDto } from './dto';
+import { CreateMessageDto, UpdateMessageDto } from './dto';
+import { DeleteMessageDto } from './dto/delete-message.dto';
+import { RestoreMessageDto } from './dto/restore-message.dto';
+import { MessageEntity } from './entity/message.entity';
+import {
+  ClientMessageEvents,
+  MessageEvent,
+  MessagePayload,
+} from './events/messages.events';
 import { MessagesService } from './messages.service';
 import type {
   MessageServer,
   MessageSocket,
   ServerToClientEvents,
 } from './types/message-socket.type';
-import { flattenValidationErrors } from 'src/utils/flattenValidationErrors.util';
-import { instanceToPlain } from 'class-transformer';
-import { MessageEntity } from './entity/message.entity';
-import { ClientMessageEvents } from './events/messages.events';
-import { ClientRoomEvents } from './events/room.events';
-import { RoomService } from '../room/room.service';
 
 @WebSocketGateway({
   namespace: 'messages',
@@ -87,7 +91,7 @@ export class MessagesGateway
     } catch (error) {
       client.emit('exception', {
         status: 'error',
-        error: error ?? 'Unauthorized',
+        error,
         timestamp: new Date().toISOString(),
       });
       client.disconnect();
@@ -105,7 +109,6 @@ export class MessagesGateway
   ) {
     const { id: userId } = client.data.auth.user;
     const { roomId } = dto;
-
     if (!client.rooms.has(dto.roomId)) {
       throw new WsException('User not a member of this room');
     }
@@ -132,49 +135,55 @@ export class MessagesGateway
     this.emitToRoom(dto.roomId, 'message.updated', message);
   }
 
-  // @SubscribeMessage(ClientMessageEvents.DELETE)
-  // async delete(
-  //   @ConnectedSocket() client: MessageSocket,
-  //   @MessageBody() dto: CreateMessageDto,
-  // ) {
-  //   const { id: userId } = client.data.auth.user;
-  //   const { roomId } = dto;
-
-  //   if (!client.rooms.has(dto.roomId)) {
-  //     throw new WsException('User not a member of this room');
-  //   }
-
-  //   const message = await this.messagesService.create(userId, roomId, dto);
-
-  //   this.emitToRoom(dto.roomId, 'message.deleted', message);
-  // }
-
-  // @SubscribeMessage(ClientMessageEvents.RESTORE)
-  // async restore(
-  //   @ConnectedSocket() client: MessageSocket,
-  //   @MessageBody() dto: CreateMessageDto,
-  // ) {
-  //   const { id: userId } = client.data.auth.user;
-  //   const { roomId } = dto;
-
-  //   if (!client.rooms.has(dto.roomId)) {
-  //     throw new WsException('User not a member of this room');
-  //   }
-
-  //   const message = await this.messagesService.create(userId, roomId, dto);
-
-  //   this.emitToRoom(dto.roomId, 'message.restored', message);
-  // }
-
-  private emitToRoom<E extends keyof ServerToClientEvents>(
-    roomId: string,
-    event: E,
-    ...args: Parameters<ServerToClientEvents[E]>
+  @SubscribeMessage(ClientMessageEvents.DELETE)
+  async delete(
+    @ConnectedSocket() client: MessageSocket,
+    @MessageBody() dto: DeleteMessageDto,
   ) {
-    const serialized = args.map((arg) =>
-      arg instanceof Object && '_isEntity' in arg ? instanceToPlain(arg) : arg,
-    ) as Parameters<ServerToClientEvents[E]>;
+    const { id: userId } = client.data.auth.user;
+    const { roomId, messageId } = dto;
 
-    this.server.to(roomId).emit(event, ...serialized);
+    if (!client.rooms.has(dto.roomId)) {
+      throw new WsException('User not a member of this room');
+    }
+
+    const message = await this.messagesService.softDelete(
+      userId,
+      roomId,
+      messageId,
+    );
+
+    this.emitToRoom(dto.roomId, 'message.deleted', message);
+  }
+
+  @SubscribeMessage(ClientMessageEvents.RESTORE)
+  async restore(
+    @ConnectedSocket() client: MessageSocket,
+    @MessageBody() dto: RestoreMessageDto,
+  ) {
+    const { id: userId } = client.data.auth.user;
+    const { roomId, messageId } = dto;
+
+    if (!client.rooms.has(dto.roomId)) {
+      throw new WsException('User not a member of this room');
+    }
+
+    const message = await this.messagesService.restore(
+      userId,
+      roomId,
+      messageId,
+    );
+
+    this.emitToRoom(dto.roomId, 'message.restored', message);
+  }
+
+  private emitToRoom(
+    roomId: string,
+    event: MessageEvent,
+    message: MessageEntity,
+  ) {
+    const payload = instanceToPlain(message) as MessagePayload;
+
+    this.server.to(roomId).emit(event, payload);
   }
 }

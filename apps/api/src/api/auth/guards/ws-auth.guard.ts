@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io';
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
-import { socketAuthData } from 'src/types/socket/socketAuthData.type';
+import { SocketAuthData } from 'src/types/socket/socket-auth-data.type';
 import { WsException } from '@nestjs/websockets';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class WsAuthGuard implements CanActivate {
   constructor() {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const client: Socket<{}, {}, {}, socketAuthData> = context
+    const client: Socket<{}, {}, {}, SocketAuthData> = context
       .switchToWs()
       .getClient();
     if (!client.data.auth.user) {
