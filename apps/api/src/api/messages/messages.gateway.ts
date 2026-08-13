@@ -18,10 +18,8 @@ import {
 } from '@nestjs/websockets';
 import { instanceToPlain } from 'class-transformer';
 import { WsExceptionFilter } from 'src/common/filters';
-import { flattenValidationErrors } from 'src/utils/flattenValidationErrors.util';
 import { WsAuthGuard } from '../auth/guards';
 import { RoomService } from '../room/room.service';
-import { UserService } from '../user/user.service';
 import { CreateMessageDto, UpdateMessageDto } from './dto';
 import { DeleteMessageDto } from './dto/delete-message.dto';
 import { RestoreMessageDto } from './dto/restore-message.dto';
@@ -37,6 +35,8 @@ import type {
   MessageSocket,
   ServerToClientEvents,
 } from './types/message-socket.type';
+import { WsAuthService } from '../auth/ws-auth.service';
+import { BaseGateway, flattenValidationErrors } from 'src/utils';
 
 @WebSocketGateway({
   namespace: 'messages',
@@ -56,50 +56,28 @@ import type {
   }),
 )
 export class MessagesGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
+  extends BaseGateway
+  implements OnGatewayConnection
 {
   @WebSocketServer() server: MessageServer;
 
   constructor(
-    private readonly userService: UserService,
     private readonly messagesService: MessagesService,
-    private readonly configService: ConfigService,
     private readonly roomService: RoomService,
-  ) {}
+    private readonly wsAuthService: WsAuthService,
+  ) {
+    super();
+  }
 
   async handleConnection(client: MessageSocket) {
-    const token = client.handshake.headers.authorization?.split(' ')[1];
     try {
-      if (!token) {
-        throw new WsException('Token not provided');
-      }
-
-      const payload = await verifyToken(token, {
-        secretKey: this.configService.getOrThrow('CLERK_SECRET_KEY'),
-      });
-
-      const user = await this.userService.findByClerkId(payload.sub);
-
-      if (!user) {
-        throw new WsException('User not found');
-      }
-
-      client.data.auth = { user };
+      const user = await this.wsAuthService.authenticate(client);
 
       const roomIds = await this.roomService.findUserRoomIds(user.id);
       client.join(roomIds.map(({ roomId }) => roomId));
     } catch (error) {
-      client.emit('exception', {
-        status: 'error',
-        error,
-        timestamp: new Date().toISOString(),
-      });
-      client.disconnect();
+      this.disconnectedWithError(client, error);
     }
-  }
-
-  handleDisconnect(client: MessageSocket) {
-    console.log('Client disconnected: ', client.id);
   }
 
   @SubscribeMessage(ClientMessageEvents.SEND)
