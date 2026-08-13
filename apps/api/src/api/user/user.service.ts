@@ -1,17 +1,11 @@
-import { type ClerkClient } from '@clerk/backend';
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { CLERK_CLIENT } from 'src/infra/clerk/clerk-client.provider';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { UserEntity } from './entity';
 import { LimitPageQueryDto } from 'src/common/dto';
 
 @Injectable()
 export class UserService {
-  constructor(
-    @Inject(CLERK_CLIENT)
-    private readonly clerkClient: ClerkClient,
-    private readonly prismaService: PrismaService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async findById(id: string): Promise<UserEntity> {
     const user = await this.prismaService.user.findUnique({ where: { id } });
