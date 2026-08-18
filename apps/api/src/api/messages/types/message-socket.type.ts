@@ -2,9 +2,9 @@ import { Server, Socket } from 'socket.io';
 import { DefaultEventsMap } from 'socket.io';
 import { SocketAuthData } from 'src/types/socket/socket-auth-data.type';
 import {
-  ClientToServerMessageEvents,
   ServerToClientMessageEvents,
-} from '../events/messages.events';
+  ClientToServerMessageEvents,
+} from '../contracts/messages.socket-contract';
 
 export type ServerToClientEvents = ServerToClientMessageEvents;
 

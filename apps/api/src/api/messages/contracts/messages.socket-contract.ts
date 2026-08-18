@@ -13,6 +13,7 @@ export interface ExceptionPayload {
   error: unknown;
   timestamp: string;
 }
+
 export interface ServerToClientMessageEvents {
   'message.created': (message: MessagePayload) => void;
   'message.updated': (message: MessagePayload) => void;

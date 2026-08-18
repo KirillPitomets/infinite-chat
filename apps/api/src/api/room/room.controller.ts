@@ -8,6 +8,7 @@ import {
   Param,
   Post,
   Query,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { ClerkUserId } from 'src/common/decorators';
@@ -24,6 +25,7 @@ import { RoomEntity } from './entities';
 import { RoleGuard } from './guards/role.guard';
 import { RoomService } from './room.service';
 import { LimitPageQueryDto } from 'src/common/dto';
+import { type Response } from 'express';
 
 @UseGuards(RoleGuard)
 @Controller('room')
@@ -33,10 +35,19 @@ export class RoomController {
   @ApiFindOrCreateDirectRoom()
   @Post('/direct')
   async findOrCreateDirect(
-    @ClerkUserId(UserByIdPipe) user: User,
+    @Res({ passthrough: true }) res: Response,
+    @ClerkUserId(UserByIdPipe)
+    user: User,
     @Body() dto: FindOrCreateDirectRoomDto,
   ): Promise<RoomEntity> {
-    return this.roomService.findOrCreateDirect(user.id, dto);
+    const { entity, created } = await this.roomService.findOrCreateDirect(
+      user.id,
+      dto,
+    );
+
+    res.status(created ? HttpStatus.CREATED : HttpStatus.OK);
+
+    return entity;
   }
 
   @ApiFindRoomById()

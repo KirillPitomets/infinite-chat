@@ -6,6 +6,7 @@ import {
 } from 'src/api/attachments/dto';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { baseMessageIncludes } from './constants/includes';
+import { JsonValue } from '@prisma/client/runtime/client';
 
 @Injectable()
 export class MessageRepository {
@@ -69,6 +70,22 @@ export class MessageRepository {
         attachments: attachments?.length
           ? { createMany: { data: attachments } }
           : undefined,
+      },
+      include: baseMessageIncludes,
+    });
+  }
+
+  async createSystemMessage(
+    actorId: string,
+    roomId: string,
+    systemContent: string,
+  ) {
+    return await this.prisma.message.create({
+      data: {
+        roomId,
+        type: 'SYSTEM',
+        systemContent,
+        senderId: actorId,
       },
       include: baseMessageIncludes,
     });

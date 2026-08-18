@@ -1,7 +1,8 @@
 import { Exclude } from 'class-transformer';
 import { UserEntity } from 'src/api/user/entity';
-import { Message, Prisma } from 'src/generated/prisma/client';
+import { Message, MessageType, Prisma } from 'src/generated/prisma/client';
 import { MessageAttachmentEntity } from './message-attachment.entity';
+import { type JsonValue } from '@prisma/client/runtime/client';
 
 type ReplyMessagePayload = Prisma.MessageGetPayload<{
   include: {
@@ -21,6 +22,9 @@ export class ReplyMessageEntity implements Message {
   createdAt: Date;
   updatedAt: Date;
 
+  @Exclude() type: MessageType;
+  @Exclude() metadata: JsonValue;
+  @Exclude() systemContent: string | null;
   @Exclude() replyToMessageId: string | null;
   @Exclude() roomId: string;
   @Exclude() senderId: string;

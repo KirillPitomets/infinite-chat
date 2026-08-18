@@ -4,9 +4,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
+import { LimitPageQueryDto } from 'src/common/dto';
+import { TypedEventEmitterService } from 'src/common/events/typed-event-emitter.service';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
-import { UserService } from '../user/user.service';
 import {
   CreateGroupRoomDto,
   FindOrCreateDirectRoomDto,
@@ -15,19 +15,21 @@ import {
 } from './dto';
 import { RoomEntity } from './entities';
 import { RoomRepository } from './repositories/room.repository';
-import { LimitPageQueryDto } from 'src/common/dto';
+import { RoomMember, RoomMemberRole } from 'src/generated/prisma/client';
+import { AppEventMap, AppEventName } from 'src/common/events/event-map';
 
 @Injectable()
 export class RoomService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly roomRepo: RoomRepository,
+    private readonly typedEventEmitterService: TypedEventEmitterService,
   ) {}
 
   async findOrCreateDirect(
     userId: string,
     dto: FindOrCreateDirectRoomDto,
-  ): Promise<RoomEntity> {
+  ): Promise<{ entity: RoomEntity; created: boolean }> {
     const member = await this.prismaService.user.findUnique({
       where: { id: dto.memberId },
     });
@@ -42,11 +44,18 @@ export class RoomService {
 
     const existingRoom = await this.roomRepo.findDirectRoom(userId, member.id);
 
-    if (existingRoom) return new RoomEntity(existingRoom);
+    if (existingRoom)
+      return { entity: new RoomEntity(existingRoom), created: false };
 
     const room = await this.roomRepo.createDirectRoom(userId, member.id);
 
-    return new RoomEntity(room);
+    this.typedEventEmitterService.emit('room:created', {
+      entity: new RoomEntity(room),
+      actorId: userId,
+      recipientIds: this.getMemberUserIds(room.memberships),
+    });
+
+    return { entity: new RoomEntity(room), created: true };
   }
 
   async createGroup(
@@ -71,6 +80,12 @@ export class RoomService {
       userId,
       name,
       memberships: validMembers,
+    });
+
+    this.typedEventEmitterService.emit('room:created', {
+      entity: new RoomEntity(room),
+      actorId: userId,
+      recipientIds: this.getMemberUserIds(room.memberships),
     });
 
     return new RoomEntity(room);
@@ -137,10 +152,6 @@ export class RoomService {
     roomId: string,
     memberId: string,
   ): Promise<void> {
-    if (userId === memberId) {
-      throw new BadRequestException('You cannot kick yourself');
-    }
-
     const roomMember = await this.prismaService.roomMember.findFirst({
       where: {
         id: memberId,
@@ -152,6 +163,10 @@ export class RoomService {
       throw new NotFoundException('Member are not in the room');
     }
 
+    if (userId === roomMember.userId) {
+      throw new BadRequestException('You cannot kick yourself');
+    }
+
     // TODO: replace this condition on roleService.isOwner(roomMember.role)
     if (roomMember.role === 'OWNER') {
       throw new BadRequestException('You cannot kick room owner');
@@ -160,6 +175,12 @@ export class RoomService {
     await this.prismaService.roomMember.update({
       where: { id: roomMember.id },
       data: { leftAt: new Date() },
+    });
+
+    this.typedEventEmitterService.emit('room:member-kicked', {
+      actorId: userId,
+      roomId,
+      kickedMemberId: roomMember.id,
     });
   }
 
@@ -170,7 +191,7 @@ export class RoomService {
         roomId,
       },
       include: {
-        room: { select: { type: true } },
+        room: { include: { memberships: true } },
       },
     });
 
@@ -187,6 +208,11 @@ export class RoomService {
       throw new BadRequestException('You cannot leave from your group');
     }
 
+    this.typedEventEmitterService.emit('room:member-left', {
+      actorId: userId,
+      roomId,
+    });
+
     await this.prismaService.roomMember.update({
       where: { id: roomMember.id },
       data: { leftAt: new Date() },
@@ -196,7 +222,7 @@ export class RoomService {
   async delete(userId: string, roomId: string): Promise<void> {
     const roomMember = await this.prismaService.roomMember.findFirst({
       where: { roomId, userId },
-      include: { room: true },
+      include: { room: { include: { memberships: true } } },
     });
 
     if (!roomMember) {
@@ -207,33 +233,30 @@ export class RoomService {
       throw new ForbiddenException('Only the owner can delete group room');
     }
 
-    await this.prismaService.room.delete({
+    const room = await this.prismaService.room.delete({
       where: { id: roomMember.room.id },
     });
-  }
 
-  async assertUserInRoom(userId: string, roomId: string) {
-    const roomMember = await this.prismaService.roomMember.findFirst({
-      where: {
-        userId,
-        roomId,
-      },
+    this.typedEventEmitterService.emit('room:deleted', {
+      actorId: userId,
+      roomId: room.id,
+      recipientIds: this.getMemberUserIds(roomMember.room.memberships),
     });
-
-    if (!roomMember || roomMember.leftAt) {
-      throw new ForbiddenException('User are not room member');
-    }
-
-    return true;
   }
 
-  async findUserRoomIds(userId: string) {
-    return this.prismaService.roomMember.findMany({
+  async findUserRoomIds(userId: string): Promise<string[]> {
+    const rooms = await this.prismaService.roomMember.findMany({
       where: {
         userId,
         leftAt: null,
       },
       select: { roomId: true },
     });
+
+    return rooms.map(({ roomId }) => roomId);
+  }
+
+  private getMemberUserIds(memberships: RoomMember[]): string[] {
+    return memberships.map(({ userId }) => userId);
   }
 }

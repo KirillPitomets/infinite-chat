@@ -7,6 +7,7 @@ import { MessagesModule } from './messages/messages.module';
 import { AuthModule } from './auth/auth.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { NotificationModule } from './notification/notification.module';
+import { RoomAuthModule } from './room-auth/room-auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NotificationModule } from './notification/notification.module';
     AuthModule,
     AttachmentsModule,
     NotificationModule,
+    RoomAuthModule,
   ],
   exports: [DevModule],
 })

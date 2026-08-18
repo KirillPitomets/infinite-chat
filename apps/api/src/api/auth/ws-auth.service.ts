@@ -32,8 +32,6 @@ export class WsAuthService {
       throw new WsException('User not found');
     }
 
-    client.data.auth = { user };
-
     return user;
   }
 }

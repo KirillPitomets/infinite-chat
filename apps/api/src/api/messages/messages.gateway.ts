@@ -1,16 +1,9 @@
-import { verifyToken } from '@clerk/backend';
-import {
-  UseFilters,
-  UseGuards,
-  UsePipes,
-  ValidationPipe,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { UseFilters, UseGuards, UsePipes } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import {
   ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -18,43 +11,31 @@ import {
 } from '@nestjs/websockets';
 import { instanceToPlain } from 'class-transformer';
 import { WsExceptionFilter } from 'src/common/filters';
+import { WsExceptionPipe } from 'src/common/pipes/ws-exception.pipe';
+import { BaseGateway } from 'src/utils';
 import { WsAuthGuard } from '../auth/guards';
-import { RoomService } from '../room/room.service';
-import { CreateMessageDto, UpdateMessageDto } from './dto';
-import { DeleteMessageDto } from './dto/delete-message.dto';
-import { RestoreMessageDto } from './dto/restore-message.dto';
-import { MessageEntity } from './entity/message.entity';
+import { WsAuthService } from '../auth/ws-auth.service';
+import { RoomAuthService } from '../room-auth/room-auth.service';
 import {
   ClientMessageEvents,
   MessageEvent,
   MessagePayload,
-} from './events/messages.events';
+} from './contracts/messages.socket-contract';
+import { CreateMessageDto, UpdateMessageDto } from './dto';
+import { DeleteMessageDto } from './dto/delete-message.dto';
+import { RestoreMessageDto } from './dto/restore-message.dto';
+import { MessageEntity } from './entity/message.entity';
+import { SystemMessageCreatedEvent } from './events/SystemMessageCreated.event';
 import { MessagesService } from './messages.service';
-import type {
-  MessageServer,
-  MessageSocket,
-  ServerToClientEvents,
-} from './types/message-socket.type';
-import { WsAuthService } from '../auth/ws-auth.service';
-import { BaseGateway, flattenValidationErrors } from 'src/utils';
+import type { MessageServer, MessageSocket } from './types/message-socket.type';
+import { RoomService } from '../room/room.service';
 
 @WebSocketGateway({
   namespace: 'messages',
 })
 @UseFilters(WsExceptionFilter)
 @UseGuards(WsAuthGuard)
-@UsePipes(
-  new ValidationPipe({
-    transform: true,
-    whitelist: true,
-    exceptionFactory(errors) {
-      const messages: string[] = flattenValidationErrors(errors);
-      return new WsException(
-        messages.length ? messages.join(', ') : 'Validation failed',
-      );
-    },
-  }),
-)
+@UsePipes(WsExceptionPipe)
 export class MessagesGateway
   extends BaseGateway
   implements OnGatewayConnection
@@ -73,8 +54,9 @@ export class MessagesGateway
     try {
       const user = await this.wsAuthService.authenticate(client);
 
+      client.data.auth = { user };
       const roomIds = await this.roomService.findUserRoomIds(user.id);
-      client.join(roomIds.map(({ roomId }) => roomId));
+      client.join(roomIds.map((id) => `room:${id}`));
     } catch (error) {
       this.disconnectedWithError(client, error);
     }
@@ -87,13 +69,20 @@ export class MessagesGateway
   ) {
     const { id: userId } = client.data.auth.user;
     const { roomId } = dto;
-    if (!client.rooms.has(dto.roomId)) {
+
+    if (!client.rooms.has(`room:${dto.roomId}`)) {
       throw new WsException('User not a member of this room');
     }
 
     const message = await this.messagesService.create(userId, roomId, dto);
 
     this.emitToRoom(dto.roomId, 'message.created', message);
+  }
+
+  @OnEvent('message:created')
+  async createSystemMessage(payload: SystemMessageCreatedEvent) {
+    const { message, roomId } = payload;
+    this.emitToRoom(roomId, 'message.created', message);
   }
 
   @SubscribeMessage(ClientMessageEvents.UPDATE)
@@ -162,6 +151,6 @@ export class MessagesGateway
   ) {
     const payload = instanceToPlain(message) as MessagePayload;
 
-    this.server.to(roomId).emit(event, payload);
+    this.server.to(`room:${roomId}`).emit(event, payload);
   }
 }

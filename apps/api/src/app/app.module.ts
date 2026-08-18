@@ -7,6 +7,8 @@ import { InfraModule } from '../infra/infra.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ClerkAuthGuard } from 'src/api/auth/guards';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ListenerModule } from 'src/listeners/listener.module';
 
 @Module({
   imports: [
@@ -16,6 +18,8 @@ import { ClerkAuthGuard } from 'src/api/auth/guards';
     }),
     ApiModule,
     InfraModule,
+    ListenerModule,
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ClerkAuthGuard }],

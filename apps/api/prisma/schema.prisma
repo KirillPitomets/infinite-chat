@@ -10,23 +10,25 @@ datasource db {
 
 
 model User {
-  id           String                          @id @default(uuid(4))
-  clerkId      String       @map("clerk_id")   @unique
+  id            String                            @id @default(uuid(4))
+  clerkId       String         @map("clerk_id")   @unique
 
   // tag         String                        @unique
-  email        String                          @unique
-  firstName    String       @map("first_name")
-  lastName     String       @map("last_name")
-  username     String
-  imageUrl     String       @map("image_url")
+  email         String                            @unique
+  firstName     String         @map("first_name")
+  lastName      String         @map("last_name")
+  username      String
+  imageUrl      String         @map("image_url")
 
   // Last date when user was online
-  lastSeen     DateTime     @map("last_seen")  @default(now())
-  createdAt    DateTime     @map("created_at") @default(now())
+  lastSeen      DateTime       @map("last_seen")  @default(now())
+  createdAt     DateTime       @map("created_at") @default(now())
 
-  messages     Message[]
-  memberships  RoomMember[]
-  createdRooms Room[]       @relation("RoomCreator")
+  messages      Message[]
+  memberships   RoomMember[]
+  notifications Notification[]
+
+  createdRooms  Room[]         @relation("RoomCreator")
 }
 
 model RoomMember {
@@ -70,6 +72,10 @@ model Message {
   replyToMessage   Message?            @relation("MessageReply", fields: [replyToMessageId], references: [id])
   replies          Message[]           @relation("MessageReply")
 
+  type             MessageType                                     @default(USER)
+  systemContent    String?             @map("system_content")
+  metadata         Json?
+
   createdAt        DateTime            @map("created_at")          @default(now())
   updatedAt        DateTime            @map("updated_at")          @updatedAt
   isDeleted        Boolean             @map("is_deleted")          @default(false)
@@ -102,6 +108,26 @@ model MessageAttachment  {
   @@map("message_attachment")
 }
 
+model Notification {
+  id        String                                  @id @default(uuid())
+  userId    String               @map("user_id")
+  entityId  String?              @map("entity_id")  @db.Uuid
+  type      String
+  title     String
+  body      String
+  metadata  Json?
+
+  category  NotificationCategory
+
+  isRead    Boolean              @map("is_read")    @default(false)
+  readAt    DateTime?            @map("read_at")
+
+
+  createdAt DateTime             @map("created_at") @default(now())
+
+  user      User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 enum RoomMemberRole {
   OWNER
   ADMIN
@@ -118,4 +144,14 @@ enum MessageAttachmentType {
   IMAGE
   AUDIO
   FILE
+}
+
+enum NotificationCategory {
+  CHAT
+  EVENTS
+}
+
+enum MessageType {
+  USER
+  SYSTEM
 }

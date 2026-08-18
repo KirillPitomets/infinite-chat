@@ -9,7 +9,8 @@ import { Message } from 'src/generated/prisma/client';
 import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { AttachmentsService } from '../attachments/attachments.service';
-import { RoomService } from '../room/room.service';
+import { RoomAuthService } from '../room-auth/room-auth.service';
+import { UserService } from '../user/user.service';
 import { CreateMessageDto, UpdateMessageDto } from './dto';
 import { MessageEntity } from './entity';
 import { MessageRepository } from './repositories/message.repository';
@@ -18,8 +19,9 @@ import { MessageRepository } from './repositories/message.repository';
 export class MessagesService {
   constructor(
     private readonly prismaService: PrismaService,
+    private readonly userService: UserService,
     private readonly messageRepo: MessageRepository,
-    private readonly roomService: RoomService,
+    private readonly roomAuthService: RoomAuthService,
     private readonly attachmentsService: AttachmentsService,
     private readonly cloudinaryService: CloudinaryService,
   ) {}
@@ -29,7 +31,7 @@ export class MessagesService {
     roomId: string,
     query: LimitPageQueryDto,
   ): Promise<MessageEntity[]> {
-    await this.roomService.assertUserInRoom(userId, roomId);
+    await this.roomAuthService.assertUserInRoom(userId, roomId);
 
     const { limit, page } = query;
 
@@ -45,7 +47,7 @@ export class MessagesService {
   ): Promise<MessageEntity> {
     const { text, attachments, replyToMessageId } = dto;
 
-    await this.roomService.assertUserInRoom(userId, roomId);
+    await this.roomAuthService.assertUserInRoom(userId, roomId);
 
     if (!text && (!attachments || attachments.length === 0)) {
       throw new BadRequestException('Message must have text or attachments');
@@ -74,7 +76,7 @@ export class MessagesService {
 
   async update(userId: string, dto: UpdateMessageDto): Promise<MessageEntity> {
     const { messageId, roomId, text, attachments, replyToMessageId } = dto;
-    await this.roomService.assertUserInRoom(userId, roomId);
+    await this.roomAuthService.assertUserInRoom(userId, roomId);
 
     if (text === undefined && attachments === undefined) {
       throw new BadRequestException('Message must have text or attachments');
@@ -106,7 +108,7 @@ export class MessagesService {
     roomId: string,
     messageId: string,
   ): Promise<MessageEntity> {
-    await this.roomService.assertUserInRoom(userId, roomId);
+    await this.roomAuthService.assertUserInRoom(userId, roomId);
 
     const existMessage = await this.prismaService.message.findUnique({
       where: { id: messageId },
@@ -137,7 +139,7 @@ export class MessagesService {
     roomId: string,
     messageId: string,
   ): Promise<MessageEntity> {
-    await this.roomService.assertUserInRoom(userId, roomId);
+    await this.roomAuthService.assertUserInRoom(userId, roomId);
 
     const existMessage = await this.prismaService.message.findUnique({
       where: { id: messageId },
@@ -191,6 +193,44 @@ export class MessagesService {
     }
 
     return message;
+  }
+
+  async createLeftSystemMessage(actorId: string, roomId: string) {
+    const user = await this.userService.findById(actorId);
+
+    const message = await this.messageRepo.createSystemMessage(
+      actorId,
+      roomId,
+      `${user.username} has left from the room`,
+    );
+
+    return new MessageEntity(message);
+  }
+
+  async createKickSystemMessage(
+    actorId: string,
+    kickedMemberId: string,
+    roomId: string,
+  ) {
+    const actor = await this.userService.findById(actorId);
+    const kickedUser = await this.prismaService.roomMember.findUnique({
+      where: {
+        id: kickedMemberId,
+      },
+      include: { user: true },
+    });
+
+    if (!kickedUser) {
+      throw new NotFoundException('Kicked user not found');
+    }
+
+    const message = await this.messageRepo.createSystemMessage(
+      actorId,
+      roomId,
+      `${actor.username} kicked ${kickedUser?.user.username}`,
+    );
+
+    return new MessageEntity(message);
   }
 
   async ensureMessageWillHaveContent(messageId: string, dto: UpdateMessageDto) {
