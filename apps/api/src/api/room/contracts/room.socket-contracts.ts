@@ -1,7 +1,10 @@
 import { RoomEntity } from '../entities';
 import { RoomMemberEntity } from '../entities/room-member.entity';
 
-type RoomMemberPayload = Omit<RoomMemberEntity, 'roomId' | 'userId' | 'leftAt'>;
+export type RoomMemberPayload = Omit<
+  RoomMemberEntity,
+  'roomId' | 'userId' | 'leftAt'
+>;
 
 export type RoomPayload = Omit<RoomEntity, 'memberships'> & {
   memberships: RoomMemberPayload[];
@@ -25,5 +28,12 @@ export interface ServerToClientRoomEvents {
     actorId: string;
     kickedMemberId: string;
     roomId: string;
+  }) => void;
+  'room.member-joined': ({
+    roomId,
+    roomMember,
+  }: {
+    roomId: string;
+    roomMember: RoomMemberPayload;
   }) => void;
 }

@@ -1,3 +1,5 @@
+export * from './add-room-member.doc';
+export * from './api-role-guard.doc';
 export * from './create-group.doc';
 export * from './delete-room.doc';
 export * from './find-by-id.doc';

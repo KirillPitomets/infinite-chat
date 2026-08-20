@@ -195,7 +195,10 @@ export class MessagesService {
     return message;
   }
 
-  async createLeftSystemMessage(actorId: string, roomId: string) {
+  async createLeftSystemMessage(
+    actorId: string,
+    roomId: string,
+  ): Promise<MessageEntity> {
     const user = await this.userService.findById(actorId);
 
     const message = await this.messageRepo.createSystemMessage(
@@ -211,7 +214,7 @@ export class MessagesService {
     actorId: string,
     kickedMemberId: string,
     roomId: string,
-  ) {
+  ): Promise<MessageEntity> {
     const actor = await this.userService.findById(actorId);
     const kickedUser = await this.prismaService.roomMember.findUnique({
       where: {
@@ -228,6 +231,21 @@ export class MessagesService {
       actorId,
       roomId,
       `${actor.username} kicked ${kickedUser?.user.username}`,
+    );
+
+    return new MessageEntity(message);
+  }
+
+  async createJoinSystemMessage(
+    actorId: string,
+    roomId: string,
+  ): Promise<MessageEntity> {
+    const actor = await this.userService.findById(actorId);
+
+    const message = await this.messageRepo.createSystemMessage(
+      actorId,
+      roomId,
+      `${actor.username} joined to room`,
     );
 
     return new MessageEntity(message);

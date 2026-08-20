@@ -12,7 +12,6 @@ import {
 import { instanceToPlain } from 'class-transformer';
 import { WsExceptionFilter } from 'src/common/filters';
 import { WsExceptionPipe } from 'src/common/pipes/ws-exception.pipe';
-import { BaseGateway } from 'src/utils';
 import { WsAuthGuard } from '../auth/guards';
 import { WsAuthService } from '../auth/ws-auth.service';
 import { RoomAuthService } from '../room-auth/room-auth.service';
@@ -29,6 +28,9 @@ import { SystemMessageCreatedEvent } from './events/SystemMessageCreated.event';
 import { MessagesService } from './messages.service';
 import type { MessageServer, MessageSocket } from './types/message-socket.type';
 import { RoomService } from '../room/room.service';
+import { AppEventMap } from 'src/common/events/event-map';
+import { BaseGateway } from 'src/utils';
+import { RoomMemberEntity } from '../room/entities/room-member.entity';
 
 @WebSocketGateway({
   namespace: 'messages',
@@ -55,8 +57,12 @@ export class MessagesGateway
       const user = await this.wsAuthService.authenticate(client);
 
       client.data.auth = { user };
+
+      client.join(`user:${user.id}`);
+
       const roomIds = await this.roomService.findUserRoomIds(user.id);
-      client.join(roomIds.map((id) => `room:${id}`));
+      console.log(roomIds);
+      this.joinToAllClientRooms(client, roomIds);
     } catch (error) {
       this.disconnectedWithError(client, error);
     }
@@ -142,6 +148,26 @@ export class MessagesGateway
     );
 
     this.emitToRoom(dto.roomId, 'message.restored', message);
+  }
+
+  @OnEvent('room:member-left')
+  async handleRoomMemberLeft(payload: AppEventMap['room:member-left']) {
+    console.log('echo - msg-gateaway');
+    this.leaveRoomForUser(this.server, payload.actorId, payload.roomId);
+  }
+
+  @OnEvent('room:member-kicked')
+  async handleRoomMemberKicked(payload: AppEventMap['room:member-kicked']) {
+    this.leaveRoomForUser(
+      this.server,
+      payload.kickedRoomMember.userId,
+      payload.roomId,
+    );
+  }
+
+  @OnEvent('room:member-joined')
+  async handleRoomMemberJoined(payload: AppEventMap['room:member-joined']) {
+    this.addRoomForUser(this.server, payload.roomMember.userId, payload.roomId);
   }
 
   private emitToRoom(

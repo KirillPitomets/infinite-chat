@@ -17,12 +17,17 @@ import { RoomEntity } from './entities';
 import { RoomRepository } from './repositories/room.repository';
 import { RoomMember, RoomMemberRole } from 'src/generated/prisma/client';
 import { AppEventMap, AppEventName } from 'src/common/events/event-map';
+import { UserService } from '../user/user.service';
+import { RoomMemberRepository } from './repositories/room-member.repository';
+import { RoomMemberEntity } from './entities/room-member.entity';
 
 @Injectable()
 export class RoomService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly roomRepo: RoomRepository,
+    private readonly roomMemberRepo: RoomMemberRepository,
+    private readonly userService: UserService,
     private readonly typedEventEmitterService: TypedEventEmitterService,
   ) {}
 
@@ -110,6 +115,58 @@ export class RoomService {
     return rooms.map((room) => new RoomEntity(room));
   }
 
+  async addMemberToGroup(roomId: string, newMemberId: string) {
+    const room = await this.prismaService.room.findUnique({
+      where: { id: roomId },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+    if (room.type == 'DIRECT') {
+      throw new BadRequestException('You cannot add new member in Direct room');
+    }
+
+    const newMember = await this.userService.findById(newMemberId);
+
+    if (!newMember) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existRoomMember = await this.prismaService.roomMember.findFirst({
+      where: {
+        roomId,
+        userId: newMemberId,
+      },
+      include: { user: true },
+    });
+
+    if (existRoomMember) {
+      if (existRoomMember.leftAt === null) {
+        throw new BadRequestException('This user already in group');
+      } else {
+        await this.roomMemberRepo.restoreRoomMember(existRoomMember.id);
+
+        this.typedEventEmitterService.emit('room:member-joined', {
+          roomMember: new RoomMemberEntity(existRoomMember),
+          roomId,
+        });
+
+        return;
+      }
+    }
+
+    const newRoomMember = await this.roomMemberRepo.addRoomMember(
+      newMemberId,
+      roomId,
+    );
+
+    this.typedEventEmitterService.emit('room:member-joined', {
+      roomMember: newRoomMember,
+      roomId,
+    });
+  }
+
   async updateGroupName(
     userId: string,
     roomId: string,
@@ -159,7 +216,7 @@ export class RoomService {
       },
     });
 
-    if (!roomMember) {
+    if (!roomMember || roomMember.leftAt !== null) {
       throw new NotFoundException('Member are not in the room');
     }
 
@@ -180,7 +237,7 @@ export class RoomService {
     this.typedEventEmitterService.emit('room:member-kicked', {
       actorId: userId,
       roomId,
-      kickedMemberId: roomMember.id,
+      kickedRoomMember: { userId: roomMember.userId, id: roomMember.id },
     });
   }
 

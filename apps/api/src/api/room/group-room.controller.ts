@@ -63,6 +63,17 @@ export class GroupRoomController {
     return this.roomService.updateGroupName(user.id, roomId, dto);
   }
 
+  @Role('ADMIN')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Post('/:roomId/add/:memberId')
+  async addNewMember(
+    @ClerkUserId(UserByIdPipe) user: User,
+    @Param('roomId') roomId: string,
+    @Param('memberId') memberId: string,
+  ) {
+    return this.roomService.addMemberToGroup(roomId, memberId);
+  }
+
   @ApiPresignGroupAvatar()
   @ApiRoleGuardResponse('ADMIN')
   @Role('ADMIN')

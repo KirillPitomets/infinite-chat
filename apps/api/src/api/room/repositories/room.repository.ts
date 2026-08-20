@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { User } from 'src/generated/prisma/client';
 import { PrismaService } from 'src/infra/prisma/prisma.service';
-import { createGroupRoomArgs } from './types/room.repository.types';
 import { activeMembershipsInclude } from './constants/includes';
+import { createGroupRoomArgs } from './types/room.repository.types';
 
 @Injectable()
 export class RoomRepository {

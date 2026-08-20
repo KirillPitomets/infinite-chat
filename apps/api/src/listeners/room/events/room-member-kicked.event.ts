@@ -1,11 +1,25 @@
 export class RoomMemberKickedEvent {
   actorId: string;
-  kickedMemberId: string;
+  kickedRoomMember: {
+    id: string;
+    userId: string;
+  };
   roomId: string;
 
-  constructor(actorId: string, kickedMemberId: string, roomId: string) {
+  constructor({
+    actorId,
+    kickedRoomMember,
+    roomId,
+  }: {
+    actorId: string;
+    kickedRoomMember: {
+      id: string;
+      userId: string;
+    };
+    roomId: string;
+  }) {
     this.actorId = actorId;
-    this.kickedMemberId = kickedMemberId;
+    this.kickedRoomMember = kickedRoomMember;
     this.roomId = roomId;
   }
 }

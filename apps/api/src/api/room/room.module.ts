@@ -8,11 +8,12 @@ import { RoomRepository } from './repositories/room.repository';
 import { RoomController } from './room.controller';
 import { RoomGateway } from './room.gateway';
 import { RoomService } from './room.service';
+import { RoomMemberRepository } from './repositories/room-member.repository';
 
 @Module({
   imports: [UserModule, CloudinaryModule, AuthModule, TypedEventEmitterModule],
   controllers: [RoomController, GroupRoomController],
-  providers: [RoomService, RoomRepository, RoomGateway],
+  providers: [RoomService, RoomRepository, RoomMemberRepository, RoomGateway],
   exports: [RoomService],
 })
 export class RoomModule {}

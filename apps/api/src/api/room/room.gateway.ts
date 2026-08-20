@@ -5,16 +5,16 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { instanceToPlain } from 'class-transformer';
 import { AppEventMap } from 'src/common/events/event-map';
 import { WsExceptionFilter } from 'src/common/filters';
 import { WsExceptionPipe } from 'src/common/pipes/ws-exception.pipe';
 import { BaseGateway } from 'src/utils';
 import { WsAuthGuard } from '../auth/guards';
 import { WsAuthService } from '../auth/ws-auth.service';
-import { RoomPayload } from './contracts/room.socket-contracts';
-import type { RoomServer, RoomSocket } from './types/room-socket.type';
 import { RoomService } from './room.service';
+import type { RoomServer, RoomSocket } from './types/room-socket.type';
+import { instanceToPlain } from 'class-transformer';
+import { RoomMemberPayload } from './contracts/room.socket-contracts';
 
 @WebSocketGateway({
   namespace: 'rooms',
@@ -37,8 +37,11 @@ export class RoomGateway extends BaseGateway implements OnGatewayConnection {
       const user = await this.wsAuthService.authenticate(client);
       client.data.auth = { user };
 
-      const rooms = await this.roomService.findUserRoomIds(user.id);
-      client.join(rooms.map((id) => `room:${id}`));
+      client.join(`user:${user.id}`);
+
+      const roomIds = await this.roomService.findUserRoomIds(user.id);
+
+      this.joinToAllClientRooms(client, roomIds);
     } catch (error) {
       this.disconnectedWithError(client, error);
     }
@@ -52,13 +55,35 @@ export class RoomGateway extends BaseGateway implements OnGatewayConnection {
       roomId,
       userId: actorId,
     });
+
+    this.leaveRoomForUser(this.server, actorId, roomId);
   }
 
   @OnEvent('room:member-kicked')
   async handleRoomMemberKicked(payload: AppEventMap['room:member-kicked']) {
-    const { actorId, kickedMemberId, roomId } = payload;
-    this.server
-      .to(`room:${roomId}`)
-      .emit('room.member-kicked', { actorId, kickedMemberId, roomId });
+    const { actorId, kickedRoomMember, roomId } = payload;
+    this.server.to(`room:${roomId}`).emit('room.member-kicked', {
+      actorId,
+      kickedMemberId: kickedRoomMember.id,
+      roomId,
+    });
+
+    this.leaveRoomForUser(this.server, kickedRoomMember.userId, roomId);
+  }
+
+  @OnEvent('room:member-joined')
+  async handleRoomMemberJoined(payload: AppEventMap['room:member-joined']) {
+    const { roomMember, roomId } = payload;
+
+    const roomMemberPayload = instanceToPlain(
+      payload.roomMember,
+    ) as RoomMemberPayload;
+
+    this.server.to(`room:${roomId}`).emit('room.member-joined', {
+      roomId,
+      roomMember: roomMemberPayload,
+    });
+
+    this.addRoomForUser(this.server, roomMember.userId, roomId);
   }
 }
