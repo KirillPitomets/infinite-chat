@@ -1,8 +1,7 @@
 import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
 import { useThrottle } from "@/shared/hooks/useThrottle"
-import { edenClient } from "@/shared/lib/eden"
-import { User } from "@/shared/types/User.type"
+import { User } from "@/shared/types/api.type"
 import { isReadMessage } from "@/shared/utils/isReadMessage"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect, useRef } from "react"
@@ -49,9 +48,10 @@ export const MessageList = ({
       ) {
         return
       }
-      await edenClient.chat({ chatId }).read.put({
-        lastReadAt: lastIncommingMessage.createdAt
-      })
+      // == TODO ==
+      // await edenClient.chat({ chatId }).read.put({
+      //   lastReadAt: lastIncommingMessage.createdAt
+      // })
     }
   })
 

@@ -1,4 +1,3 @@
-import { edenClient } from "@/shared/lib/eden"
 import { useMutation } from "@tanstack/react-query"
 import Image from "next/image"
 import toast from "react-hot-toast"
@@ -28,22 +27,21 @@ const DeletedMessage = ({
   const changeMessageStatus = useChangeMessageStatus()
   const { mutate: restoreMessage } = useMutation({
     mutationFn: async () => {
-      const res = await edenClient.messages.restore({ messageId: id }).post()
-
-      if (res.status !== 200 || !res.data) {
-        throw new Error("Failed to restore message")
-      }
-
-      return mapAPIMessageToUI(res.data, "sent", false)
+      // == TODO ==
+      // const res = await edenClient.messages.restore({ messageId: id }).post()
+      // if (res.status !== 200 || !res.data) {
+      // throw new Error("Failed to restore message")
+      // }
+      // return mapAPIMessageToUI(res.data, "sent", false)
     },
     onSuccess(message) {
-      if (message) {
-        changeMessageStatus({
-          chatId: chatId,
-          messageId: message.id,
-          status: "sent"
-        })
-      }
+      // if (message) {
+      //   changeMessageStatus({
+      //     chatId: chatId,
+      //     messageId: message.id,
+      //     status: "sent"
+      //   })
+      // }
     },
     onError(error) {
       toast.error(error.message)

@@ -2,7 +2,6 @@
 
 import { ChatInboxList } from "@/features/chat/ui/Inbox/InboxList/InboxList"
 import SearchInput from "@/shared/components/ui/SearchInput/SearchInput"
-import { edenClient } from "@/shared/lib/eden"
 import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { useQuery } from "@tanstack/react-query"
 import { chatKeys } from "../../chat/model/chat.keys"
@@ -19,11 +18,12 @@ export function ChatInbox() {
 
   const { data: chats = [], isLoading } = useQuery<UserChatPreview[]>({
     queryKey: chatKeys.inbox(),
-    queryFn: async () => {
-      const res = await edenClient.chat.preview.get()
+    // == TODO ==
+    // queryFn: async () => {
+    //   const res = await edenClient.chat.preview.get()
 
-      return res.data ?? []
-    },
+    //   return res.data ?? []
+    // },
     select: chats =>
       [...chats].sort(
         (a, b) =>

@@ -1,4 +1,3 @@
-import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 import { ChatMessage } from "@/shared/schemes/message.schema"
 
 type LatestMessageProps = {
@@ -13,11 +12,7 @@ const LatestMessage = ({ latestMessage }: LatestMessageProps) => {
       <p className="truncate max-w-40 opacity-60">
         {latestMessage ? (
           <>
-            <span>
-              {latestMessage.sender.id === user.id
-                ? "you: "
-                : ""}
-            </span>
+            <span>{latestMessage.sender.id === user.id ? "you: " : ""}</span>
             {latestMessage.content ? (
               latestMessage.content
             ) : latestMessage.attachments.length ? (

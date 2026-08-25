@@ -1,13 +1,13 @@
 "use client"
 
-import {useAuthRedirect} from "@/shared/hooks/useAuthRedirect"
-import {SignInButton, SignUpButton} from "@clerk/nextjs"
+import { useAuthRedirect } from "@/shared/hooks/useAuthRedirect"
+import { SignInButton, SignUpButton, useAuth } from "@clerk/nextjs"
 
 export default function Home() {
   useAuthRedirect()
 
   return (
-    <main className="flex justify-center items-center flex-col w-full h-screen">
+    <main className="flex justify-center items-center flex-col w-full h-screen gap-2">
       <h1>Welcome to Infinite chat 😊❤️</h1>
 
       {

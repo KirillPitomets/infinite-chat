@@ -2,7 +2,6 @@
 
 import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
-import { edenClient } from "@/shared/lib/eden"
 import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { matchRoute } from "@/shared/utils/matchRoute"
 import { useQuery } from "@tanstack/react-query"
@@ -17,9 +16,9 @@ export default function NavMenu() {
 
   const { data: inboxChats = [] } = useQuery<UserChatPreview[]>({
     queryKey: chatKeys.inbox(),
+    // == TODO ==
     queryFn: async () => {
-      const res = await edenClient.chat.preview.get()
-      return res.data ?? []
+      return []
     }
   })
 

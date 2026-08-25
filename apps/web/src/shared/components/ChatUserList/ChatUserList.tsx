@@ -1,76 +1,70 @@
-import Image from "next/image"
-import { IconButtonBase } from "../ui/IconButtonBase"
-import { useMutation, useQuery } from "@tanstack/react-query"
-import { edenClient } from "@/shared/lib/eden"
-import { useRouter } from "next/navigation"
+"use client"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
-import toast from "react-hot-toast"
-import { ChatUserListSkeleton } from "./Skeleton"
+import { unwrap } from "@/shared/lib/api/unwrap"
+import { useApiClient } from "@/shared/lib/api/useApiClient"
+import { User } from "@/shared/types/api.type"
+import { useMutation, useQuery } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
 
-export const ChatUserList = () => {
+type ChatUserListProps = {
+  initialData: User[]
+}
+
+export const ChatUserList = ({ initialData }: ChatUserListProps) => {
   const router = useRouter()
+  const api = useApiClient()
 
-  const { data: usersList, isLoading } = useQuery({
-    queryKey: ["getAllUsers"],
-    queryFn: async () => {
-      const res = await edenClient.user.all.get()
-
-      return res.data?.sort(
-        (a, b) =>
-          new Date(a.createdAt).getSeconds() -
-          new Date(b.createdAt).getSeconds()
-      )
-    }
+  const { data: users, refetch } = useQuery({
+    queryKey: ["users"],
+    queryFn: async () => await unwrap(api.GET("/api/v1/user")),
+    initialData
   })
 
   const { mutate: createChat, isPending } = useMutation({
-    mutationFn: async (tag: string) => {
-      const res = await edenClient.chat.create.post({
-        memberTag: tag
-      })
+    mutationFn: async (memberId: string) => {
+      const room = await unwrap(
+        api.POST("/api/v1/room/direct", { body: { memberId } })
+      )
 
-      if (res.status !== 200 || !res.data) {
-        throw new Error(
-          res.error?.value.message ?? "Failed to create new chat :("
-        )
-      }
-
-      router.push(ACCOUNT_PAGES.CHAT_ID(res.data.id))
-    },
-    onError: error => {
-      toast.error(error.message)
+      router.push(ACCOUNT_PAGES.CHAT_ID(room.id))
     }
   })
 
-  if (isLoading) {
-    return <ChatUserListSkeleton />
-  }
-
-  return usersList ? (
+  return users.length ? (
     <ul className="w-full max-w-150 max-h-140 overflow-scroll pr-2">
-      {usersList.map(user => (
+      {users.map(user => (
         <li
-          key={user.tag}
+          key={user.id}
           className="flex items-center justify-between p-2 border-b border-zinc-400"
         >
-          <div className="flex gap-2">
-            <Image
-              width={30}
-              height={20}
-              src={user.imageUrl}
-              alt={user.tag}
-              className="rounded-full"
-            />
-            <span className="font-semibold">{user.name} </span>
+          <div className="flex gap-2 items-center">
+            <div className="flex items-center justify-center rounded-full font-medium text-white overflow-hidden max-w-10 max-h-10">
+              <img
+                src={user.imageUrl}
+                alt={user.username}
+                className=" w-full h-full object-cover"
+              />
+            </div>
+
+            <span className="font-semibold">{user.firstName} </span>
+            <span className="font-semibold">{user.lastName} </span>
           </div>
-          <span className="font-semibold">{user.tag} </span>
-          <IconButtonBase>
-            <button onClick={() => createChat(user.tag)} disabled={isPending}>Create chat</button>
-          </IconButtonBase>
+          <span className="font-semibold">{user.username}</span>
+
+          <button
+            className="p-2 rounded-2xl cursor-pointer hover:bg-green-400"
+            onClick={() => createChat(user.id)}
+            disabled={isPending}
+          >
+            Create chat
+          </button>
         </li>
       ))}
     </ul>
   ) : (
-    <p className="text-xl">No users to start chatting with 🥲</p>
+    <>
+      <p className="text-xl">No users to start chatting with 🥲</p>
+      <button onClick={() => refetch()}>refetch</button>
+    </>
   )
 }

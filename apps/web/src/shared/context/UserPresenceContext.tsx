@@ -1,5 +1,4 @@
 import React, { useEffect } from "react"
-import { edenClient } from "../lib/eden"
 
 export const UserPresenceProvider = ({
   children
@@ -8,7 +7,7 @@ export const UserPresenceProvider = ({
 }) => {
   useEffect(() => {
     const heartbeat = async () => {
-      await edenClient.presence.heartbeat.post()
+      // await edenClient.presence.heartbeat.post()
     }
     const interval = setInterval(heartbeat, 10000)
     return () => clearInterval(interval)

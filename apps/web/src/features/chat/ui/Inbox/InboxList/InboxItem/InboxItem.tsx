@@ -8,7 +8,6 @@ import { useRealtimeTyping } from "@/features/chat/realtime/useRealtimeTyping"
 import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
 import { format } from "date-fns"
 import { MessageStatus } from "../../../Message/Status"
-import { useCurrentUser } from "@/shared/context/CurrentUserContext"
 
 export interface InboxLatestMessage extends ChatMessage {
   isRead: boolean
@@ -31,9 +30,9 @@ export const ChatInboxItem = ({
   memberId,
   unreadConut = 0
 }: ChatInboxItemProps) => {
-  const user = useCurrentUser()
-  const { isOnline } = usePresenceUserStatus(memberId)
-  const { isMemberTyping, member } = useRealtimeTyping(chatId)
+  // const user = useCurrentUser()
+  // const { isOnline } = usePresenceUserStatus(memberId)
+  // const { isMemberTyping, member } = useRealtimeTyping(chatId)
 
   return (
     <Link

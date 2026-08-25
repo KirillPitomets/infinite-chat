@@ -1,13 +1,14 @@
 "use client"
 
-import {ACCOUNT_PAGES} from "@/shared/config/accountPages.config"
-import {useUser} from "@clerk/nextjs"
-import {useRouter} from "next/navigation"
-import {useEffect} from "react"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { useUser } from "@clerk/nextjs"
+import { useRouter } from "next/navigation"
+import { useEffect } from "react"
 
 export const useAuthRedirect = () => {
-  const {user, isSignedIn} = useUser()
-  const {push} = useRouter()
+  const { user, isSignedIn } = useUser()
+
+  const { push } = useRouter()
 
   useEffect(() => {
     if (user && isSignedIn) push(ACCOUNT_PAGES.HOME)

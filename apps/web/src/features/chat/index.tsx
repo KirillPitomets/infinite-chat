@@ -1,20 +1,19 @@
 "use client"
 
-import { useParams } from "next/navigation"
-import ChatLayout from "@/features/chat/ui/ChatLayout"
-import { ChatRoomPage } from "./pages/ChatRoomPage"
 import { ChatEmptyState } from "./pages/ChatEmptyState"
+import { ChatRoomPage } from "./pages/ChatRoomPage"
 
-export const ChatPage = () => {
-  const {chatId} = useParams<{chatId: string}>()
+type chatPageProps = {
+  chatId: string
+}
 
+export const ChatPage = ({ chatId }: chatPageProps) => {
+  console.log(chatId)
   return (
-    <ChatLayout>
-      <div
-        className={` ${chatId ? "max-sm:block" : "max-sm:hidden "} w-full min-h-screen`}
-      >
-        {chatId ? <ChatRoomPage chatId={chatId} /> : <ChatEmptyState />}
-      </div>
-    </ChatLayout>
+    <div
+      className={` ${chatId ? "max-sm:block" : "max-sm:hidden "} w-full min-h-screen`}
+    >
+      {chatId ? <ChatRoomPage chatId={chatId} /> : <ChatEmptyState />}
+    </div>
   )
 }

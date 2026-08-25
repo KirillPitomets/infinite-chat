@@ -1,5 +1,4 @@
 import { ChatInputUI } from "@/features/chat/ui/Input/InputUI"
-import { edenClient } from "@/shared/lib/eden"
 import { useMutation } from "@tanstack/react-query"
 import { DropzoneInputProps } from "react-dropzone"
 import { useTypingIndicator } from "../../hooks/useTypingIndicator"
@@ -38,7 +37,8 @@ export const ChatInputController = ({
 }: ChatinputControllerProps) => {
   const { mutate } = useMutation({
     mutationFn: async (isTyping: boolean) => {
-      await edenClient.presence.chats({ chatId }).typing.post({ isTyping })
+      // == TODO ==
+      // await edenClient.presence.chats({ chatId }).typing.post({ isTyping })
     }
   })
 

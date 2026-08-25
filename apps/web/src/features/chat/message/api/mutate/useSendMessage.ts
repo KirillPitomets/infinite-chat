@@ -4,8 +4,6 @@ import {
   mapAPIMessageToUI
 } from "@/features/chat/message/model/message.types"
 import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
-import { useCurrentUser } from "@/shared/context/CurrentUserContext"
-import { edenClient } from "@/shared/lib/eden"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import toast from "react-hot-toast"
@@ -22,7 +20,7 @@ export function useSendMessage(chatId: string) {
   )
   const [isReplyMessage, setIsReplyMessage] = useState(false)
   const queryClient = useQueryClient()
-  const currentUser = useCurrentUser()
+  // const currentUser = useCurrentUser()
 
   const clearReplyMessage = () => {
     setIsReplyMessage(false)
@@ -37,22 +35,21 @@ export function useSendMessage(chatId: string) {
   >({
     mutationKey: chatKeys.sendMessages(chatId),
     mutationFn: async ({ content, files, replyMessage }) => {
-
-      if (!content && !files ) {
+      if (!content && !files) {
         throw new Error("Failed to send message")
       }
-   
-      const res = await edenClient.chat({ chatId }).messages.post({
-        content,
-        files,
-        replyToMessageId: replyMessage ? replyMessage.id : null
-      })
+      // == TODO ==
+      // const res = await edenClient.chat({ chatId }).messages.post({
+      //   content,
+      //   files,
+      //   replyToMessageId: replyMessage ? replyMessage.id : null
+      // })
 
-      if (!res.data) {
-        throw new Error("Failed to send message")
-      }
+      // if (!res.data) {
+      //   throw new Error("Failed to send message")
+      // }
 
-      return mapAPIMessageToUI(res.data, "sent", false)
+      // return mapAPIMessageToUI(res.data, "sent", false)
     },
 
     onMutate: async ({ content, files, replyMessage }) => {

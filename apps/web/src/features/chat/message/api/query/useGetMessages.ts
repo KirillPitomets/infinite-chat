@@ -1,4 +1,3 @@
-import { edenClient } from "@/shared/lib/eden"
 import {
   ChatUIMessage,
   mapAPIMessageToUI
@@ -9,17 +8,18 @@ import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 export function useGetMessages(chatId: string) {
   return useQuery<ChatUIMessage[]>({
     enabled: !!chatId,
-    queryKey: chatKeys.messages(chatId),
-    queryFn: async () => {
-      const res = await edenClient.chat({ chatId }).messages.get({
-        query: { chatId: chatId }
-      })
+    queryKey: chatKeys.messages(chatId)
+    // == TODO ==
+    // queryFn: async () => {
+    // const res = await edenClient.chat({ chatId }).messages.get({
+    //   query: { chatId: chatId }
+    // })
 
-      if (!res.data) {
-        throw new Error("Failed to get messages")
-      }
+    // if (!res.data) {
+    //   throw new Error("Failed to get messages")
+    // }
 
-      return res.data.map(msg => mapAPIMessageToUI(msg, "sent", false))
-    }
+    // return res.data.map(msg => mapAPIMessageToUI(msg, "sent", false))
+    // }
   })
 }
