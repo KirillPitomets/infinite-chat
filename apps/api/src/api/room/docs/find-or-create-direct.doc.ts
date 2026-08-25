@@ -5,6 +5,7 @@ import {
   ApiOperation,
 } from '@nestjs/swagger';
 import { RoomEntity } from '../entities';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiFindOrCreateDirectRoom() {
   return applyDecorators(
@@ -20,6 +21,7 @@ export function ApiFindOrCreateDirectRoom() {
     ApiBadRequestResponse({
       description:
         'Attempted to create a chat with yourself or invalid user ID',
+      type: ErrResponse,
     }),
   );
 }

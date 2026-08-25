@@ -6,6 +6,7 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiLeaveRoom() {
   return applyDecorators(
@@ -22,13 +23,16 @@ export function ApiLeaveRoom() {
     }),
     ApiNoContentResponse({
       description: 'Successfully left the room',
+      type: ErrResponse,
     }),
     ApiNotFoundResponse({
       description: 'Room not found or user is not in this room',
+      type: ErrResponse,
     }),
     ApiBadRequestResponse({
       description:
         'User is the group owner and cannot leave without transferring ownership first, or the room is a DIRECT chat (leaving is not supported for direct messages)',
+      type: ErrResponse,
     }),
   );
 }

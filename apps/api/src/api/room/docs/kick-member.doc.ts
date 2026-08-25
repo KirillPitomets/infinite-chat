@@ -9,6 +9,7 @@ import {
   ApiForbiddenResponse,
   ApiNoContentResponse,
 } from '@nestjs/swagger';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiKickMember() {
   return applyDecorators(
@@ -31,14 +32,17 @@ export function ApiKickMember() {
     }),
     ApiNoContentResponse({
       description: 'Member successfully removed from the room',
+      type: ErrResponse,
     }),
     ApiNotFoundResponse({
       description:
         'Group room was not found, or the specified member is not in the room',
+      type: ErrResponse,
     }),
     ApiBadRequestResponse({
       description:
         'roomId/memberId param is missing, attempted to kick yourself, or attempted to kick the room owner',
+      type: ErrResponse,
     }),
   );
 }

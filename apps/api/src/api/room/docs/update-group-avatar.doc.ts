@@ -12,6 +12,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateGroupAvatarDto } from '../dto';
 import { RoomEntity } from '../entities';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiUpdateGroupAvatar() {
   return applyDecorators(
@@ -46,10 +47,12 @@ Saves the avatar reference (secure URL + public ID) after the client has already
     ApiNotFoundResponse({
       description:
         'Group room with the specified ID was not found or user is not a member',
+      type: ErrResponse,
     }),
     ApiBadRequestResponse({
       description:
         'Invalid input data, validation failed, avatarUrl does not match the expected Cloudinary domain',
+      type: ErrResponse,
     }),
   );
 }

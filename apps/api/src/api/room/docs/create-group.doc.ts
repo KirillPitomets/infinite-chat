@@ -6,6 +6,7 @@ import {
   ApiBadRequestResponse,
 } from '@nestjs/swagger';
 import { RoomEntity } from '../entities';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiCreateGroupRoom() {
   return applyDecorators(
@@ -21,6 +22,7 @@ export function ApiCreateGroupRoom() {
     ApiBadRequestResponse({
       description:
         'The creator ID is included in memberIds, or one or more provided member IDs do not exist',
+      type: ErrResponse,
     }),
   );
 }

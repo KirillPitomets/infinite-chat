@@ -8,6 +8,7 @@ import {
   ApiForbiddenResponse,
 } from '@nestjs/swagger';
 import { RoomEntity } from '../entities';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiAddMember() {
   return applyDecorators(
@@ -34,12 +35,15 @@ export function ApiAddMember() {
     ApiBadRequestResponse({
       description:
         'The room is a DIRECT chat (adding members is not supported), or the user is already an active member of this group',
+      type: ErrResponse,
     }),
     ApiNotFoundResponse({
       description: 'Room not found, or the specified member ID does not exist',
+      type: ErrResponse,
     }),
     ApiForbiddenResponse({
       description: 'Current user does not have ADMIN role in this room',
+      type: ErrResponse,
     }),
   );
 }

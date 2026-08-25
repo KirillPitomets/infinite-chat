@@ -6,6 +6,7 @@ import {
   ApiOperation,
   ApiParam,
 } from '@nestjs/swagger';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiDeleteRoom() {
   return applyDecorators(
@@ -22,12 +23,15 @@ export function ApiDeleteRoom() {
     }),
     ApiNoContentResponse({
       description: 'Room successfully deleted',
+      type: ErrResponse,
     }),
     ApiNotFoundResponse({
       description: 'Room not found, or user is not a member of this room',
+      type: ErrResponse,
     }),
     ApiForbiddenResponse({
       description: 'User is not the owner of this GROUP room',
+      type: ErrResponse,
     }),
   );
 }

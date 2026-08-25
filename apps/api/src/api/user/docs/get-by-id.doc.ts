@@ -7,6 +7,7 @@ import {
   ApiResponse,
 } from '@nestjs/swagger';
 import { UserEntity } from '../entity';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiGetById() {
   return applyDecorators(
@@ -26,6 +27,7 @@ export function ApiGetById() {
     }),
     ApiNotFoundResponse({
       description: 'User with the specified ID was not found',
+      type: ErrResponse,
     }),
   );
 }

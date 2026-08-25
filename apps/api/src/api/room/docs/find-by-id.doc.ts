@@ -6,6 +6,7 @@ import {
   ApiParam,
 } from '@nestjs/swagger';
 import { RoomEntity } from '../entities';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiFindRoomById() {
   return applyDecorators(
@@ -27,6 +28,7 @@ export function ApiFindRoomById() {
     ApiNotFoundResponse({
       description:
         'Room with the specified ID was not found or user is not a member',
+      type: ErrResponse,
     }),
   );
 }

@@ -6,6 +6,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 import { PresignedUrlEntity } from 'src/infra/cloudinary/entity/PresignedUrl.entity';
 
 export function ApiPresignGroupAvatar() {
@@ -34,6 +35,7 @@ Step 1 of 3 in the direct upload flow (presigned Cloudinary upload).
     ApiNotFoundResponse({
       description:
         'Group room with the specified ID was not found or user is not a member',
+      type: ErrResponse,
     }),
   );
 }

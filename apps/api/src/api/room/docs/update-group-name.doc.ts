@@ -11,6 +11,7 @@ import {
 } from '@nestjs/swagger';
 import { UpdateGroupNameDto } from '../dto/update-group-name.dto';
 import { RoomEntity } from '../entities';
+import { ErrResponse } from 'src/common/dto/error-response.dto';
 
 export function ApiUpdateGroupName() {
   return applyDecorators(
@@ -36,9 +37,11 @@ export function ApiUpdateGroupName() {
     ApiNotFoundResponse({
       description:
         'Group room with the specified ID was not found, type is not GROUP, or user is not a member',
+      type: ErrResponse,
     }),
     ApiBadRequestResponse({
       description: 'Invalid input data or validation failed',
+      type: ErrResponse,
     }),
   );
 }
