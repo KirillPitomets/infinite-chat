@@ -37,6 +37,10 @@ export class RoomEntity implements Room {
   })
   avatarPublicId: string;
 
+  @ApiProperty({
+    description: 'memberships list',
+    type: [RoomMemberEntity],
+  })
   @Type(() => RoomMemberEntity)
   memberships: RoomMemberEntity[];
 

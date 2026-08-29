@@ -14,6 +14,7 @@ import { type User } from 'src/generated/prisma/client';
 import { CloudinaryService } from 'src/infra/cloudinary/cloudinary.service';
 import { PresignedUrlEntity } from 'src/infra/cloudinary/entity/PresignedUrl.entity';
 import { MessagesService } from './messages.service';
+import { ApiGetMessageHistory, ApiPresignAttachments } from './docs';
 
 @Controller('/message')
 export class MessagesController {
@@ -22,6 +23,7 @@ export class MessagesController {
     private readonly messageService: MessagesService,
   ) {}
 
+  @ApiGetMessageHistory()
   @Get('/history/:roomId')
   async getHistory(
     @ClerkUserId(UserByIdPipe) user: User,
@@ -31,6 +33,7 @@ export class MessagesController {
     return this.messageService.getHistory(user.id, roomId, query);
   }
 
+  @ApiPresignAttachments()
   @Post('/attachments/presign/:roomId')
   async presignAttachments(
     @ClerkUserId(UserByIdPipe) user: User,

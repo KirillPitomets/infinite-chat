@@ -2,7 +2,7 @@ import { Exclude, Type } from 'class-transformer';
 import { UserEntity } from 'src/api/user/entity';
 import { RoomMemberRole, RoomMember } from 'src/generated/prisma/client';
 
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import { RoomMemberGetPayload } from 'src/generated/prisma/models';
 
 type RoomMemberWithUser = RoomMemberGetPayload<{ include: { user } }>;
@@ -15,7 +15,7 @@ export class RoomMemberEntity implements RoomMember {
   })
   id: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Date and time when the user last read messages in this room',
     type: Date,
     example: '2026-07-30T10:15:00.000Z',
@@ -39,7 +39,7 @@ export class RoomMemberEntity implements RoomMember {
   @Exclude()
   userId: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Detailed profile information of the member user',
     type: () => UserEntity,
   })

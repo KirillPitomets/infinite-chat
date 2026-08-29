@@ -29,12 +29,16 @@ export class UserService {
     return new UserEntity(user);
   }
 
-  async findAll(query: LimitPageQueryDto): Promise<UserEntity[]> {
+  async findAll(
+    userId: string,
+    query: LimitPageQueryDto,
+  ): Promise<UserEntity[]> {
     const { limit, page } = query;
 
     const users = await this.prismaService.user.findMany({
       take: limit,
       skip: page * limit,
+      where: { NOT: { id: userId } },
     });
 
     return users;

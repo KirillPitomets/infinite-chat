@@ -34,7 +34,10 @@ export class UserController {
 
   @ApiGetAll()
   @Get()
-  async findAll(@Query() query: LimitPageQueryDto): Promise<UserEntity[]> {
-    return this.userService.findAll(query);
+  async findAll(
+    @ClerkUserId(UserByIdPipe) user: User,
+    @Query() query: LimitPageQueryDto,
+  ): Promise<UserEntity[]> {
+    return this.userService.findAll(user.id, query);
   }
 }
