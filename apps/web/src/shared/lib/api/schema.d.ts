@@ -20,26 +20,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/v1/user/{id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get user by ID
-         * @description Fetches a single user record from the database by its unique identifier.
-         */
-        get: operations["UserController_findById_v1"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/api/v1/user/me": {
         parameters: {
             query?: never;
@@ -52,6 +32,26 @@ export interface paths {
          * @description Retrieves the profile of the currently authenticated user based on the Clerk authentication token.
          */
         get: operations["UserController_currentUser_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/user/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get user by ID
+         * @description Fetches a single user record from the database by its unique identifier.
+         */
+        get: operations["UserController_findById_v1"];
         put?: never;
         post?: never;
         delete?: never;
@@ -313,6 +313,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Get room message history
+         * @description Retrieves a paginated list of chat messages for a specific room. The user must be a member of the room.
+         */
         get: operations["MessagesController_getHistory_v1"];
         put?: never;
         post?: never;
@@ -331,6 +335,10 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Generate presigned attachment upload URLs
+         * @description Generates Cloudinary presigned upload URLs for uploading message attachments directly from the client.
+         */
         post: operations["MessagesController_presignAttachments_v1"];
         delete?: never;
         options?: never;
@@ -402,6 +410,28 @@ export interface components {
              */
             memberId: string;
         };
+        RoomMemberEntity: {
+            /**
+             * Format: uuid
+             * @description Unique identifier of the room membership (UUID)
+             * @example b1f486a9-8f92-4c6e-93b1-2e64b8a2c3d4
+             */
+            id: string;
+            /**
+             * Format: date-time
+             * @description Date and time when the user last read messages in this room
+             * @example 2026-07-30T10:15:00.000Z
+             */
+            lastReadAt: string | null;
+            /**
+             * @description Role of the member within the room
+             * @example MEMBER
+             * @enum {string}
+             */
+            role: "OWNER" | "ADMIN" | "MEMBER";
+            /** @description Detailed profile information of the member user */
+            user: components["schemas"]["UserEntity"];
+        };
         RoomEntity: {
             /**
              * @description Unique identifier of the room (UUID)
@@ -426,6 +456,8 @@ export interface components {
             avatarUrl: string;
             /** @description Id of the room image */
             avatarPublicId: string;
+            /** @description memberships list */
+            memberships: components["schemas"]["RoomMemberEntity"][];
             /**
              * @description ID of the user who created the room
              * @example 123e4567-e89b-12d3-a456-426614174000
@@ -504,6 +536,131 @@ export interface components {
              */
             publicId: string;
         };
+        MessageAttachmentEntity: {
+            /**
+             * @description Unique attachment identifier (uuid)
+             * @example a1b2c3d4-e5f6-7890-1234-56789abcdef0
+             */
+            id: string;
+            /**
+             * @description Storage key/filename in the cloud storage (e.g., Cloudinary/S3)
+             * @example uploads/messages/att_12345.png
+             */
+            key: string;
+            /**
+             * @description Original file name
+             * @example document.pdf
+             */
+            name: string;
+            /**
+             * @description Direct public URL of the uploaded attachment
+             * @example https://res.cloudinary.com/demo/image/upload/v1/sample.jpg
+             */
+            url: string;
+            /**
+             * @description File size in bytes
+             * @example 1048576
+             */
+            size: number;
+            /**
+             * @description Type of attachment (e.g., IMAGE, FILE, AUDIO, VIDEO)
+             * @example IMAGE
+             * @enum {string}
+             */
+            type: "VIDEO" | "IMAGE" | "AUDIO" | "FILE";
+            /**
+             * Format: date-time
+             * @description Timestamp when the attachment was created
+             * @example 2026-03-30T12:00:00.000Z
+             */
+            createdAt: string;
+        };
+        ReplyMessageEntity: {
+            /**
+             * @description Unique ID of the referenced message being replied to
+             * @example d8c2b7e1-8f4b-4b2a-9e1d-3c8f5a6b7c8d
+             */
+            id: string;
+            /**
+             * @description Text content of the replied message
+             * @example Original message text
+             */
+            text?: Record<string, never> | null;
+            /**
+             * @description Flag indicating whether the replied message was deleted
+             * @example false
+             */
+            isDeleted: boolean;
+            /** @description Author of the replied message */
+            sender: components["schemas"]["UserEntity"];
+            /** @description List of attachments in the replied message */
+            attachments: components["schemas"]["MessageAttachmentEntity"][];
+            /**
+             * Format: date-time
+             * @description Timestamp when the original message was created
+             * @example 2026-03-30T11:55:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the original message was last updated
+             * @example 2026-03-30T11:55:00.000Z
+             */
+            updatedAt: string;
+        };
+        MessageEntity: {
+            /**
+             * @description Unique message identifier (uuid)
+             * @example d8c2b7e1-8f4b-4b2a-9e1d-3c8f5a6b7c8d
+             */
+            id: string;
+            /**
+             * @description Text content of the message. Nullable for attachment-only messages.
+             * @example Hello! Check out this document.
+             */
+            text?: Record<string, never> | null;
+            /** @description User who sent the message */
+            sender: components["schemas"]["UserEntity"];
+            /** @description Parent message being replied to, if applicable */
+            replyToMessage?: components["schemas"]["ReplyMessageEntity"] | null;
+            /** @description List of files or media attached to the message */
+            attachments: components["schemas"]["MessageAttachmentEntity"][];
+            /**
+             * @description Type of the message
+             * @example USER
+             * @enum {string}
+             */
+            type: "USER" | "SYSTEM";
+            /**
+             * @description Arbitrary JSON metadata associated with the message
+             * @example {
+             *       "key": "value"
+             *     }
+             */
+            metadata?: Record<string, never> | null;
+            /**
+             * @description System-generated text/content for system events (e.g. user joined)
+             * @example User joined the room
+             */
+            systemContent?: Record<string, never> | null;
+            /**
+             * @description Flag indicating whether the message has been soft-deleted
+             * @example false
+             */
+            isDeleted: boolean;
+            /**
+             * Format: date-time
+             * @description Timestamp when the message was created
+             * @example 2026-03-30T12:00:00.000Z
+             */
+            createdAt: string;
+            /**
+             * Format: date-time
+             * @description Timestamp when the message was last updated
+             * @example 2026-03-30T12:00:00.000Z
+             */
+            updatedAt: string;
+        };
     };
     responses: never;
     parameters: never;
@@ -529,38 +686,6 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
-            };
-        };
-    };
-    UserController_findById_v1: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                /** @description Unique user identifier (uuid) */
-                id: string;
-            };
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description User successfully retrieved */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["UserEntity"];
-                };
-            };
-            /** @description User with the specified ID was not found */
-            404: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrResponse"];
-                };
             };
         };
     };
@@ -592,6 +717,38 @@ export interface operations {
                 };
             };
             /** @description User profile with the specified Clerk ID was not found in the database */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrResponse"];
+                };
+            };
+        };
+    };
+    UserController_findById_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique user identifier (uuid) */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description User successfully retrieved */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UserEntity"];
+                };
+            };
+            /** @description User with the specified ID was not found */
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -1143,13 +1300,38 @@ export interface operations {
             };
             header?: never;
             path: {
+                /** @description Unique room identifier (uuid) */
                 roomId: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
+            /** @description List of room messages successfully retrieved */
             200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MessageEntity"][];
+                };
+            };
+            /** @description User is not authenticated (missing or invalid Clerk token) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Access denied (user is not a member of the room) */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User profile with the specified Clerk ID was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1162,13 +1344,31 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
+                /** @description Unique room identifier (uuid) */
                 roomId: string;
             };
             cookie?: never;
         };
         requestBody?: never;
         responses: {
+            /** @description Presigned upload URLs generated successfully */
             201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PresignedUrlEntity"][];
+                };
+            };
+            /** @description User is not authenticated (missing or invalid Clerk token) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User profile with the specified Clerk ID was not found */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

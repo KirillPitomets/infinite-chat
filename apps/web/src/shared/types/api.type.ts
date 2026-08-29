@@ -1,7 +1,7 @@
 import { components, paths } from "@/shared/lib/api/schema"
 
 export type User = components["schemas"]["UserEntity"]
-export type Room = components["schemas"]["RoomEntity"]
+export type ChatRoom = components["schemas"]["RoomEntity"]
 // export type Message = components["schemas"]["message"]
 
 export type UserListResponse =

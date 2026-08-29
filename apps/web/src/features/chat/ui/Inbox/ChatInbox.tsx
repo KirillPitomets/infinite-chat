@@ -29,7 +29,8 @@ export function ChatInbox() {
         (a, b) =>
           new Date(b.latestMessage?.createdAt ?? 0).getTime() -
           new Date(a.latestMessage?.createdAt ?? 0).getTime()
-      )
+      ),
+    initialData: []
   })
 
   useRealtimeInbox(chats)

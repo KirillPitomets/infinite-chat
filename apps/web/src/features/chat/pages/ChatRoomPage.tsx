@@ -1,6 +1,6 @@
 "use client"
 
-import { useChatData } from "@/features/chat/chat/api/useChatData"
+// import { useChatData } from "@/features/chat/chat/api/useChatData"
 import { useDeleteChat } from "@/features/chat/chat/api/useDeleteChat"
 import { useDeleteMessage } from "@/features/chat/message/api/mutate/useDeleteMessage"
 import {
@@ -12,18 +12,33 @@ import { useRealtimeChat } from "@/features/chat/realtime/useRealtimeChat"
 import { ChatHeader } from "@/features/chat/ui/Header/Header"
 import { ChatInputController } from "@/features/chat/ui/Input/InputController"
 import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 import { UploadIcon } from "@/shared/components/ui/icons"
 import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
 import { useFiles } from "@/shared/hooks/useFiles"
 import { usePreviewImageDialog } from "@/shared/hooks/usePreviewImage"
-import { useCallback, useEffect } from "react"
+import { ChatRoom, User } from "@/shared/types/api.type"
+import { useQuery } from "@tanstack/react-query"
+import { Suspense, useCallback, useEffect } from "react"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
 
 const MAX_FILES = 4
 
-export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
-  return <div>Chat room with ID: {chatId}</div>
+/*
+1. current user  
+2. useFiles 
+
+*/
+
+type ChatRoomPageProps = {
+  chatId: string
+  chatRoomData: ChatRoom
+}
+
+export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
+  const currentUser = useCurrentUser()
+  // return <div>Chat room with ID: {chatId}</div>
   // const currentUser = useCurrentUser()
   // const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
   //   maxFiles: MAX_FILES
@@ -49,7 +64,7 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   //   editingMessage,
   //   handleEditingMessage,
   //   isEditMessage
-  // } = useUpdateMessage(chatId)
+  // } = useUpdateMessage(chatId)1
   // const { mutate: deleteMessage } = useDeleteMessage(chatId)
   // const { mutate: deleteChat } = useDeleteChat(chatId)
   // const onDrop = useCallback(
@@ -98,73 +113,70 @@ export const ChatRoomPage = ({ chatId }: { chatId: string }) => {
   //     }
   //   })
   // }, [fileRejections, fileRejections.length])
-  // return (
-  //   <div className="flex flex-col w-full h-full">
-  //     <ImagePreviewDialog
-  //       isOpen={isOpenImagePreview}
-  //       image={previewImage}
-  //       onClose={closePreviewImageDialog}
-  //     />
-  //     <ChatHeader
-  //       chatId={chatId}
-  //       chatData={
-  //         chatData?.type === "DIRECT"
-  //           ? { type: "DIRECT", otherUser: chatData.otherUser }
-  //           : chatData?.type === "GROUP"
-  //             ? chatData
-  //             : undefined
-  //       }
-  //       onDelete={deleteChat}
-  //       isLoading={isChatDataLoading}
-  //     />
-  //     <div
-  //       {...getRootProps()}
-  //       className="relative flex flex-col flex-1 min-h-0"
-  //     >
-  //       {isDragActive && (
-  //         <div className="absolute inset-0 flex items-center justify-center w-full h-full bg-black/50 z-1001">
-  //           <div className="p-4 border-4 rounded-sm border-black/50">
-  //             <UploadIcon className="w-40 h-40 opacity-60" />
-  //           </div>
-  //         </div>
-  //       )}
-  //       <MessageList
-  //         chatId={chatId}
-  //         selectedMessageId={editingMessage.id || replyMessage?.id}
-  //         currentUser={currentUser}
-  //         otherUserLastReadAt={
-  //           chatData?.type === "DIRECT"
-  //             ? chatData.otherUser.lastReadAt
-  //             : undefined
-  //         }
-  //         handleUpdate={editingMessage => {
-  //           disenableAllInputStates()
-  //           handleEditingMessage(editingMessage)
-  //         }}
-  //         handleReplyToMessage={replyMessage => {
-  //           disenableAllInputStates()
-  //           setIsReplyMessage(true)
-  //           setReplyMessage(replyMessage)
-  //         }}
-  //         onDelete={deleteMessage}
-  //         onPreviewImage={handleImagePreviewDialog}
-  //       />
-  //       <div className="relative">
-  //         <ChatInputController
-  //           chatId={chatId}
-  //           replyMessage={replyMessage}
-  //           previewFiles={files}
-  //           mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
-  //           removePreviewFile={removePreviewFile}
-  //           inputDropZoneProps={getInputProps()}
-  //           editingMessage={editingMessage}
-  //           onUpdate={handleMessageUpdate}
-  //           onCancelUpdate={cancelUpdate}
-  //           onCancelReplyToMessage={clearReplyMessage}
-  //           onSubmit={handleMessageSubmit}
-  //         />
-  //       </div>
-  //     </div>
-  //   </div>
-  // )
+
+  return (
+    <div className="flex flex-col w-full h-full">
+      {/* <ImagePreviewDialog
+        isOpen={isOpenImagePreview}
+        image={previewImage}
+        onClose={closePreviewImageDialog}
+      /> */}
+      <ChatHeader
+        chatId={chatId}
+        chatName={chatRoomData.name}
+        avatarUrl={chatRoomData.avatarUrl}
+        type={chatRoomData.type}
+        memberships={chatRoomData.memberships}
+        onDelete={() => {}}
+      />
+      {/* <div
+        {...getRootProps()}
+        className="relative flex flex-col flex-1 min-h-0"
+      > */}
+      {/* {isDragActive && (
+          <div className="absolute inset-0 flex items-center justify-center w-full h-full bg-black/50 z-1001">
+            <div className="p-4 border-4 rounded-sm border-black/50">
+              <UploadIcon className="w-40 h-40 opacity-60" />
+            </div>
+          </div>
+        )} */}
+      {/* <MessageList
+          chatId={chatId}
+          selectedMessageId={editingMessage.id || replyMessage?.id}
+          currentUser={currentUser}
+          otherUserLastReadAt={
+            chatData?.type === "DIRECT"
+              ? chatData.otherUser.lastReadAt
+              : undefined
+          }
+          handleUpdate={editingMessage => {
+            disenableAllInputStates()
+            handleEditingMessage(editingMessage)
+          }}
+          handleReplyToMessage={replyMessage => {
+            disenableAllInputStates()
+            setIsReplyMessage(true)
+            setReplyMessage(replyMessage)
+          }}
+          onDelete={deleteMessage}
+          onPreviewImage={handleImagePreviewDialog}
+        />
+        <div className="relative">
+          <ChatInputController
+            chatId={chatId}
+            replyMessage={replyMessage}
+            previewFiles={files}
+            mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
+            removePreviewFile={removePreviewFile}
+            inputDropZoneProps={getInputProps()}
+            editingMessage={editingMessage}
+            onUpdate={handleMessageUpdate}
+            onCancelUpdate={cancelUpdate}
+            onCancelReplyToMessage={clearReplyMessage}
+            onSubmit={handleMessageSubmit}
+          />
+        </div> */}
+      {/* </div> */}
+    </div>
+  )
 }

@@ -14,8 +14,14 @@ export async function unwrap<T>(
   const { data, error, response } = await promise
 
   if (error) {
-    console.log(error)
-    throw new ApiError(response.status, error.message ?? "Unknown error", error)
+    // RSC error boundayr can change custom class ApiError when send it from Server -> error.tsx (Client Component)
+    // instanceof ApiError check doesn't guarantee correct code execution
+    //  therefore inclue  status in the msg string and parase It within error.tsx (Client Component)
+    // FORMAT - "[ERROR STATUS CODE] ERROR MESSAGE"
+    const errMsg = error.message
+      ? `[${response.status}] ${error.message}`
+      : "Unknown error"
+    throw new ApiError(response.status, errMsg, error)
   }
 
   return data as T

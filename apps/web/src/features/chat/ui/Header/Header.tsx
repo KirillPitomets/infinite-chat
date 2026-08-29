@@ -10,33 +10,35 @@ import {
 } from "@/shared/components/ui/icons"
 import Link from "next/link"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { ChatRoom } from "@/shared/types/api.type"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import { currentUser } from "@clerk/nextjs/server"
 
-type DirectChat = {
-  type: "DIRECT"
-  otherUser: {
-    id: string
-    name: string
-    tag: string
-    imageUrl: string
-  }
-}
-
-type GroupChat = {
-  type: "GROUP"
-  name: string
-  membersCount: number
-  imageUrl: string
-}
+/*
+  group room've 
+    - room name 
+    - memberships count > 2 
+    - type group 
+*/
 
 type ChatHeaderProps = {
   chatId: string
-  isLoading: boolean
-  chatData?: DirectChat | GroupChat
+  type: "DIRECT" | "GROUP"
+  memberships: ChatRoom["memberships"]
+  chatName: string
+  avatarUrl: string
   onDelete: () => void
 }
 
-export function ChatHeader({ chatId, isLoading, chatData, onDelete }: ChatHeaderProps) {
-  if (isLoading || !chatData) return <HeaderSkeleton />
+export function ChatHeader({
+  chatId,
+  avatarUrl,
+  chatName,
+  memberships,
+  type,
+  onDelete
+}: ChatHeaderProps) {
+  const currentUser = useCurrentUser()
 
   return (
     <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
@@ -47,20 +49,19 @@ export function ChatHeader({ chatId, isLoading, chatData, onDelete }: ChatHeader
         >
           <ArrowIcon className="w-8 h-8 text-green-600" />
         </Link>
-        {chatData.type === "DIRECT" && (
+        {type === "DIRECT" && (
           <DirectInfo
             chatId={chatId}
-            memberId={chatData.otherUser.id}
-            avatarUrl={chatData.otherUser.imageUrl}
-            name={chatData.otherUser.name}
-            tag={chatData.otherUser.tag}
+            member={
+              memberships.filter(member => member.id !== currentUser.id)[0].user
+            }
           />
         )}
-        {chatData.type === "GROUP" && (
+        {type === "GROUP" && (
           <GroupInfo
-            avatarUrl={chatData.imageUrl}
-            membersCount={chatData.membersCount}
-            name={chatData.name}
+            avatarUrl={avatarUrl}
+            membersCount={memberships.length}
+            name={chatName}
           />
         )}
       </div>

@@ -3,8 +3,10 @@ import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { unwrap } from "@/shared/lib/api/unwrap"
 import { useApiClient } from "@/shared/lib/api/useApiClient"
 import { User } from "@/shared/types/api.type"
+import { parseErrorMessage } from "@/shared/utils/parseErrorStatus"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
+import toast from "react-hot-toast"
 
 type ChatUserListProps = {
   initialData: User[]
@@ -25,8 +27,11 @@ export const ChatUserList = ({ initialData }: ChatUserListProps) => {
       const room = await unwrap(
         api.POST("/api/v1/room/direct", { body: { memberId } })
       )
-
       router.push(ACCOUNT_PAGES.CHAT_ID(room.id))
+    },
+    onError(error, variables, onMutateResult, context) {
+      const { text } = parseErrorMessage(error.message)
+      toast.error(text)
     }
   })
 

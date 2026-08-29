@@ -3,8 +3,9 @@ import { chatKeys } from "../model/chat.keys"
 import { useRouter } from "next/navigation"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import toast from "react-hot-toast"
+import { Room } from "@/shared/types/api.type"
 
-export function useChatData(chatId: string) {
+export function useChatRoomData(chatId: string, initialData: Room) {
   const router = useRouter()
 
   return useQuery({
@@ -20,6 +21,7 @@ export function useChatData(chatId: string) {
       //   router.replace(ACCOUNT_PAGES.CHAT)
       // }
       // return res.data
-    }
+    },
+    initialData
   })
 }

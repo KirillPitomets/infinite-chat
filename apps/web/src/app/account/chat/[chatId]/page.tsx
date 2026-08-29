@@ -1,5 +1,4 @@
 import { ChatPage } from "@/features/chat/"
-import { auth } from "@clerk/nextjs/server"
 
 type ChatPageParams = { params: Promise<{ chatId: string }> }
 
