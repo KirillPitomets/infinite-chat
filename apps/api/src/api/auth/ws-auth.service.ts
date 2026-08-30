@@ -16,7 +16,11 @@ export class WsAuthService {
   ) {}
 
   async authenticate(client: Socket): Promise<UserEntity> {
-    const token = client.handshake.headers.authorization?.split(' ')[1];
+    let token: string | undefined = client.handshake.auth?.token;
+
+    if (!token) {
+      token = client.handshake.headers.authorization?.split(' ')[1];
+    }
 
     if (!token) {
       throw new WsException('Token not provided');

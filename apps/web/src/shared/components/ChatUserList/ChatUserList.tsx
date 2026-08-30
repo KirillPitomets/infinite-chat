@@ -7,6 +7,7 @@ import { parseErrorMessage } from "@/shared/utils/parseErrorStatus"
 import { useMutation, useQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import toast from "react-hot-toast"
+import { UserAvatar } from "../ui/UserAvatar/UserAvatar"
 
 type ChatUserListProps = {
   initialData: User[]
@@ -43,13 +44,7 @@ export const ChatUserList = ({ initialData }: ChatUserListProps) => {
           className="flex items-center justify-between p-2 border-b border-zinc-400"
         >
           <div className="flex gap-2 items-center">
-            <div className="flex items-center justify-center rounded-full font-medium text-white overflow-hidden max-w-10 max-h-10">
-              <img
-                src={user.imageUrl}
-                alt={user.username}
-                className=" w-full h-full object-cover"
-              />
-            </div>
+            <UserAvatar url={user.imageUrl} alt={user.username} size={10} />
 
             <span className="font-semibold">{user.firstName} </span>
             <span className="font-semibold">{user.lastName} </span>

@@ -1,7 +1,8 @@
+"use client"
 import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
 import { useThrottle } from "@/shared/hooks/useThrottle"
-import { User } from "@/shared/types/api.type"
+import type { Message as MessageType, User } from "@/shared/types/api.type"
 import { isReadMessage } from "@/shared/utils/isReadMessage"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect, useRef } from "react"
@@ -9,31 +10,35 @@ import { useChatScroll } from "../../hooks/useChatScroll"
 import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 import { useGetMessages } from "../../message/api/query/useGetMessages"
 import { MessageListSkeleton } from "./Skeleton"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 
 type MessageListProps = {
   chatId: string
-  selectedMessageId?: string
-  currentUser: User
-  otherUserLastReadAt?: string
-  handleUpdate: (editingMessage: EditingMessage) => void
-  handleReplyToMessage: (message: ChatUIMessage) => void
-  onDelete: (id: string) => void
-  onPreviewImage: (image: { alt: string; url: string }) => void
+  initialData: MessageType[]
+  // selectedMessageId?: string
+  // currentUser: User
+  // otherUserLastReadAt?: string
+  // handleUpdate: (editingMessage: EditingMessage) => void
+  // handleReplyToMessage: (message: ChatUIMessage) => void
+  // onDelete: (id: string) => void
+  // onPreviewImage: (image: { alt: string; url: string }) => void
 }
 
 export const MessageList = ({
   chatId,
-  selectedMessageId,
-  currentUser,
-  otherUserLastReadAt,
-  handleUpdate,
-  handleReplyToMessage,
-  onDelete,
-  onPreviewImage
+  initialData
+  // selectedMessageId,
+  // currentUser,
+  // otherUserLastReadAt,
+  // handleUpdate,
+  // handleReplyToMessage,
+  // onDelete,
+  // onPreviewImage
 }: MessageListProps) => {
+  const currentUser = useCurrentUser()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const { data: messages = [], isLoading } = useGetMessages(chatId)
+  const { data: messages } = useGetMessages(chatId, initialData)
 
   const { mutate: updateLastReadAt } = useMutation({
     mutationFn: async () => {
@@ -56,36 +61,72 @@ export const MessageList = ({
   })
 
   const throttledHandleScroll = useThrottle(() => updateLastReadAt(), 1000)
-
   useChatScroll(containerRef, messages, () => throttledHandleScroll())
+
+  // const contextMenu = useMessageContextMenu({
+  //   closeContext: () => setIsVisibleContextMenu(false),
+  //   copyMessage: () => {
+  //     if (content) {
+  //       navigator.clipboard.writeText(content)
+  //       toast.success("Message copied :)")
+  //     } else {
+  //       toast.error("No content for copy")
+  //     }
+  //   },
+  //   deleteMessage() {
+  //     onDelete(id)
+  //   },
+  //   updateMessage() {
+  //     handleUpdate({
+  //       id,
+  //       initialValue: content,
+  //       initialAttachments: attachments
+  //     })
+  //   },
+  //   replyMessage() {
+  //     handleReplyToMessage({
+  //       id,
+  //       attachments,
+  //       content,
+  //       createdAt,
+  //       status,
+  //       isDeleted,
+  //       updatedAt,
+  //       sender
+  //     })
+  //   }
+  // })
 
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 p-4 space-y-5 overflow-y-auto scrollbar-thin"
+      className="relative flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin"
     >
-      {isLoading ? (
-        <MessageListSkeleton />
-      ) : (
-        messages.map(msg => (
-          <Message
-            key={msg.id}
-            chatId={chatId}
-            selectedMessageId={selectedMessageId}
-            handleUpdate={handleUpdate}
-            onDelete={onDelete}
-            isMine={currentUser.id === msg.sender.id}
-            onPreviewImage={onPreviewImage}
-            handleReplyToMessage={handleReplyToMessage}
-            isRead={
-              otherUserLastReadAt
-                ? isReadMessage(msg.createdAt, otherUserLastReadAt)
-                : false
-            }
-            {...msg}
-          />
-        ))
-      )}
+      {/* <MessageContextMenu
+          isMineMessage={isMine}
+          isVisible={isVisibleContextMenu}
+          buttons={contextMenu}
+        /> 
+      */}
+      {messages.map((msg, indx) => (
+        <Message
+          key={msg.id}
+          chatId={chatId}
+          prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
+          {...msg}
+          // selectedMessageId={selectedMessageId}
+          // handleUpdate={handleUpdate}
+          // handleReplyToMessage={handleReplyToMessage}
+          // onDelete={onDelete}
+          // onPreviewImage={onPreviewImage}
+
+          // isRead={
+          //   otherUserLastReadAt
+          //     ? isReadMessage(msg.createdAt, otherUserLastReadAt)
+          //     : false
+          // }
+        />
+      ))}
     </div>
   )
 }

@@ -1,45 +1,46 @@
 "use client"
 
-// import { useChatData } from "@/features/chat/chat/api/useChatData"
-import { useDeleteChat } from "@/features/chat/chat/api/useDeleteChat"
-import { useDeleteMessage } from "@/features/chat/message/api/mutate/useDeleteMessage"
-import {
-  SubmitMessageArgs,
-  useSendMessage
-} from "@/features/chat/message/api/mutate/useSendMessage"
-import { useUpdateMessage } from "@/features/chat/message/api/mutate/useUpdateMessage"
-import { useRealtimeChat } from "@/features/chat/realtime/useRealtimeChat"
 import { ChatHeader } from "@/features/chat/ui/Header/Header"
-import { ChatInputController } from "@/features/chat/ui/Input/InputController"
-import { MessageList } from "@/features/chat/ui/MessageList/MessageList"
-import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
-import { UploadIcon } from "@/shared/components/ui/icons"
-import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
-import { useFiles } from "@/shared/hooks/useFiles"
-import { usePreviewImageDialog } from "@/shared/hooks/usePreviewImage"
-import { ChatRoom, User } from "@/shared/types/api.type"
-import { useQuery } from "@tanstack/react-query"
-import { Suspense, useCallback, useEffect } from "react"
-import { useDropzone } from "react-dropzone"
-import toast from "react-hot-toast"
+import {
+  ChatRoom,
+  CreateMessageDto,
+  Message,
+  User
+} from "@/shared/types/api.type"
+import {
+  PropsWithChildren,
+  Suspense,
+  useEffect,
+  useEffectEvent,
+  useRef
+} from "react"
+import { MessageListSkeleton } from "../ui/MessageList/Skeleton"
+import { MessageListServer } from "../ui/MessageList/MessageList.server"
+import { ChatInputController } from "../ui/Input/InputController"
+import { useChatRoomData } from "../chat/api/useChatRoomData"
+import { useMessagesSocket } from "../message/providers/socketProvider"
+import { useQueryClient } from "@tanstack/react-query"
+import { useAuth } from "@clerk/nextjs"
+import { Socket } from "socket.io-client"
+import { chatKeys } from "../chat/model/chat.keys"
+import { useSendMessage } from "../message/api/mutate/useSendMessage"
 
 const MAX_FILES = 4
-
-/*
-1. current user  
-2. useFiles 
-
-*/
 
 type ChatRoomPageProps = {
   chatId: string
   chatRoomData: ChatRoom
 }
 
-export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
-  const currentUser = useCurrentUser()
-  // return <div>Chat room with ID: {chatId}</div>
+export const ChatRoomPage = ({
+  chatId,
+  chatRoomData,
+  children
+}: PropsWithChildren<ChatRoomPageProps>) => {
   // const currentUser = useCurrentUser()
+  // =======================================
+  // ================ FILES ================
+  // =======================================
   // const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
   //   maxFiles: MAX_FILES
   // })
@@ -49,30 +50,6 @@ export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
   //   closePreviewImageDialog,
   //   handleImagePreviewDialog
   // } = usePreviewImageDialog()
-  // const { data: chatData, isLoading: isChatDataLoading } = useChatData(chatId)
-  // const {
-  //   mutate: sendMessage,
-  //   setIsReplyMessage,
-  //   isReplyMessage,
-  //   setReplyMessage,
-  //   replyMessage,
-  //   clearReplyMessage
-  // } = useSendMessage(chatId)
-  // const {
-  //   updateMessage,
-  //   cancelUpdate,
-  //   editingMessage,
-  //   handleEditingMessage,
-  //   isEditMessage
-  // } = useUpdateMessage(chatId)1
-  // const { mutate: deleteMessage } = useDeleteMessage(chatId)
-  // const { mutate: deleteChat } = useDeleteChat(chatId)
-  // const onDrop = useCallback(
-  //   (acceptedFiles: File[]) => {
-  //     addFiles(acceptedFiles)
-  //   },
-  //   [addFiles]
-  // )
   // const { getInputProps, getRootProps, isDragActive, fileRejections } =
   //   useDropzone({
   //     accept: {
@@ -87,6 +64,28 @@ export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
   //     maxFiles: MAX_FILES,
   //     multiple: true
   //   })
+
+  // =======================================
+  // ============== Messages ===============
+  // =======================================
+
+  // const {
+  //   updateMessage,
+  //   cancelUpdate,
+  //   editingMessage,
+  //   handleEditingMessage,
+  //   isEditMessage
+  // } = useUpdateMessage(chatId)1
+  // const { mutate: deleteMessage } = useDeleteMessage(chatId)
+  // const { mutate: deleteChat } = useDeleteChat(chatId)
+
+  // const onDrop = useCallback(
+  //   (acceptedFiles: File[]) => {
+  //     addFiles(acceptedFiles)
+  //   },
+  //   [addFiles]
+  // )
+
   // const handleMessageUpdate = (id: string, value: string) => {
   //   updateMessage({ messageId: id, content: value, files })
   //   clearFiles()
@@ -102,7 +101,9 @@ export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
   //   cancelUpdate()
   //   setIsReplyMessage(false)
   // }
-  // // useRealtimeChat(chatId, currentUser.id)
+
+  // useRealtimeChat(chatId, currentUser.id)
+
   // useEffect(() => {
   //   toast.dismissAll()
   // }, [])
@@ -114,6 +115,40 @@ export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
   //   })
   // }, [fileRejections, fileRejections.length])
 
+  const messageSocket = useMessagesSocket()
+  const queryClient = useQueryClient()
+  const {
+    handleSendMessage,
+    setIsReplyMessage,
+    isReplyMessage,
+    setReplyMessage,
+    replyMessage,
+    clearReplyMessage
+  } = useSendMessage(chatId, messageSocket)
+
+  useEffect(() => {
+    if (!messageSocket) return
+
+    const handleNewMessage = (msg: Message) => {
+      console.log("Message created - ", msg)
+
+      queryClient.setQueryData<Message[]>(
+        chatKeys.messages(chatId),
+        (old = []) => [...old, msg]
+      )
+    }
+
+    const handleExceptions = (err: any) => console.log(err)
+
+    messageSocket.on("message.created", handleNewMessage)
+
+    messageSocket.on("exception", handleExceptions)
+    return () => {
+      messageSocket.off("message.created", handleNewMessage)
+      messageSocket.off("exception", handleExceptions)
+    }
+  }, [messageSocket, chatId])
+
   return (
     <div className="flex flex-col w-full h-full">
       {/* <ImagePreviewDialog
@@ -121,18 +156,20 @@ export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
         image={previewImage}
         onClose={closePreviewImageDialog}
       /> */}
+
       <ChatHeader
         chatId={chatId}
         chatName={chatRoomData.name}
         avatarUrl={chatRoomData.avatarUrl}
         type={chatRoomData.type}
         memberships={chatRoomData.memberships}
-        onDelete={() => {}}
       />
+
       {/* <div
         {...getRootProps()}
         className="relative flex flex-col flex-1 min-h-0"
       > */}
+
       {/* {isDragActive && (
           <div className="absolute inset-0 flex items-center justify-center w-full h-full bg-black/50 z-1001">
             <div className="p-4 border-4 rounded-sm border-black/50">
@@ -140,42 +177,23 @@ export const ChatRoomPage = ({ chatId, chatRoomData }: ChatRoomPageProps) => {
             </div>
           </div>
         )} */}
-      {/* <MessageList
+
+      {children}
+      <div className="relative">
+        <ChatInputController
           chatId={chatId}
-          selectedMessageId={editingMessage.id || replyMessage?.id}
-          currentUser={currentUser}
-          otherUserLastReadAt={
-            chatData?.type === "DIRECT"
-              ? chatData.otherUser.lastReadAt
-              : undefined
-          }
-          handleUpdate={editingMessage => {
-            disenableAllInputStates()
-            handleEditingMessage(editingMessage)
-          }}
-          handleReplyToMessage={replyMessage => {
-            disenableAllInputStates()
-            setIsReplyMessage(true)
-            setReplyMessage(replyMessage)
-          }}
-          onDelete={deleteMessage}
-          onPreviewImage={handleImagePreviewDialog}
+          // replyMessage={replyMessage}
+          // previewFiles={files}
+          // mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
+          // inputDropZoneProps={getInputProps()}
+          // editingMessage={editingMessage}
+          onRemovePreviewFile={() => {}} // removePreviewFile={removePreviewFile}
+          onUpdate={() => {}}
+          onCancelUpdate={() => {}}
+          onCancelReplyToMessage={() => {}}
+          onSubmit={handleSendMessage}
         />
-        <div className="relative">
-          <ChatInputController
-            chatId={chatId}
-            replyMessage={replyMessage}
-            previewFiles={files}
-            mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
-            removePreviewFile={removePreviewFile}
-            inputDropZoneProps={getInputProps()}
-            editingMessage={editingMessage}
-            onUpdate={handleMessageUpdate}
-            onCancelUpdate={cancelUpdate}
-            onCancelReplyToMessage={clearReplyMessage}
-            onSubmit={handleMessageSubmit}
-          />
-        </div> */}
+      </div>
       {/* </div> */}
     </div>
   )

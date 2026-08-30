@@ -1,5 +1,4 @@
 import { getCurrentUserServer } from "@/features/user/api/getCurrentUser.server"
-import { ChatUserList } from "@/shared/components/ChatUserList/ChatUserList"
 import { ChatUserListServer } from "@/shared/components/ChatUserList/ChatUserList.server"
 import { ChatUserListSkeleton } from "@/shared/components/ChatUserList/Skeleton"
 import { ApiError } from "@/shared/lib/api/unwrap"

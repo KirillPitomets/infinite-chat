@@ -585,7 +585,7 @@ export interface components {
              * @description Text content of the replied message
              * @example Original message text
              */
-            text?: Record<string, never> | null;
+            text?: string | null;
             /**
              * @description Flag indicating whether the replied message was deleted
              * @example false
@@ -615,10 +615,15 @@ export interface components {
              */
             id: string;
             /**
+             * @description Unique room identifier (uuid)
+             * @example d8c2b7e1-8f4b-4b2a-9e1d-3c8f5a6b7c8d
+             */
+            roomId: string;
+            /**
              * @description Text content of the message. Nullable for attachment-only messages.
              * @example Hello! Check out this document.
              */
-            text?: Record<string, never> | null;
+            text?: string | null;
             /** @description User who sent the message */
             sender: components["schemas"]["UserEntity"];
             /** @description Parent message being replied to, if applicable */
@@ -642,7 +647,7 @@ export interface components {
              * @description System-generated text/content for system events (e.g. user joined)
              * @example User joined the room
              */
-            systemContent?: Record<string, never> | null;
+            systemContent?: string | null;
             /**
              * @description Flag indicating whether the message has been soft-deleted
              * @example false
@@ -660,6 +665,110 @@ export interface components {
              * @example 2026-03-30T12:00:00.000Z
              */
             updatedAt: string;
+        };
+        CreateMessageAttachmentDto: {
+            /**
+             * @description Name of the attachment file
+             * @example document.pdf
+             */
+            name: string;
+            /**
+             * @description Storage key or unique path identifier for the file
+             * @example uploads/attachments/document_uuid.pdf
+             */
+            key: string;
+            /**
+             * @description Type of the message attachment
+             * @example IMAGE
+             * @enum {string}
+             */
+            type: "VIDEO" | "IMAGE" | "AUDIO" | "FILE";
+            /**
+             * @description File size in bytes (maximum 20MB / 20971520 bytes)
+             * @example 1048576
+             */
+            size: number;
+            /**
+             * @description Public URL of the attachment file
+             * @example https://storage.example.com/uploads/document.pdf
+             */
+            url: string;
+        };
+        CreateMessageDto: {
+            /**
+             * Format: uuid
+             * @description Unique room identifier where the message is sent (UUID v4)
+             * @example a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+             */
+            roomId: string;
+            /**
+             * @description Text content of the message (max 160 characters)
+             * @example Hello, team!
+             */
+            text?: string | null;
+            /**
+             * Format: uuid
+             * @description Identifier of the message being replied to (UUID v7)
+             * @example 018f3b2c-8a1a-7b2c-8d3e-4f5a6b7c8d9e
+             */
+            replyToMessageId?: string | null;
+            /** @description List of attachments included in the message */
+            attachments?: components["schemas"]["CreateMessageAttachmentDto"][] | null;
+        };
+        UpdateMessageDto: {
+            /**
+             * Format: uuid
+             * @description Unique room identifier where the message is sent (UUID v4)
+             * @example a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+             */
+            roomId: string;
+            /**
+             * @description Text content of the message (max 160 characters)
+             * @example Hello, team!
+             */
+            text?: string | null;
+            /**
+             * Format: uuid
+             * @description Identifier of the message being replied to (UUID v7)
+             * @example 018f3b2c-8a1a-7b2c-8d3e-4f5a6b7c8d9e
+             */
+            replyToMessageId?: string | null;
+            /** @description List of attachments included in the message */
+            attachments?: components["schemas"]["CreateMessageAttachmentDto"][] | null;
+            /**
+             * Format: uuid
+             * @description Unique identifier of the message being updated (UUID v7)
+             * @example 018f3b2c-8a1a-7b2c-8d3e-4f5a6b7c8d9e
+             */
+            messageId: string;
+        };
+        DeleteMessageDto: {
+            /**
+             * Format: uuid
+             * @description Unique room identifier (UUID v4)
+             * @example a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+             */
+            roomId: string;
+            /**
+             * Format: uuid
+             * @description Unique message identifier to delete (UUID v7)
+             * @example 018f3b2c-8a1a-7b2c-8d3e-4f5a6b7c8d9e
+             */
+            messageId: string;
+        };
+        RestoreMessageDto: {
+            /**
+             * Format: uuid
+             * @description Unique room identifier (UUID v4)
+             * @example a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+             */
+            roomId: string;
+            /**
+             * Format: uuid
+             * @description Unique message identifier to restore (UUID v7)
+             * @example 018f3b2c-8a1a-7b2c-8d3e-4f5a6b7c8d9e
+             */
+            messageId: string;
         };
     };
     responses: never;

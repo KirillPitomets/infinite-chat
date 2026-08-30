@@ -25,7 +25,7 @@ export default function Error({
       )}
       <div className="flex items-center justify-center gap-5">
         <button
-          className="bg-green-600 rounded-2xl px-4 py-2 cursor-pointer transition-all hover:bg-green-900 "
+          className="bg-green-600 rounded-sm px-4 py-2 cursor-pointer transition-all hover:bg-green-900 "
           onClick={() => {
             reset()
           }}
@@ -33,7 +33,7 @@ export default function Error({
           Try again
         </button>
         <button
-          className="bg-green-600 rounded-2xl px-4 py-2 cursor-pointer transition-all hover:bg-green-900 "
+          className="bg-green-600 rounded-sm px-4 py-2 cursor-pointer transition-all hover:bg-green-900 "
           onClick={() => {
             window.location.reload()
           }}

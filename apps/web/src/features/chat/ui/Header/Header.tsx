@@ -1,3 +1,5 @@
+"use client"
+
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
@@ -27,7 +29,6 @@ type ChatHeaderProps = {
   memberships: ChatRoom["memberships"]
   chatName: string
   avatarUrl: string
-  onDelete: () => void
 }
 
 export function ChatHeader({
@@ -35,11 +36,12 @@ export function ChatHeader({
   avatarUrl,
   chatName,
   memberships,
-  type,
-  onDelete
+  type
 }: ChatHeaderProps) {
   const currentUser = useCurrentUser()
-
+  const secondUser = memberships.find(
+    member => member.user.id !== currentUser.id
+  )
   return (
     <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
       <div className="flex items-center gap-2">
@@ -49,14 +51,11 @@ export function ChatHeader({
         >
           <ArrowIcon className="w-8 h-8 text-green-600" />
         </Link>
-        {type === "DIRECT" && (
-          <DirectInfo
-            chatId={chatId}
-            member={
-              memberships.filter(member => member.id !== currentUser.id)[0].user
-            }
-          />
+
+        {type === "DIRECT" && secondUser && (
+          <DirectInfo chatId={chatId} member={secondUser.user} />
         )}
+
         {type === "GROUP" && (
           <GroupInfo
             avatarUrl={avatarUrl}
@@ -74,7 +73,7 @@ export function ChatHeader({
           <InformationIcon />
         </IconButtonBase>
 
-        <button onClick={() => onDelete()}>
+        <button onClick={() => console.log("TODO IT - DELETE CHAT")}>
           <IconButtonBase size={4}>
             <TrashIcon />
           </IconButtonBase>

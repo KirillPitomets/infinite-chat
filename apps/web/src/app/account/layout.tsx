@@ -1,3 +1,4 @@
+import { SocketProvider } from "@/features/chat/message/providers/socketProvider"
 import { getCurrentUserServer } from "@/features/user/api/getCurrentUser.server"
 import Sidebar from "@/shared/components/Sidebar/Sidebar"
 import { NotificationManager } from "@/shared/context/NotificationManager"
@@ -33,13 +34,15 @@ export default async function AccountLayout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <UserPresenceProvider>
-        <main className="flex max-h-screen overflow-hidden">
-          <NotificationManager />
-          <Sidebar />
-          {children}
-        </main>
-      </UserPresenceProvider>
+      <SocketProvider>
+        <UserPresenceProvider>
+          <main className="flex max-h-screen overflow-hidden">
+            <NotificationManager />
+            <Sidebar />
+            {children}
+          </main>
+        </UserPresenceProvider>
+      </SocketProvider>
     </HydrationBoundary>
   )
 }

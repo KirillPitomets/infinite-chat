@@ -61,7 +61,8 @@ export class MessagesGateway
       client.join(`user:${user.id}`);
 
       const roomIds = await this.roomService.findUserRoomIds(user.id);
-      console.log(roomIds);
+      console.log(`userId - ${user.id}`);
+      console.log(`roomId - ${roomIds}`);
       this.joinToAllClientRooms(client, roomIds);
     } catch (error) {
       this.disconnectedWithError(client, error);
@@ -82,13 +83,16 @@ export class MessagesGateway
 
     const message = await this.messagesService.create(userId, roomId, dto);
 
-    this.emitToRoom(dto.roomId, 'message.created', message);
-  }
+    const messageEntity = this.instanceMessageToPlain(message);
 
-  @OnEvent('message:created')
-  async createSystemMessage(payload: SystemMessageCreatedEvent) {
-    const { message, roomId } = payload;
-    this.emitToRoom(roomId, 'message.created', message);
+    this.broadcastEmitToRoom(
+      client,
+      dto.roomId,
+      'message.created',
+      messageEntity,
+    );
+
+    return messageEntity;
   }
 
   @SubscribeMessage(ClientMessageEvents.UPDATE)
@@ -99,13 +103,20 @@ export class MessagesGateway
     const { id: userId } = client.data.auth.user;
     const { roomId } = dto;
 
-    if (!client.rooms.has(roomId)) {
+    if (!client.rooms.has(`room:${dto.roomId}`)) {
       throw new WsException('User not a member of this room');
     }
 
     const message = await this.messagesService.update(userId, dto);
+    const messageEntity = this.instanceMessageToPlain(message);
 
-    this.emitToRoom(dto.roomId, 'message.updated', message);
+    this.broadcastEmitToRoom(
+      client,
+      dto.roomId,
+      'message.updated',
+      messageEntity,
+    );
+    return messageEntity;
   }
 
   @SubscribeMessage(ClientMessageEvents.DELETE)
@@ -116,7 +127,7 @@ export class MessagesGateway
     const { id: userId } = client.data.auth.user;
     const { roomId, messageId } = dto;
 
-    if (!client.rooms.has(dto.roomId)) {
+    if (!client.rooms.has(`room:${dto.roomId}`)) {
       throw new WsException('User not a member of this room');
     }
 
@@ -125,8 +136,15 @@ export class MessagesGateway
       roomId,
       messageId,
     );
+    const messageEntity = this.instanceMessageToPlain(message);
 
-    this.emitToRoom(dto.roomId, 'message.deleted', message);
+    this.broadcastEmitToRoom(
+      client,
+      dto.roomId,
+      'message.deleted',
+      messageEntity,
+    );
+    return messageEntity;
   }
 
   @SubscribeMessage(ClientMessageEvents.RESTORE)
@@ -137,7 +155,7 @@ export class MessagesGateway
     const { id: userId } = client.data.auth.user;
     const { roomId, messageId } = dto;
 
-    if (!client.rooms.has(dto.roomId)) {
+    if (!client.rooms.has(`room:${dto.roomId}`)) {
       throw new WsException('User not a member of this room');
     }
 
@@ -146,8 +164,22 @@ export class MessagesGateway
       roomId,
       messageId,
     );
+    const messageEntity = this.instanceMessageToPlain(message);
 
-    this.emitToRoom(dto.roomId, 'message.restored', message);
+    this.broadcastEmitToRoom(
+      client,
+      dto.roomId,
+      'message.restored',
+      messageEntity,
+    );
+
+    return messageEntity;
+  }
+
+  @OnEvent('message:created')
+  async createSystemMessage(payload: SystemMessageCreatedEvent) {
+    const { message, roomId } = payload;
+    this.emitToRoom(roomId, 'message.created', message);
   }
 
   @OnEvent('room:member-left')
@@ -170,13 +202,24 @@ export class MessagesGateway
     this.addRoomForUser(this.server, payload.roomMember.userId, payload.roomId);
   }
 
+  private broadcastEmitToRoom(
+    client: MessageSocket,
+    roomId: string,
+    event: MessageEvent,
+    payload: MessagePayload,
+  ) {
+    client.broadcast.to(`room:${roomId}`).emit(event, payload);
+  }
+
   private emitToRoom(
     roomId: string,
     event: MessageEvent,
-    message: MessageEntity,
+    payload: MessagePayload,
   ) {
-    const payload = instanceToPlain(message) as MessagePayload;
-
     this.server.to(`room:${roomId}`).emit(event, payload);
+  }
+
+  private instanceMessageToPlain(message: MessageEntity): MessagePayload {
+    return instanceToPlain(message) as MessagePayload;
   }
 }

@@ -13,12 +13,12 @@ export default function Home() {
       {
         <div className="space-x-4">
           <SignInButton>
-            <button className="border border-zinc-400 p-2 rounded-2xl transition-colors cursor-pointer hover:bg-zinc-700 hover:text-white">
+            <button className="border border-zinc-400 p-2 rounded-sm transition-colors cursor-pointer hover:bg-zinc-700 hover:text-white">
               Sign in
             </button>
           </SignInButton>
           <SignUpButton>
-            <button className="border border-zinc-400 p-2 rounded-2xl transition-colors cursor-pointer hover:bg-zinc-700 hover:text-white">
+            <button className="border border-zinc-400 p-2 rounded-sm transition-colors cursor-pointer hover:bg-zinc-700 hover:text-white">
               Sign Up
             </button>
           </SignUpButton>

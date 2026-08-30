@@ -1,11 +1,21 @@
 import { INestApplication } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { getSwaggerConfig } from './swagger.config';
+import { CreateMessageDto, UpdateMessageDto } from 'src/api/messages/dto';
+import { DeleteMessageDto } from 'src/api/messages/dto/delete-message.dto';
+import { RestoreMessageDto } from 'src/api/messages/dto/restore-message.dto';
 
 export const setupSwagger = (app: INestApplication) => {
   const config = getSwaggerConfig();
 
-  const document = SwaggerModule.createDocument(app, config);
+  const document = SwaggerModule.createDocument(app, config, {
+    extraModels: [
+      CreateMessageDto,
+      UpdateMessageDto,
+      DeleteMessageDto,
+      RestoreMessageDto,
+    ],
+  });
 
   SwaggerModule.setup('api/docs', app, document, {
     jsonDocumentUrl: 'api/docs/json',

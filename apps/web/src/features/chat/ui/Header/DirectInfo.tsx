@@ -3,6 +3,7 @@ import Image from "next/image"
 import { useRealtimeTyping } from "../../realtime/useRealtimeTyping"
 import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
 import { User } from "@/shared/types/api.type"
+import { UserAvatar } from "@/shared/components/ui/UserAvatar/UserAvatar"
 
 type DirectInfoProps = {
   chatId: string
@@ -15,14 +16,7 @@ export const DirectInfo = ({ chatId, member }: DirectInfoProps) => {
 
   return (
     <>
-      <div className="max-w-10.5 max-h-10.5 rounded-4xl bg-gray-600 overflow-hidden flex justify-center align-center">
-        <Image
-          width={42}
-          height={42}
-          src={member.imageUrl}
-          alt={member.username}
-        />
-      </div>
+      <UserAvatar size={10} url={member.imageUrl} alt={member.username} />
       <div>
         <p className="font-semibold">{member.username}</p>
 

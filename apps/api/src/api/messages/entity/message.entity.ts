@@ -24,10 +24,17 @@ export class MessageEntity implements Message {
   })
   id: string;
 
+  @ApiProperty({
+    description: 'Unique room identifier (uuid)',
+    example: 'd8c2b7e1-8f4b-4b2a-9e1d-3c8f5a6b7c8d',
+  })
+  roomId: string;
+
   @ApiPropertyOptional({
     description:
       'Text content of the message. Nullable for attachment-only messages.',
     example: 'Hello! Check out this document.',
+    type: String,
     nullable: true,
   })
   text: string | null;
@@ -72,6 +79,7 @@ export class MessageEntity implements Message {
     description:
       'System-generated text/content for system events (e.g. user joined)',
     example: 'User joined the room',
+    type: String,
     nullable: true,
   })
   systemContent: string | null;
@@ -95,7 +103,6 @@ export class MessageEntity implements Message {
   updatedAt: Date;
 
   @Exclude() senderId: string;
-  @Exclude() roomId: string;
   @Exclude() replyToMessageId: string | null;
 
   constructor(message: MessageWithRelations) {

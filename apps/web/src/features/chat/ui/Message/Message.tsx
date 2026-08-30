@@ -1,3 +1,4 @@
+"use client"
 import {
   ChatUIMessage,
   UIAttachment
@@ -12,78 +13,86 @@ import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
 import { MessageStatus } from "./Status"
 import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import type { Message as MessageType } from "@/shared/types/api.type"
 
 interface IMessageProps extends ChatUIMessage {
   chatId: string
-  isMine: boolean
-  selectedMessageId?: string
-  isRead: boolean
-  handleUpdate: (editingMessage: EditingMessage) => void
-  handleReplyToMessage: (message: ChatUIMessage) => void
-  onDelete: (id: string) => void
-  onPreviewImage: (image: { alt: string; url: string }) => void
+  prevSenderMessageId?: string
+  // selectedMessageId?: string
+  // isRead: boolean
+  // handleUpdate: (editingMessage: EditingMessage) => void
+  // handleReplyToMessage: (message: ChatUIMessage) => void
+  // onDelete: (id: string) => void
+  // onPreviewImage: (image: { alt: string; url: string }) => void
 }
 
 export const Message = ({
-  id,
   chatId,
-  selectedMessageId,
-  isRead,
-  isMine,
-  content,
+  id,
+  text,
   sender,
   attachments,
-  status,
   isDeleted,
-  updatedAt,
-  createdAt,
   replyToMessage,
-  handleReplyToMessage,
-  handleUpdate,
-  onDelete,
-  onPreviewImage
-}: IMessageProps) => {
-  const [isVisibleContextMenu, setIsVisibleContextMenu] = useState(false)
-  const handleContextMenu = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    e.preventDefault()
-    setIsVisibleContextMenu(prev => !prev)
-  }
+  type,
+  systemContent,
+  createdAt,
+  updatedAt,
+  status,
 
-  const contextMenu = useMessageContextMenu({
-    closeContext: () => setIsVisibleContextMenu(false),
-    copyMessage: () => {
-      if (content) {
-        navigator.clipboard.writeText(content)
-        toast.success("Message copied :)")
-      } else {
-        toast.error("No content for copy")
-      }
-    },
-    deleteMessage() {
-      onDelete(id)
-    },
-    updateMessage() {
-      handleUpdate({
-        id,
-        initialValue: content,
-        initialAttachments: attachments
-      })
-    },
-    replyMessage() {
-      handleReplyToMessage({
-        id,
-        attachments,
-        content,
-        createdAt,
-        status,
-        isDeleted,
-        updatedAt,
-        sender
-      })
-    }
-  })
+  prevSenderMessageId
+
+  // id,
+  // selectedMessageId,
+  // isRead,
+  // attachments,
+  // status,
+  // isDeleted,
+  // updatedAt,
+  // createdAt,
+  // replyToMessage,
+  // handleReplyToMessage,
+  // handleUpdate,
+  // onDelete,
+  // onPreviewImage
+}: IMessageProps) => {
+  const currentUser = useCurrentUser()
+  const isMine = currentUser.id === sender.id
+
+  // const contextMenu = useMessageContextMenu({
+  //   closeContext: () => setIsVisibleContextMenu(false),
+  //   copyMessage: () => {
+  //     if (content) {
+  //       navigator.clipboard.writeText(content)
+  //       toast.success("Message copied :)")
+  //     } else {
+  //       toast.error("No content for copy")
+  //     }
+  //   },
+  //   deleteMessage() {
+  //     onDelete(id)
+  //   },
+  //   updateMessage() {
+  //     handleUpdate({
+  //       id,
+  //       initialValue: content,
+  //       initialAttachments: attachments
+  //     })
+  //   },
+  //   replyMessage() {
+  //     handleReplyToMessage({
+  //       id,
+  //       attachments,
+  //       content,
+  //       createdAt,
+  //       status,
+  //       isDeleted,
+  //       updatedAt,
+  //       sender
+  //     })
+  //   }
+  // })
 
   if (isDeleted || status === "deleted") {
     return (
@@ -92,7 +101,7 @@ export const Message = ({
         chatId={chatId}
         isMine={isMine}
         senderImageUrl={sender.imageUrl}
-        senderName={sender.name}
+        senderName={sender.username}
       />
     )
   }
@@ -102,48 +111,40 @@ export const Message = ({
       <div
         className={`max-w-[80%] flex flex-col space-y-2 ${status === "loading" && "opacity-70"} `}
       >
-        {!isMine && (
-          <MessageSender avatarUrl={sender.imageUrl} name={sender.name} />
+        {!isMine && sender.id !== prevSenderMessageId && (
+          <MessageSender avatarUrl={sender.imageUrl} name={sender.username} />
         )}
 
         <div
-          className={`relative px-3 py-1 rounded-sm 
-            ${
-              id === selectedMessageId
-                ? "dark:bg-green-700 bg-green-400"
-                : "dark:bg-zinc-700 bg-gray-200 "
-            } 
-            `}
+          className={`relative px-3 py-1 rounded-sm
+        ${
+          // id === selectedMessageId
+          false
+            ? "dark:bg-green-700 bg-green-400"
+            : "dark:bg-zinc-700 bg-gray-200 "
+        }
+        `}
         >
           {replyToMessage && (
             <div className="p-1 pl-2 text-sm border-l-2 border-black dark:bg-zinc-800 bg-gray-300 rounedd-xl">
-              <p>{replyToMessage.sender.name}</p>
-              <p className="opacity-80">{replyToMessage.content}</p>
+              <p>{replyToMessage.sender.username}</p>
+              <p className="opacity-80">{String(replyToMessage.text)}</p>
             </div>
           )}
 
-          <div
-            className="flex flex-wrap items-end justify-between gap-3"
-            onContextMenu={handleContextMenu}
-          >
-            <MessageContextMenu
-              isMineMessage={isMine}
-              isVisible={isVisibleContextMenu}
-              buttons={contextMenu}
-            />
-
+          <div className="flex flex-wrap items-end justify-between gap-3">
             <MessageContent
               attachments={attachments}
-              onPreviewImage={onPreviewImage}
-              content={content}
-              messageStatus={status}
+              onPreviewImage={() => {}}
+              content={String(text)}
+              messageStatus={"sent"}
             />
 
             <div className="flex justify-end space-x-2">
               <p className={`text-sm opacity-50 ${isMine && "text-end"}`}>
                 {formatDate(createdAt, "HH:mm")}
               </p>
-              {isMine && <MessageStatus status={isRead ? "readed" : status} />}
+              {/* {isMine && <MessageStatus status={isRead ? "readed" : status} />} */}
             </div>
           </div>
         </div>

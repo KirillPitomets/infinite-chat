@@ -22,6 +22,7 @@ export class ReplyMessageEntity implements Message {
   @ApiPropertyOptional({
     description: 'Text content of the replied message',
     example: 'Original message text',
+    type: String,
     nullable: true,
   })
   text: string | null;

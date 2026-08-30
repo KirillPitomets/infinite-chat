@@ -4,55 +4,59 @@ import {
   mapAPIMessageToUI
 } from "@/features/chat/message/model/message.types"
 import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import { MessageSocket } from "@/shared/lib/socket/socketFactory"
+import { CreateMessageDto, Message } from "@/shared/types/api.type"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import toast from "react-hot-toast"
+import { Socket } from "socket.io-client"
 
 export type SubmitMessageArgs = {
-  content?: string
+  text?: string
   files?: File[]
   replyMessage?: ChatUIMessage
 }
 
-export function useSendMessage(chatId: string) {
+export function useSendMessage(chatId: string, socket: MessageSocket | null) {
   const [replyMessage, setReplyMessage] = useState<ChatUIMessage | undefined>(
     undefined
   )
   const [isReplyMessage, setIsReplyMessage] = useState(false)
   const queryClient = useQueryClient()
-  // const currentUser = useCurrentUser()
+  const currentUser = useCurrentUser()
 
   const clearReplyMessage = () => {
     setIsReplyMessage(false)
     setReplyMessage(undefined)
   }
 
-  const { mutate } = useMutation<
+  const { mutate: handleSendMessage } = useMutation<
     ChatUIMessage,
     Error,
     SubmitMessageArgs,
     { previousMessages: ChatUIMessage[]; tempId: string; filesCount?: number }
   >({
     mutationKey: chatKeys.sendMessages(chatId),
-    mutationFn: async ({ content, files, replyMessage }) => {
-      if (!content && !files) {
+    mutationFn: async ({ text, files, replyMessage }) => {
+      if (!text && !files) {
         throw new Error("Failed to send message")
       }
-      // == TODO ==
-      // const res = await edenClient.chat({ chatId }).messages.post({
-      //   content,
-      //   files,
-      //   replyToMessageId: replyMessage ? replyMessage.id : null
-      // })
 
-      // if (!res.data) {
-      //   throw new Error("Failed to send message")
-      // }
+      if (!socket) {
+        throw new Error("Invalid socket")
+      }
 
-      // return mapAPIMessageToUI(res.data, "sent", false)
+      const msg = await socket.timeout(5000).emitWithAck("message.send", {
+        roomId: chatId,
+        text,
+        replyToMessageId: replyMessage?.id
+      })
+
+      return mapAPIMessageToUI(msg, "sent", false)
     },
 
-    onMutate: async ({ content, files, replyMessage }) => {
+    onMutate: async ({ text, files, replyMessage }) => {
       await queryClient.cancelQueries({
         queryKey: chatKeys.messages(chatId)
       })
@@ -66,26 +70,25 @@ export function useSendMessage(chatId: string) {
       const tempId = crypto.randomUUID()
       const optimisticMessage: ChatUIMessage = {
         id: tempId,
-        content: content ? content : "",
+        roomId: chatId,
+        type: "USER",
+        text,
         sender: currentUser,
         isDeleted: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         status: "loading",
-        replyToMessage: replyMessage
-          ? {
-              id: replyMessage.id,
-              content: replyMessage.content,
-              sender: replyMessage.sender
-            }
-          : undefined,
+        replyToMessage: replyMessage,
         attachments: files
           ? files.map(_ => ({
+              id: "",
               key: `temp-${Date.now()}-missingAttachment`,
               name: "temp-attachment",
-              size: 0,
+              size: 123,
               type: "VIDEO",
               url: "",
+              createdAt: "",
+
               isError: false
             }))
           : []
@@ -129,7 +132,7 @@ export function useSendMessage(chatId: string) {
   })
 
   return {
-    mutate,
+    handleSendMessage,
     setReplyMessage,
     setIsReplyMessage,
     clearReplyMessage,

@@ -24,10 +24,10 @@ export interface ServerToClientMessageEvents {
 }
 
 export interface ClientToServerMessageEvents {
-  'message.send': (dto: CreateMessageDto) => void;
-  'message.update': (dto: UpdateMessageDto) => void;
-  'message.delete': (dto: DeleteMessageDto) => void;
-  'message.restore': (dto: RestoreMessageDto) => void;
+  'message.send': (dto: CreateMessageDto) => MessageEntity;
+  'message.update': (dto: UpdateMessageDto) => MessageEntity;
+  'message.delete': (dto: DeleteMessageDto) => MessageEntity;
+  'message.restore': (dto: RestoreMessageDto) => MessageEntity;
 }
 
 export const ClientMessageEvents = {
