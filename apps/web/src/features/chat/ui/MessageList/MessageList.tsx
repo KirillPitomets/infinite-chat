@@ -24,7 +24,7 @@ type MessageListProps = {
   onReplyToMessage: (message: ChatUIMessage) => void
   onRestore: (messageId: string) => void
   onDelete: (id: string) => void
-  // onPreviewImage: (image: { alt: string; url: string }) => void
+  onPreviewImage: (image: { alt: string; url: string }) => void
 }
 
 export const MessageList = ({
@@ -36,8 +36,8 @@ export const MessageList = ({
   onUpdate,
   onReplyToMessage,
   onDelete,
-  onRestore
-  // onPreviewImage
+  onRestore,
+  onPreviewImage
 }: MessageListProps) => {
   const currentUser = useCurrentUser()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -115,19 +115,14 @@ export const MessageList = ({
       {messages.map((msg, indx) => (
         <Message
           key={msg.id}
-          chatId={chatId}
           selectedMessageId={selectedMessageId}
           prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
           onDelete={onDelete}
           onUpdate={onUpdate}
           onReplyToMessage={onReplyToMessage}
           onRestore={onRestore}
-          msgData={mapAPIMessageToUI(msg, "sent", false)}
-          // selectedMessageId={selectedMessageId}
-          // handleUpdate={handleUpdate}
-          // handleReplyToMessage={handleReplyToMessage}
-          // onDelete={onDelete}
-          // onPreviewImage={onPreviewImage}
+          msgData={msg}
+          onPreviewImage={onPreviewImage}
 
           // isRead={
           //   otherUserLastReadAt

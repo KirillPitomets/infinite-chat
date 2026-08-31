@@ -11,16 +11,18 @@ import { useApiClient } from "@/shared/lib/api/useApiClient"
 export function useGetMessages(chatId: string, initialData: Message[]) {
   const api = useApiClient()
 
-  return useQuery<Message[]>({
+  return useQuery<ChatUIMessage[]>({
     enabled: !!chatId,
     queryKey: chatKeys.messages(chatId),
-    queryFn: async () =>
-      await unwrap(
+    queryFn: async () => {
+      const messages = await unwrap(
         api.GET("/api/v1/message/history/{roomId}", {
           params: { path: { roomId: chatId } }
         })
-      ),
+      )
 
-    initialData
+      return messages.map(msg => mapAPIMessageToUI(msg, "sent", false))
+    },
+    initialData: initialData.map(msg => mapAPIMessageToUI(msg, "sent", false))
   })
 }

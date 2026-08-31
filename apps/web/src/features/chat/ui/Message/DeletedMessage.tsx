@@ -2,42 +2,29 @@ import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { ReloadIcon } from "@/shared/components/ui/icons"
 import Image from "next/image"
 import { useChangeMessageStatus } from "../../message/api/useChangeMessageStatus"
+import { Message, User } from "@/shared/types/api.type"
+import { MessageSender } from "./Sender"
 
 type DeletedMessageProps = {
   id: string
-  chatId: string
   isMine: boolean
-  senderName: string
-  senderImageUrl: string
+  sender: User
   onRestore: (messageId: string) => void
+  prevSenderMessageId?: string
 }
 
 const DeletedMessage = ({
   id,
-  chatId,
+  sender,
+  prevSenderMessageId,
   isMine,
-  senderImageUrl,
-  senderName,
   onRestore
 }: DeletedMessageProps) => {
-  const changeMessageStatus = useChangeMessageStatus()
-
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
       <div className="flex flex-col space-y-2">
-        {!isMine && (
-          <div className="flex space-x-2.5">
-            <div className="w-6.25 h-6.25">
-              <Image
-                width={25}
-                height={25}
-                src={senderImageUrl}
-                alt={senderName}
-                className="rounded-2xl"
-              />
-            </div>
-            <p>{senderName}</p>
-          </div>
+        {!isMine && sender.id !== prevSenderMessageId && (
+          <MessageSender avatarUrl={sender.imageUrl} name={sender.username} />
         )}
         <div className="p-3 rounded-2xl bg-gray-200 dark:bg-zinc-700 relative group">
           {isMine && (

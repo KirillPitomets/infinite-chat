@@ -4,97 +4,56 @@ import {
   ChatUIMessage,
   mapAPIMessageToUI
 } from "@/features/chat/message/model/message.types"
-import { ChatDetails } from "@/shared/schemes/chat.schema"
+import { MessageSocket } from "@/shared/lib/socket/socketFactory"
+import { Message } from "@/shared/types/api.type"
+import { replaceMessageInCache } from "@/shared/utils/replaceMessageInCache"
 import { useQueryClient } from "@tanstack/react-query"
+import { useEffect } from "react"
 
-export function useRealtimeChat(chatId: string, currentUserId: string) {
+export function useRealtimeChat(
+  chatId: string,
+  messageSocket: MessageSocket | null
+) {
   const queryClient = useQueryClient()
   const changeMessageStatus = useChangeMessageStatus()
 
-  // useRealtime({
-  //   channels: [chatId],
-  //   events: [
-  //     "chat.message.created",
-  //     "chat.message.deleted",
-  //     "chat.message.restored",
-  //     "chat.message.updated",
-  //     "chat.message.readed"
-  //   ],
-  //   onData({ data, event }) {
-  //     switch (event) {
-  //       case "chat.message.created": {
-  //         const message = data.message
-  //         if (message.sender.id === currentUserId) return
-  //         // Change optimistic message to real message in chat
-  //         queryClient.setQueryData<ChatUIMessage[]>(
-  //           chatKeys.messages(data.chatId),
-  //           old => [...(old ?? []), mapAPIMessageToUI(message, "sent", false)]
-  //         )
-  //         break
-  //       }
-  //       case "chat.message.updated": {
-  //         const message = data.message
-  //         if (message.sender.id === currentUserId) return
-  //         // Change message to updated message
-  //         queryClient.setQueryData<ChatUIMessage[]>(
-  //           chatKeys.messages(data.chatId),
-  //           old =>
-  //             old
-  //               ? old.map(msg =>
-  //                   msg.id === message.id
-  //                     ? mapAPIMessageToUI(message, "sent", false)
-  //                     : msg
-  //                 )
-  //               : []
-  //         )
-  //         break
-  //       }
-  //       case "chat.message.deleted": {
-  //         const message = data.message
-  //         if (message.sender.id === currentUserId) return
-  //         changeMessageStatus({
-  //           chatId: data.chatId,
-  //           messageId: message.id,
-  //           status: "deleted"
-  //         })
+  useEffect(() => {
+    if (!messageSocket) return
 
-  //         break
-  //       }
+    const handleCreated = (message: Message) => {
+      queryClient.setQueryData<ChatUIMessage[]>(
+        chatKeys.messages(chatId),
 
-  //       case "chat.message.restored": {
-  //         const message = data.message
-  //         if (message.sender.id === currentUserId) return
-  //         changeMessageStatus({
-  //           chatId: data.chatId,
-  //           messageId: message.id,
-  //           status: "sent"
-  //         })
+        old => [...(old ?? []), mapAPIMessageToUI(message, "sent", false)]
+      )
+    }
 
-  //         break
-  //       }
+    const handleUpdated = (message: Message) => {
+      replaceMessageInCache(queryClient, chatId, message, "sent")
+    }
 
-  //       case "chat.message.readed": {
-  //         if (data.userId === currentUserId) return
-  //         // ========= Change lastReadAt for current chat =========
-  //         queryClient.setQueryData<ChatDetails>(
-  //           chatKeys.data(data.chatId),
-  //           old => {
-  //             if (old && old.type === "DIRECT") {
-  //               return {
-  //                 ...old,
-  //                 otherUser: { ...old.otherUser, lastReadAt: data.lastReadAt }
-  //               }
-  //             }
+    const handleDeleted = (message: Message) => {
+      replaceMessageInCache(queryClient, chatId, message, "deleted")
+    }
 
-  //             return old
-  //           }
-  //         )
-  //         break
-  //       }
+    const handleRestored = (message: Message) => {
+      replaceMessageInCache(queryClient, chatId, message, "sent")
+    }
 
-  //       default:
-  //         break
-  //     }
-  //   }
-  // })
+    const handleException = (err: unknown) => console.log(err)
+
+    messageSocket.on("message.created", handleCreated)
+    messageSocket.on("message.updated", handleUpdated)
+    messageSocket.on("message.deleted", handleDeleted)
+    messageSocket.on("message.restored", handleRestored)
+    messageSocket.on("exception", handleException)
+
+    return () => {
+      messageSocket.off("message.created", handleCreated)
+      messageSocket.off("message.updated", handleUpdated)
+      messageSocket.off("message.deleted", handleDeleted)
+      messageSocket.off("message.restored", handleRestored)
+      messageSocket.off("exception", handleException)
+    }
+  }, [messageSocket, chatId, queryClient, changeMessageStatus])
 }

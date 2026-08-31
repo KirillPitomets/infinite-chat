@@ -1,12 +1,19 @@
 import { Message, MessageAttachments } from "@/shared/types/api.type"
 
+export type ChatUIMessageStatus =
+  | "loading"
+  | "sent"
+  | "error"
+  | "deleted"
+  | "readed"
+
 export type UIAttachment = MessageAttachments & {
   isError: boolean
 }
 
 export type ChatUIMessage = Message & {
   attachments: UIAttachment[]
-  status: "loading" | "sent" | "error" | "deleted" | "readed"
+  status: ChatUIMessageStatus
 }
 
 export const mapAPIMessageToUI = (

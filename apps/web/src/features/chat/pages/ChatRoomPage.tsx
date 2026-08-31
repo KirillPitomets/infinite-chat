@@ -1,33 +1,23 @@
 "use client"
 
 import { ChatHeader } from "@/features/chat/ui/Header/Header"
-import {
-  ChatRoom,
-  CreateMessageDto,
-  Message,
-  User
-} from "@/shared/types/api.type"
-import {
-  PropsWithChildren,
-  Suspense,
-  useEffect,
-  useEffectEvent,
-  useRef
-} from "react"
-import { MessageListSkeleton } from "../ui/MessageList/Skeleton"
-import { MessageListServer } from "../ui/MessageList/MessageList.server"
-import { ChatInputController } from "../ui/Input/InputController"
-import { useChatRoomData } from "../chat/api/useChatRoomData"
-import { useMessagesSocket } from "../message/providers/socketProvider"
-import { useQueryClient } from "@tanstack/react-query"
-import { useAuth } from "@clerk/nextjs"
-import { Socket } from "socket.io-client"
-import { chatKeys } from "../chat/model/chat.keys"
-import { useSendMessage } from "../message/api/mutate/useSendMessage"
-import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
-import { MessageList } from "../ui/MessageList/MessageList"
+import { UploadIcon } from "@/shared/components/ui/icons"
+import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
+import { useFiles } from "@/shared/hooks/useFiles"
+import { usePreviewImageDialog } from "@/shared/hooks/usePreviewImage"
+import { ChatRoom, Message } from "@/shared/types/api.type"
+import { useCallback, useEffect } from "react"
+import { useDropzone } from "react-dropzone"
+import toast from "react-hot-toast"
+import { useDeleteChat } from "../chat/api/useDeleteChat"
 import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
 import { useRestoreMessage } from "../message/api/mutate/useRestoreMessage"
+import { useSendMessage } from "../message/api/mutate/useSendMessage"
+import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
+import { useMessagesSocket } from "../message/providers/socketProvider"
+import { useRealtimeChat } from "../realtime/useRealtimeChat"
+import { ChatInputController } from "../ui/Input/InputController"
+import { MessageList } from "../ui/MessageList/MessageList"
 
 const MAX_FILES = 4
 
@@ -42,78 +32,49 @@ export const ChatRoomPage = ({
   chatRoomData,
   initialMessages
 }: ChatRoomPageProps) => {
-  // const currentUser = useCurrentUser()
   // =======================================
   // ================ FILES ================
   // =======================================
-  // const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
-  //   maxFiles: MAX_FILES
-  // })
-  // const {
-  //   previewImage,
-  //   isOpenImagePreview,
-  //   closePreviewImageDialog,
-  //   handleImagePreviewDialog
-  // } = usePreviewImageDialog()
-  // const { getInputProps, getRootProps, isDragActive, fileRejections } =
-  //   useDropzone({
-  //     accept: {
-  //       "image/jpeg": [],
-  //       "image/png": [],
-  //       "image/webp": [],
-  //       "image/heic": [],
-  //       "image/jfif": []
-  //     },
-  //     noClick: true,
-  //     onDrop,
-  //     maxFiles: MAX_FILES,
-  //     multiple: true
-  //   })
+  const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
+    maxFiles: MAX_FILES
+  })
+  const {
+    previewImage,
+    isOpenImagePreview,
+    closePreviewImageDialog,
+    handleImagePreviewDialog
+  } = usePreviewImageDialog()
 
-  // =======================================
-  // ============== Messages ===============
-  // =======================================
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      addFiles(acceptedFiles)
+    },
+    [addFiles]
+  )
 
-  // const { mutate: deleteChat } = useDeleteChat(chatId)
+  const { getInputProps, getRootProps, isDragActive, fileRejections } =
+    useDropzone({
+      accept: {
+        "image/jpeg": [],
+        "image/png": [],
+        "image/webp": [],
+        "image/heic": [],
+        "image/jfif": []
+      },
+      noClick: true,
+      onDrop,
+      maxFiles: MAX_FILES,
+      multiple: true
+    })
 
-  // const onDrop = useCallback(
-  //   (acceptedFiles: File[]) => {
-  //     addFiles(acceptedFiles)
-  //   },
-  //   [addFiles]
-  // )
+  const { mutate: deleteChat } = useDeleteChat(chatId)
 
-  // const handleMessageUpdate = (id: string, value: string) => {
-  //   updateMessage({ messageId: id, content: value, files })
-  //   clearFiles()
-  // }
-  // const handleMessageSubmit = ({
-  //   content,
-  //   replyMessage
-  // }: SubmitMessageArgs) => {
-  //   sendMessage({ content, files, replyMessage })
-  //   clearFiles()
-  // }
-  // const disenableAllInputStates = () => {
-  //   cancelUpdate()
-  //   setIsReplyMessage(false)
-  // }
-
-  // useRealtimeChat(chatId, currentUser.id)
-
-  // useEffect(() => {
-  //   toast.dismissAll()
-  // }, [])
-  // useEffect(() => {
-  //   fileRejections.forEach(file => {
-  //     if (file.errors) {
-  //       file.errors.forEach(err => toast.error(err.message))
-  //     }
-  //   })
-  // }, [fileRejections, fileRejections.length])
+  const disenableAllInputStates = () => {
+    cancelUpdate()
+    clearReplyMessage()
+  }
 
   const messageSocket = useMessagesSocket()
-  const queryClient = useQueryClient()
   const {
     handleSendMessage,
     handleReplyMessage,
@@ -134,39 +95,44 @@ export const ChatRoomPage = ({
     chatId,
     messageSocket
   )
-
   const { handleRestoreMessage } = useRestoreMessage(chatId, messageSocket)
 
+  const handleMessageSubmit = (value: string, files?: File[]) => {
+    handleSendMessage({
+      roomId: chatId,
+      text: value,
+      attachments: [],
+      replyToMessageId: replyMessage?.id
+    })
+    clearFiles()
+  }
+
+  const handleMessageUpdateSubmit = (value: string, files?: File[]) => {
+    handleUpdateMessage({ text: value })
+    clearFiles()
+  }
+
   useEffect(() => {
-    if (!messageSocket) return
+    toast.dismissAll()
+  }, [])
 
-    const handleNewMessage = (msg: Message) => {
-      console.log("Message created - ", msg)
+  useEffect(() => {
+    fileRejections.forEach(file => {
+      if (file.errors) {
+        file.errors.forEach(err => toast.error(err.message))
+      }
+    })
+  }, [fileRejections, fileRejections.length])
 
-      queryClient.setQueryData<Message[]>(
-        chatKeys.messages(chatId),
-        (old = []) => [...old, msg]
-      )
-    }
-
-    const handleExceptions = (err: any) => console.log(err)
-
-    messageSocket.on("message.created", handleNewMessage)
-
-    messageSocket.on("exception", handleExceptions)
-    return () => {
-      messageSocket.off("message.created", handleNewMessage)
-      messageSocket.off("exception", handleExceptions)
-    }
-  }, [messageSocket, chatId])
+  useRealtimeChat(chatId, messageSocket)
 
   return (
     <div className="flex flex-col w-full h-full">
-      {/* <ImagePreviewDialog
+      <ImagePreviewDialog
         isOpen={isOpenImagePreview}
         image={previewImage}
         onClose={closePreviewImageDialog}
-      /> */}
+      />
 
       <ChatHeader
         chatId={chatId}
@@ -176,59 +142,47 @@ export const ChatRoomPage = ({
         memberships={chatRoomData.memberships}
       />
 
-      {/* <div
+      <div
         {...getRootProps()}
         className="relative flex flex-col flex-1 min-h-0"
-      > */}
-
-      {/* {isDragActive && (
+      >
+        {isDragActive && (
           <div className="absolute inset-0 flex items-center justify-center w-full h-full bg-black/50 z-1001">
             <div className="p-4 border-4 rounded-sm border-black/50">
               <UploadIcon className="w-40 h-40 opacity-60" />
             </div>
           </div>
-        )} */}
+        )}
 
-      <MessageList
-        chatId={chatId}
-        initialData={initialMessages}
-        onUpdate={editingMsg => handleEditingMessage(editingMsg)}
-        onReplyToMessage={msg => handleReplyMessage(msg)}
-        onDelete={handleDeleteMessage}
-        onRestore={handleRestoreMessage}
-        selectedMessageId=""
-      />
-
-      <div className="relative">
-        <ChatInputController
+        <MessageList
           chatId={chatId}
-          replyMessage={replyMessage}
-          // previewFiles={files}
-          // inputDropZoneProps={getInputProps()}
-          mode={
-            isEditingMessage ? "edit" : isReplyMessage ? "reply" : undefined
-          }
-          editingMessage={editingMessage}
-          onRemovePreviewFile={() => {}} // removePreviewFile={removePreviewFile}
-          onUpdate={(value, files) =>
-            handleUpdateMessage({
-              text: value,
-              attachments: []
-            })
-          }
-          onCancelUpdate={cancelUpdate}
-          onCancelReplyToMessage={clearReplyMessage}
-          onSubmit={value =>
-            handleSendMessage({
-              roomId: chatId,
-              text: value,
-              attachments: [],
-              replyToMessageId: replyMessage?.id
-            })
-          }
+          initialData={initialMessages}
+          onUpdate={editingMsg => handleEditingMessage(editingMsg)}
+          onReplyToMessage={msg => handleReplyMessage(msg)}
+          onDelete={handleDeleteMessage}
+          onRestore={handleRestoreMessage}
+          onPreviewImage={handleImagePreviewDialog}
+          selectedMessageId=""
         />
+
+        <div className="relative">
+          <ChatInputController
+            chatId={chatId}
+            replyMessage={replyMessage}
+            previewFiles={files}
+            inputDropZoneProps={getInputProps()}
+            mode={
+              isEditingMessage ? "edit" : isReplyMessage ? "reply" : undefined
+            }
+            editingMessage={editingMessage}
+            onRemovePreviewFile={removePreviewFile}
+            onUpdate={handleMessageUpdateSubmit}
+            onCancelUpdate={cancelUpdate}
+            onCancelReplyToMessage={clearReplyMessage}
+            onSubmit={handleMessageSubmit}
+          />
+        </div>
       </div>
-      {/* </div> */}
     </div>
   )
 }
