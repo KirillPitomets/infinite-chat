@@ -1,63 +1,64 @@
 import {
   ChatUIMessage,
-  mapAPIMessageToUI,
-  UIAttachment
+  mapAPIMessageToUI
 } from "@/features/chat/message/model/message.types"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import toast from "react-hot-toast"
 import { chatKeys } from "../../../chat/model/chat.keys"
 import { useChangeMessageStatus } from "../useChangeMessageStatus"
 import { useState } from "react"
+import { MessageSocket } from "@/shared/lib/socket/socketFactory"
+import { UpdateMessageDto } from "@/shared/types/api.type"
 
-export type EditingMessage = {
-  id: string
-  initialValue?: string | null
-  initialAttachments?: UIAttachment[]
-}
+export type MessageUpdateFields = Pick<UpdateMessageDto, "text" | "attachments">
 
-export function useUpdateMessage(chatId: string) {
+export function useUpdateMessage(chatId: string, socket: MessageSocket | null) {
   const queryClient = useQueryClient()
   const changeMessageStatus = useChangeMessageStatus()
 
-  const [isEditMessage, setIsEditMessage] = useState(false)
-  const [editingMessage, setEditingMessage] = useState<EditingMessage>({
-    id: "",
-    initialValue: ""
-  })
+  const [isEditingMessage, setIsEditingMessage] = useState(false)
+  const [editingMessage, setEditingMessage] = useState<ChatUIMessage | null>()
 
-  const toggleIsEditMessage = () => setIsEditMessage(prev => !prev)
+  const toggleIsEditMessage = () => setIsEditingMessage(prev => !prev)
 
-  const handleEditingMessage = (message: EditingMessage) => {
+  const handleEditingMessage = (message: ChatUIMessage) => {
     setEditingMessage(message)
-    setIsEditMessage(true)
+    setIsEditingMessage(true)
   }
 
   const cancelUpdate = () => {
-    setEditingMessage({ id: "", initialValue: "", initialAttachments: [] })
-    setIsEditMessage(false)
+    setEditingMessage(null)
+    setIsEditingMessage(false)
   }
 
   const { mutate } = useMutation<
     ChatUIMessage,
     Error,
-    {
-      messageId: string
-      content?: string
-      files?: File[]
-    },
+    MessageUpdateFields,
     { previousMessages: ChatUIMessage[] }
   >({
-    mutationFn: async ({ messageId, content, files }) => {
-      // == TODO ==
-      // const res = await edenClient
-      //   .messages({ messageId })
-      //   .put({ content, files })
-      // if (res.status !== 200 || !res.data) {
-      //   throw new Error(res.error?.value.message ?? "Failed to update message")
-      // }
-      // return mapAPIMessageToUI(res.data, "sent", false)
+    mutationFn: async dto => {
+      if (!socket) {
+        throw new Error("Invalid socket")
+      }
+
+      if (!editingMessage) {
+        throw new Error("No have editing message")
+      }
+
+      const message = await socket.timeout(5000).emitWithAck("message.update", {
+        ...dto,
+        messageId: editingMessage.id,
+        roomId: chatId
+      })
+
+      return mapAPIMessageToUI(message, "sent", false)
     },
-    onMutate: async ({ messageId }) => {
+    onMutate: async ({}) => {
+      if (!editingMessage) {
+        throw new Error("No have editing message")
+      }
+
       await queryClient.cancelQueries({
         queryKey: chatKeys.messages(chatId)
       })
@@ -68,7 +69,11 @@ export function useUpdateMessage(chatId: string) {
           chatId
         ]) ?? []
 
-      changeMessageStatus({ chatId, messageId, status: "loading" })
+      changeMessageStatus({
+        chatId,
+        messageId: editingMessage.id,
+        status: "loading"
+      })
 
       return { previousMessages }
     },
@@ -94,8 +99,8 @@ export function useUpdateMessage(chatId: string) {
   })
 
   return {
-    updateMessage: mutate,
-    isEditMessage,
+    handleUpdateMessage: mutate,
+    isEditingMessage,
     toggleIsEditMessage,
     editingMessage,
     handleEditingMessage,

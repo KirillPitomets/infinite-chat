@@ -26,9 +26,18 @@ export interface ClientToServerMessageEvents {
     dto: CreateMessageDto,
     callback: (response: Message) => void
   ) => void
-  "message.update": (dto: UpdateMessageDto) => Message
-  "message.delete": (dto: DeleteMessageDto) => Message
-  "message.restore": (dto: RestoreMessageDto) => Message
+  "message.update": (
+    dto: UpdateMessageDto,
+    callback: (response: Message) => void
+  ) => void
+  "message.delete": (
+    dto: DeleteMessageDto,
+    callback: (response: Message) => void
+  ) => void
+  "message.restore": (
+    dto: RestoreMessageDto,
+    callback: (response: Message) => void
+  ) => void
 }
 
 export const MessageEmits = {

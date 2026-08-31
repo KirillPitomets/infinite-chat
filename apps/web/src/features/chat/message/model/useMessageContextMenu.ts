@@ -14,7 +14,7 @@ type Params = {
 }
 
 export type ContextMenuItem = {
-  icon: React.ComponentType<{width: number, height: number}>
+  icon: React.ComponentType<{ width: number; height: number }>
   handle: () => void
   isOwnerOnly: boolean
 }

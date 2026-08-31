@@ -24,19 +24,24 @@ import { useAuth } from "@clerk/nextjs"
 import { Socket } from "socket.io-client"
 import { chatKeys } from "../chat/model/chat.keys"
 import { useSendMessage } from "../message/api/mutate/useSendMessage"
+import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
+import { MessageList } from "../ui/MessageList/MessageList"
+import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
+import { useRestoreMessage } from "../message/api/mutate/useRestoreMessage"
 
 const MAX_FILES = 4
 
 type ChatRoomPageProps = {
   chatId: string
   chatRoomData: ChatRoom
+  initialMessages: Message[]
 }
 
 export const ChatRoomPage = ({
   chatId,
   chatRoomData,
-  children
-}: PropsWithChildren<ChatRoomPageProps>) => {
+  initialMessages
+}: ChatRoomPageProps) => {
   // const currentUser = useCurrentUser()
   // =======================================
   // ================ FILES ================
@@ -69,14 +74,6 @@ export const ChatRoomPage = ({
   // ============== Messages ===============
   // =======================================
 
-  // const {
-  //   updateMessage,
-  //   cancelUpdate,
-  //   editingMessage,
-  //   handleEditingMessage,
-  //   isEditMessage
-  // } = useUpdateMessage(chatId)1
-  // const { mutate: deleteMessage } = useDeleteMessage(chatId)
   // const { mutate: deleteChat } = useDeleteChat(chatId)
 
   // const onDrop = useCallback(
@@ -119,12 +116,26 @@ export const ChatRoomPage = ({
   const queryClient = useQueryClient()
   const {
     handleSendMessage,
-    setIsReplyMessage,
+    handleReplyMessage,
     isReplyMessage,
-    setReplyMessage,
     replyMessage,
     clearReplyMessage
   } = useSendMessage(chatId, messageSocket)
+
+  const {
+    handleUpdateMessage,
+    cancelUpdate,
+    editingMessage,
+    handleEditingMessage,
+    isEditingMessage
+  } = useUpdateMessage(chatId, messageSocket)
+
+  const { mutate: handleDeleteMessage } = useDeleteMessage(
+    chatId,
+    messageSocket
+  )
+
+  const { handleRestoreMessage } = useRestoreMessage(chatId, messageSocket)
 
   useEffect(() => {
     if (!messageSocket) return
@@ -178,20 +189,43 @@ export const ChatRoomPage = ({
           </div>
         )} */}
 
-      {children}
+      <MessageList
+        chatId={chatId}
+        initialData={initialMessages}
+        onUpdate={editingMsg => handleEditingMessage(editingMsg)}
+        onReplyToMessage={msg => handleReplyMessage(msg)}
+        onDelete={handleDeleteMessage}
+        onRestore={handleRestoreMessage}
+        selectedMessageId=""
+      />
+
       <div className="relative">
         <ChatInputController
           chatId={chatId}
-          // replyMessage={replyMessage}
+          replyMessage={replyMessage}
           // previewFiles={files}
-          // mode={isEditMessage ? "edit" : isReplyMessage ? "reply" : undefined}
           // inputDropZoneProps={getInputProps()}
-          // editingMessage={editingMessage}
+          mode={
+            isEditingMessage ? "edit" : isReplyMessage ? "reply" : undefined
+          }
+          editingMessage={editingMessage}
           onRemovePreviewFile={() => {}} // removePreviewFile={removePreviewFile}
-          onUpdate={() => {}}
-          onCancelUpdate={() => {}}
-          onCancelReplyToMessage={() => {}}
-          onSubmit={handleSendMessage}
+          onUpdate={(value, files) =>
+            handleUpdateMessage({
+              text: value,
+              attachments: []
+            })
+          }
+          onCancelUpdate={cancelUpdate}
+          onCancelReplyToMessage={clearReplyMessage}
+          onSubmit={value =>
+            handleSendMessage({
+              roomId: chatId,
+              text: value,
+              attachments: [],
+              replyToMessageId: replyMessage?.id
+            })
+          }
         />
       </div>
       {/* </div> */}

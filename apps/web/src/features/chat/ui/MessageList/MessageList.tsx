@@ -1,5 +1,8 @@
 "use client"
-import { ChatUIMessage } from "@/features/chat/message/model/message.types"
+import {
+  ChatUIMessage,
+  mapAPIMessageToUI
+} from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
 import { useThrottle } from "@/shared/hooks/useThrottle"
 import type { Message as MessageType, User } from "@/shared/types/api.type"
@@ -7,7 +10,6 @@ import { isReadMessage } from "@/shared/utils/isReadMessage"
 import { useMutation } from "@tanstack/react-query"
 import { useEffect, useRef } from "react"
 import { useChatScroll } from "../../hooks/useChatScroll"
-import { EditingMessage } from "../../message/api/mutate/useUpdateMessage"
 import { useGetMessages } from "../../message/api/query/useGetMessages"
 import { MessageListSkeleton } from "./Skeleton"
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
@@ -15,24 +17,26 @@ import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 type MessageListProps = {
   chatId: string
   initialData: MessageType[]
-  // selectedMessageId?: string
+  selectedMessageId?: string
   // currentUser: User
   // otherUserLastReadAt?: string
-  // handleUpdate: (editingMessage: EditingMessage) => void
-  // handleReplyToMessage: (message: ChatUIMessage) => void
-  // onDelete: (id: string) => void
+  onUpdate: (editingMessage: ChatUIMessage) => void
+  onReplyToMessage: (message: ChatUIMessage) => void
+  onRestore: (messageId: string) => void
+  onDelete: (id: string) => void
   // onPreviewImage: (image: { alt: string; url: string }) => void
 }
 
 export const MessageList = ({
   chatId,
-  initialData
-  // selectedMessageId,
+  initialData,
+  selectedMessageId,
   // currentUser,
   // otherUserLastReadAt,
-  // handleUpdate,
-  // handleReplyToMessage,
-  // onDelete,
+  onUpdate,
+  onReplyToMessage,
+  onDelete,
+  onRestore
   // onPreviewImage
 }: MessageListProps) => {
   const currentUser = useCurrentUser()
@@ -112,8 +116,13 @@ export const MessageList = ({
         <Message
           key={msg.id}
           chatId={chatId}
+          selectedMessageId={selectedMessageId}
           prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
-          {...msg}
+          onDelete={onDelete}
+          onUpdate={onUpdate}
+          onReplyToMessage={onReplyToMessage}
+          onRestore={onRestore}
+          msgData={mapAPIMessageToUI(msg, "sent", false)}
           // selectedMessageId={selectedMessageId}
           // handleUpdate={handleUpdate}
           // handleReplyToMessage={handleReplyToMessage}

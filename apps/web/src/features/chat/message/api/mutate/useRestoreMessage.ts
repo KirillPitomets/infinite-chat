@@ -1,33 +1,32 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import toast from "react-hot-toast"
 import { ChatUIMessage, mapAPIMessageToUI } from "../../model/message.types"
-import { useChangeMessageStatus } from "../useChangeMessageStatus"
+import toast from "react-hot-toast"
 import { MessageSocket } from "@/shared/lib/socket/socketFactory"
 import { chatKeys } from "@/features/chat/chat/model/chat.keys"
 
-export function useDeleteMessage(chatId: string, socket: MessageSocket | null) {
+export const useRestoreMessage = (
+  chatId: string,
+  socket: MessageSocket | null
+) => {
   const queryClient = useQueryClient()
-  const changeMessageStatus = useChangeMessageStatus()
 
-  return useMutation<ChatUIMessage, Error, string>({
+  const { mutate: handleRestoreMessage } = useMutation({
     mutationFn: async (messageId: string) => {
       if (!socket) {
         throw new Error("Invalid socket")
       }
+
       const res = await socket
         .timeout(5000)
-        .emitWithAck("message.delete", { roomId: chatId, messageId })
+        .emitWithAck("message.restore", { roomId: chatId, messageId })
 
-      return mapAPIMessageToUI(res, "deleted", false)
+      return mapAPIMessageToUI(res, "sent", false)
     },
-    onMutate(messageId) {
-      changeMessageStatus({ chatId, messageId: messageId, status: "loading" })
-    },
-    onSuccess(data) {
-      if (data) {
+    onSuccess(message) {
+      if (message) {
         queryClient.setQueryData<ChatUIMessage[]>(
           chatKeys.messages(chatId),
-          old => old?.map(msg => (msg.id === data.id ? data : msg)) ?? []
+          old => old?.map(msg => (msg.id === message.id ? message : msg)) ?? []
         )
       }
     },
@@ -35,4 +34,8 @@ export function useDeleteMessage(chatId: string, socket: MessageSocket | null) {
       toast.error(error.message)
     }
   })
+
+  return {
+    handleRestoreMessage
+  }
 }

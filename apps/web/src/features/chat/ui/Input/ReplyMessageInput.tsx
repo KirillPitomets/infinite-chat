@@ -2,13 +2,12 @@ import { DropzoneInputProps } from "react-dropzone"
 import { ChatInputUI } from "./InputUI"
 import { InputHeader } from "./Header"
 import { ChatUIMessage } from "../../message/model/message.types"
-import { SubmitMessageArgs } from "../../message/api/mutate/useSendMessage"
 
 type ReplyMessageInput = {
   previewFiles: File[]
   replyMessage: ChatUIMessage
   onCancelReplyToMessage: () => void
-  onSubmit: (args: SubmitMessageArgs) => void
+  onSubmit: (value: string) => void
   inputDropZoneProps?: DropzoneInputProps
   removePreviewFile: (filename: string) => void
 }
@@ -25,7 +24,7 @@ export const ReplyMessageInput = ({
     <div>
       <InputHeader
         title="Reply to"
-        content={replyMessage.content}
+        content={replyMessage.text}
         countAttachments={replyMessage.attachments.length}
         onCancel={onCancelReplyToMessage}
       />
@@ -34,10 +33,7 @@ export const ReplyMessageInput = ({
         previewFiles={previewFiles}
         removePreviewFile={removePreviewFile}
         onSubmit={value => {
-          onSubmit({
-            content: value,
-            replyMessage
-          })
+          onSubmit(value)
           onCancelReplyToMessage()
         }}
         initialValue=""

@@ -6,17 +6,10 @@ import {
 import { fillMissingAttachment } from "@/features/chat/message/utils/fillMissingAttachments"
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 import { MessageSocket } from "@/shared/lib/socket/socketFactory"
-import { CreateMessageDto, Message } from "@/shared/types/api.type"
+import { CreateMessageDto } from "@/shared/types/api.type"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useState } from "react"
 import toast from "react-hot-toast"
-import { Socket } from "socket.io-client"
-
-export type SubmitMessageArgs = {
-  text?: string
-  files?: File[]
-  replyMessage?: ChatUIMessage
-}
 
 export function useSendMessage(chatId: string, socket: MessageSocket | null) {
   const [replyMessage, setReplyMessage] = useState<ChatUIMessage | undefined>(
@@ -31,15 +24,20 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
     setReplyMessage(undefined)
   }
 
+  const handleReplyMessage = (msg: ChatUIMessage) => {
+    setIsReplyMessage(true)
+    setReplyMessage(msg)
+  }
+
   const { mutate: handleSendMessage } = useMutation<
     ChatUIMessage,
     Error,
-    SubmitMessageArgs,
+    CreateMessageDto,
     { previousMessages: ChatUIMessage[]; tempId: string; filesCount?: number }
   >({
     mutationKey: chatKeys.sendMessages(chatId),
-    mutationFn: async ({ text, files, replyMessage }) => {
-      if (!text && !files) {
+    mutationFn: async ({ roomId, text, attachments, replyToMessageId }) => {
+      if (!text && !attachments) {
         throw new Error("Failed to send message")
       }
 
@@ -50,13 +48,13 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
       const msg = await socket.timeout(5000).emitWithAck("message.send", {
         roomId: chatId,
         text,
-        replyToMessageId: replyMessage?.id
+        replyToMessageId
       })
 
       return mapAPIMessageToUI(msg, "sent", false)
     },
 
-    onMutate: async ({ text, files, replyMessage }) => {
+    onMutate: async ({ text, attachments, replyToMessageId }) => {
       await queryClient.cancelQueries({
         queryKey: chatKeys.messages(chatId)
       })
@@ -79,8 +77,8 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
         updatedAt: new Date().toISOString(),
         status: "loading",
         replyToMessage: replyMessage,
-        attachments: files
-          ? files.map(_ => ({
+        attachments: attachments
+          ? attachments.map(_ => ({
               id: "",
               key: `temp-${Date.now()}-missingAttachment`,
               name: "temp-attachment",
@@ -99,7 +97,7 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
         old => [...(old ?? []), optimisticMessage]
       )
 
-      return { previousMessages, tempId, filesCount: files?.length || 0 }
+      return { previousMessages, tempId, filesCount: attachments?.length || 0 }
     },
     onSuccess: (data, _, ctx) => {
       queryClient.setQueryData<ChatUIMessage[]>(
@@ -133,8 +131,7 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
 
   return {
     handleSendMessage,
-    setReplyMessage,
-    setIsReplyMessage,
+    handleReplyMessage,
     clearReplyMessage,
     isReplyMessage,
     replyMessage

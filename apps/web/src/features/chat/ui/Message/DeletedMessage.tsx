@@ -1,12 +1,6 @@
-import { useMutation } from "@tanstack/react-query"
-import Image from "next/image"
-import toast from "react-hot-toast"
-import {
-  ChatUIMessage,
-  mapAPIMessageToUI
-} from "../../message/model/message.types"
-import { ReloadIcon } from "@/shared/components/ui/icons"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { ReloadIcon } from "@/shared/components/ui/icons"
+import Image from "next/image"
 import { useChangeMessageStatus } from "../../message/api/useChangeMessageStatus"
 
 type DeletedMessageProps = {
@@ -15,6 +9,7 @@ type DeletedMessageProps = {
   isMine: boolean
   senderName: string
   senderImageUrl: string
+  onRestore: (messageId: string) => void
 }
 
 const DeletedMessage = ({
@@ -22,31 +17,10 @@ const DeletedMessage = ({
   chatId,
   isMine,
   senderImageUrl,
-  senderName
+  senderName,
+  onRestore
 }: DeletedMessageProps) => {
   const changeMessageStatus = useChangeMessageStatus()
-  const { mutate: restoreMessage } = useMutation({
-    mutationFn: async () => {
-      // == TODO ==
-      // const res = await edenClient.messages.restore({ messageId: id }).post()
-      // if (res.status !== 200 || !res.data) {
-      // throw new Error("Failed to restore message")
-      // }
-      // return mapAPIMessageToUI(res.data, "sent", false)
-    },
-    onSuccess(message) {
-      // if (message) {
-      //   changeMessageStatus({
-      //     chatId: chatId,
-      //     messageId: message.id,
-      //     status: "sent"
-      //   })
-      // }
-    },
-    onError(error) {
-      toast.error(error.message)
-    }
-  })
 
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
@@ -68,7 +42,7 @@ const DeletedMessage = ({
         <div className="p-3 rounded-2xl bg-gray-200 dark:bg-zinc-700 relative group">
           {isMine && (
             <button
-              onClick={() => restoreMessage()}
+              onClick={() => onRestore(id)}
               className="absolute top-0 left-0 -translate-x-full opacity-0 group-hover:opacity-100"
             >
               <IconButtonBase>
