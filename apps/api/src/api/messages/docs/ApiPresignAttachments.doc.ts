@@ -26,7 +26,6 @@ export function ApiPresignAttachments() {
     ApiCreatedResponse({
       description: 'Presigned upload URLs generated successfully',
       type: PresignedUrlEntity,
-      isArray: true,
     }),
     ApiUnauthorizedResponse({
       description: 'User is not authenticated (missing or invalid Clerk token)',

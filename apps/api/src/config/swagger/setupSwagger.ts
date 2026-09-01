@@ -4,6 +4,7 @@ import { getSwaggerConfig } from './swagger.config';
 import { CreateMessageDto, UpdateMessageDto } from 'src/api/messages/dto';
 import { DeleteMessageDto } from 'src/api/messages/dto/delete-message.dto';
 import { RestoreMessageDto } from 'src/api/messages/dto/restore-message.dto';
+import { CreateMessageAttachmentDto } from 'src/api/attachments/dto';
 
 export const setupSwagger = (app: INestApplication) => {
   const config = getSwaggerConfig();
@@ -11,6 +12,7 @@ export const setupSwagger = (app: INestApplication) => {
   const document = SwaggerModule.createDocument(app, config, {
     extraModels: [
       CreateMessageDto,
+      CreateMessageAttachmentDto,
       UpdateMessageDto,
       DeleteMessageDto,
       RestoreMessageDto,

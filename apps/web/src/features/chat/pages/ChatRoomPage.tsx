@@ -18,8 +18,7 @@ import { useMessagesSocket } from "../message/providers/socketProvider"
 import { useRealtimeChat } from "../realtime/useRealtimeChat"
 import { ChatInputController } from "../ui/Input/InputController"
 import { MessageList } from "../ui/MessageList/MessageList"
-
-const MAX_FILES = 4
+import { useMessageAttachmentsUpload } from "@/features/upload/hooks/useMessageAttachmentsUpload"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -36,7 +35,7 @@ export const ChatRoomPage = ({
   // ================ FILES ================
   // =======================================
   const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
-    maxFiles: MAX_FILES
+    maxFiles: 4
   })
   const {
     previewImage,
@@ -54,16 +53,16 @@ export const ChatRoomPage = ({
 
   const { getInputProps, getRootProps, isDragActive, fileRejections } =
     useDropzone({
-      accept: {
-        "image/jpeg": [],
-        "image/png": [],
-        "image/webp": [],
-        "image/heic": [],
-        "image/jfif": []
-      },
+      // accept: {
+      //   "image/jpeg": [],
+      //   "image/png": [],
+      //   "image/webp": [],
+      //   "image/heic": [],
+      //   "image/jfif": []
+      // },
       noClick: true,
       onDrop,
-      maxFiles: MAX_FILES,
+      maxFiles: 4,
       multiple: true
     })
 
@@ -75,6 +74,7 @@ export const ChatRoomPage = ({
   }
 
   const messageSocket = useMessagesSocket()
+
   const {
     handleSendMessage,
     handleReplyMessage,
@@ -97,11 +97,11 @@ export const ChatRoomPage = ({
   )
   const { handleRestoreMessage } = useRestoreMessage(chatId, messageSocket)
 
-  const handleMessageSubmit = (value: string, files?: File[]) => {
+  const handleMessageSubmit = (value: string) => {
     handleSendMessage({
       roomId: chatId,
       text: value,
-      attachments: [],
+      files,
       replyToMessageId: replyMessage?.id
     })
     clearFiles()

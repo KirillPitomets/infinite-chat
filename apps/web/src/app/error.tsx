@@ -1,6 +1,6 @@
 "use client"
-
 import { parseErrorMessage } from "@/shared/utils/parseErrorStatus"
+import { useRouter } from "next/navigation"
 
 export default function Error({
   error,
@@ -10,7 +10,7 @@ export default function Error({
   reset: () => void
 }) {
   const { status, text } = parseErrorMessage(error.message)
-
+  const router = useRouter()
   return (
     <div className="w-full min-h-screen flex items-center justify-center flex-col gap-5">
       <div className="space-y-3">
@@ -27,10 +27,10 @@ export default function Error({
         <button
           className="bg-green-600 rounded-sm px-4 py-2 cursor-pointer transition-all hover:bg-green-900 "
           onClick={() => {
-            reset()
+            router.push("/")
           }}
         >
-          Try again
+          Back to home
         </button>
         <button
           className="bg-green-600 rounded-sm px-4 py-2 cursor-pointer transition-all hover:bg-green-900 "
@@ -38,7 +38,7 @@ export default function Error({
             window.location.reload()
           }}
         >
-          Refresh page
+          Try again
         </button>
       </div>
     </div>

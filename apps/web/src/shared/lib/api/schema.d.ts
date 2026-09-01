@@ -669,7 +669,7 @@ export interface components {
         CreateMessageAttachmentDto: {
             /**
              * @description Name of the attachment file
-             * @example document.pdf
+             * @example document
              */
             name: string;
             /**
@@ -1466,7 +1466,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["PresignedUrlEntity"][];
+                    "application/json": components["schemas"]["PresignedUrlEntity"];
                 };
             };
             /** @description User is not authenticated (missing or invalid Clerk token) */

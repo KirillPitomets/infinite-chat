@@ -38,19 +38,10 @@ export class MessagesController {
   async presignAttachments(
     @ClerkUserId(UserByIdPipe) user: User,
     @Param('roomId') roomId: string,
-    @Query() query: CountPresignQueryDto,
   ) {
-    const { count } = query;
-    const presigns: PresignedUrlEntity[] = [];
-
-    for (let i = 0; i < count; i++) {
-      const presign = this.cloudinaryService.getMessageAttachmentSignature(
-        user.id,
-        roomId,
-      );
-      presigns.push(presign);
-    }
-
-    return presigns;
+    return this.cloudinaryService.getMessageAttachmentSignature(
+      user.id,
+      roomId,
+    );
   }
 }

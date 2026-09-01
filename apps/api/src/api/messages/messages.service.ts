@@ -55,7 +55,10 @@ export class MessagesService {
 
     if (attachments && attachments.length) {
       await this.attachmentsService.ensureAttachmentKeysAreUnique(
-        attachments.map((att) => att.key),
+        attachments.map((att) => {
+          console.log(att);
+          return att.key;
+        }),
       );
     }
 

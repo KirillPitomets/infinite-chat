@@ -11,6 +11,7 @@ export class AttachmentsService {
   ) {}
 
   async ensureAttachmentKeysAreUnique(keys: string[]) {
+    console.log(keys);
     const existAttachments =
       await this.prismaService.messageAttachment.findMany({
         where: {
