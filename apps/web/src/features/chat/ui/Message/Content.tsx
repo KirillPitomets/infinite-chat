@@ -1,6 +1,7 @@
 import Linkify from "linkify-react"
 import { ChatUIMessage, UIAttachment } from "../../message/model/message.types"
-import { Attachments } from "./Attachments"
+import { Attachment } from "./Attachment"
+import { AttachmentsSkeleton } from "./Attachment/AttachmentsSkeleton"
 
 type MessageContentProps = {
   messageStatus: ChatUIMessage["status"]
@@ -18,15 +19,20 @@ export const MessageContent = ({
   return (
     <div className="relative flex flex-wrap items-end gap-4">
       <div className="space-y-2">
-        {attachments.length > 0 && (
-          <Attachments
-            isLoading={messageStatus === "loading" ? true : false}
-            attachments={attachments}
-            openDialog={(url: string, alt: string) =>
-              onPreviewImage({ url, alt })
-            }
-          />
-        )}
+        <div className="flex flex-wrap items-start gap-1">
+          {attachments.length > 0 && messageStatus === "loading" ? (
+            <AttachmentsSkeleton count={attachments.length || 3} />
+          ) : (
+            attachments.map(att => (
+              <Attachment
+                key={att.key}
+                att={att}
+                openDialog={(url, alt) => onPreviewImage({ url, alt })}
+              />
+            ))
+          )}
+        </div>
+
         <p
           style={{ wordBreak: "break-word" }}
           className="whitespace-pre-wrap leading-relaxed"

@@ -18,7 +18,7 @@ import { useMessagesSocket } from "../message/providers/socketProvider"
 import { useRealtimeChat } from "../realtime/useRealtimeChat"
 import { ChatInputController } from "../ui/Input/InputController"
 import { MessageList } from "../ui/MessageList/MessageList"
-import { useMessageAttachmentsUpload } from "@/features/upload/hooks/useMessageAttachmentsUpload"
+import { useReplyMessage } from "../message/api/hooks/useReplyMessage"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -74,14 +74,14 @@ export const ChatRoomPage = ({
   }
 
   const messageSocket = useMessagesSocket()
-
   const {
-    handleSendMessage,
-    handleReplyMessage,
-    isReplyMessage,
     replyMessage,
-    clearReplyMessage
-  } = useSendMessage(chatId, messageSocket)
+    isReplyMessage,
+    clearReplyMessage,
+    handleReplyMessage
+  } = useReplyMessage()
+
+  const { handleSendMessage } = useSendMessage(chatId, messageSocket)
 
   const {
     handleUpdateMessage,
@@ -102,7 +102,7 @@ export const ChatRoomPage = ({
       roomId: chatId,
       text: value,
       files,
-      replyToMessageId: replyMessage?.id
+      replyMessage
     })
     clearFiles()
   }

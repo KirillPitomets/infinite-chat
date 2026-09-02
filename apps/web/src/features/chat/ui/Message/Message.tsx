@@ -79,7 +79,7 @@ export const Message = ({
               attachments={msgData.attachments}
               onPreviewImage={onPreviewImage}
               content={msgData.text}
-              messageStatus={"sent"}
+              messageStatus={msgData.status}
             />
 
             <div className="flex justify-end space-x-2">

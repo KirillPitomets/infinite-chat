@@ -6,26 +6,41 @@ export const uploadToCloudinary = async (
   file: File,
   onProgress?: (pct: number) => void
 ): Promise<CloudinaryUploadResponse> => {
-  const form = new FormData()
+  return new Promise((resolve, reject) => {
+    const form = new FormData()
 
-  form.append("file", file)
-  form.append("api_key", slot.apiKey)
-  form.append("timestamp", slot.timestamp)
-  form.append("folder", slot.folder)
-  form.append("signature", slot.signature)
-  form.append("public_id", slot.publicId)
-  form.append("overwrite", "false")
+    form.append("file", file)
+    form.append("api_key", slot.apiKey)
+    form.append("timestamp", slot.timestamp)
+    form.append("folder", slot.folder)
+    form.append("signature", slot.signature)
+    form.append("public_id", slot.publicId)
+    form.append("overwrite", "false")
 
-  const res = await fetch(
-    `https://api.cloudinary.com/v1_1/${slot.cloudName}/auto/upload`,
-    { method: "POST", body: form }
-  )
+    const xhr = new XMLHttpRequest()
+    xhr.open(
+      "POST",
+      `https://api.cloudinary.com/v1_1/${slot.cloudName}/auto/upload`
+    )
 
-  if (!res.ok) {
-    const errorBody = await res.json().catch(() => null)
-    console.error("Cloudinary error:", errorBody)
-    throw new Error(`Upload failed: ${errorBody?.error?.message ?? res.status}`)
-  }
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) {
+        onProgress?.(Math.round((e.loaded / e.total) * 100))
+      }
+    }
 
-  return res.json()
+    xhr.onload = () => {
+      if (xhr.status < 300) {
+        resolve(JSON.parse(xhr.responseText))
+      } else {
+        const errBody = JSON.parse(xhr.responseText || "{}")
+        reject(
+          new Error(errBody?.error?.message || `Upload failed: ${xhr.status}`)
+        )
+      }
+    }
+
+    xhr.onerror = () => reject(new Error("Network error during upload"))
+    xhr.send(form)
+  })
 }

@@ -18,7 +18,6 @@ type MessageListProps = {
   chatId: string
   initialData: MessageType[]
   selectedMessageId?: string
-  // currentUser: User
   // otherUserLastReadAt?: string
   onUpdate: (editingMessage: ChatUIMessage) => void
   onReplyToMessage: (message: ChatUIMessage) => void
@@ -31,7 +30,6 @@ export const MessageList = ({
   chatId,
   initialData,
   selectedMessageId,
-  // currentUser,
   // otherUserLastReadAt,
   onUpdate,
   onReplyToMessage,

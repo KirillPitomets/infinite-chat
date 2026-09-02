@@ -1,3 +1,6 @@
+import { CloudLoader } from "@/shared/components/CloudLoader"
+import { Loader } from "@/shared/components/ui/Loader"
+
 export const AttachmentsSkeleton = ({ count = 1 }: { count?: number }) => {
   return (
     <div className="space-y-2">
@@ -7,7 +10,7 @@ export const AttachmentsSkeleton = ({ count = 1 }: { count?: number }) => {
           key={`${Date.now}-attachmentSkeleton-${indx}`}
         >
           <div className="w-50 h-25 animate-pulse border rounded-sm flex items-center justify-center">
-            <p>Loading...</p>
+            <Loader />
           </div>
         </div>
       ))}
