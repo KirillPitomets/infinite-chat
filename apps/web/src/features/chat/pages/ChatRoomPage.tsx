@@ -19,6 +19,11 @@ import { useRealtimeChat } from "../realtime/useRealtimeChat"
 import { ChatInputController } from "../ui/Input/InputController"
 import { MessageList } from "../ui/MessageList/MessageList"
 import { useReplyMessage } from "../message/api/hooks/useReplyMessage"
+import {
+  ACCEPTED_FILE_TYPES,
+  fileSizeValidator,
+  MAX_FILES
+} from "@/shared/lib/dropzone/fileSizeValidator"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -31,12 +36,10 @@ export const ChatRoomPage = ({
   chatRoomData,
   initialMessages
 }: ChatRoomPageProps) => {
-  // =======================================
-  // ================ FILES ================
-  // =======================================
   const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
     maxFiles: 4
   })
+
   const {
     previewImage,
     isOpenImagePreview,
@@ -53,16 +56,11 @@ export const ChatRoomPage = ({
 
   const { getInputProps, getRootProps, isDragActive, fileRejections } =
     useDropzone({
-      // accept: {
-      //   "image/jpeg": [],
-      //   "image/png": [],
-      //   "image/webp": [],
-      //   "image/heic": [],
-      //   "image/jfif": []
-      // },
+      accept: ACCEPTED_FILE_TYPES,
+      validator: fileSizeValidator,
       noClick: true,
       onDrop,
-      maxFiles: 4,
+      maxFiles: MAX_FILES,
       multiple: true
     })
 

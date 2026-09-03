@@ -38,6 +38,7 @@ export function ChatInputUI({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const [isOpenEmojiPicker, setIsOpenEmojiPicker] = useState(false)
   const [latestEmoji, setLatestEmoji] = useState("🥰")
+  const emojiRef = useRef<HTMLDivElement>(null)
 
   const MIN_TEXTAREA_HEIGHT = 32
 
@@ -96,6 +97,12 @@ export function ChatInputUI({
   useEffect(() => {
     if (!isOpenEmojiPicker) return
 
+    const handleClickOutside = (e: MouseEvent) => {
+      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
+        setIsOpenEmojiPicker(false)
+      }
+    }
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         setIsOpenEmojiPicker(false)
@@ -103,7 +110,11 @@ export function ChatInputUI({
     }
 
     document.addEventListener("keydown", handleKeyDown)
-    return () => document.removeEventListener("keydown", handleKeyDown)
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown)
+      document.addEventListener("mousedown", handleClickOutside)
+    }
   }, [isOpenEmojiPicker])
 
   return (
@@ -141,12 +152,16 @@ export function ChatInputUI({
             >
               {latestEmoji}
             </button>
-            <div className="absolute right-0 bottom-full z-101 max-sm:scale-70 max-sm:-right-30 max-sm:bottom-0">
+
+            <div
+              ref={emojiRef}
+              className="absolute right-0 bottom-full z-101 max-sm:scale-70 max-sm:-right-30 max-sm:bottom-0"
+            >
               <EmojiPicker
                 open={isOpenEmojiPicker}
                 onEmojiClick={handleEmojiClick}
               />
-              {createPortal(
+              {/* {createPortal(
                 <>
                   {isOpenEmojiPicker && (
                     <div
@@ -156,7 +171,7 @@ export function ChatInputUI({
                   )}
                 </>,
                 document.body
-              )}
+              )} */}
             </div>
           </div>
         </div>

@@ -18,7 +18,7 @@ export const MessageContent = ({
 }: MessageContentProps) => {
   return (
     <div className="relative flex flex-wrap items-end gap-4">
-      <div className="space-y-2">
+      <div>
         <div className="flex flex-wrap items-start gap-1">
           {attachments.length > 0 && messageStatus === "loading" ? (
             <AttachmentsSkeleton count={attachments.length || 3} />
@@ -35,7 +35,7 @@ export const MessageContent = ({
 
         <p
           style={{ wordBreak: "break-word" }}
-          className="whitespace-pre-wrap leading-relaxed"
+          className="whitespace-pre-wrap leading-relaxed "
         >
           <Linkify
             options={{

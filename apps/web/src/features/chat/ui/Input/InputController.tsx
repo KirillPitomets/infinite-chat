@@ -72,15 +72,13 @@ export const ChatInputController = ({
   }
 
   return (
-    <>
-      <ChatInputUI
-        handleTypingIndicator={handleTypingIndicator}
-        previewFiles={previewFiles}
-        removePreviewFile={onRemovePreviewFile}
-        onSubmit={onSubmit}
-        inputDropZoneProps={inputDropZoneProps}
-        initialValue=""
-      />
-    </>
+    <ChatInputUI
+      handleTypingIndicator={handleTypingIndicator}
+      previewFiles={previewFiles}
+      removePreviewFile={onRemovePreviewFile}
+      onSubmit={onSubmit}
+      inputDropZoneProps={inputDropZoneProps}
+      initialValue=""
+    />
   )
 }

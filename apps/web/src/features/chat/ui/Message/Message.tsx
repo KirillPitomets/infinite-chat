@@ -5,31 +5,34 @@ import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 import { formatDate } from "date-fns"
 import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
+import { MouseEvent, PropsWithChildren } from "react"
 
 interface IMessageProps {
   msgData: ChatUIMessage
   prevSenderMessageId?: string
-  selectedMessageId?: string
+  isSelectedMessage: boolean
   // isRead: boolean
   onUpdate: (message: ChatUIMessage) => void
   onReplyToMessage: (message: ChatUIMessage) => void
   onRestore: (messageId: string) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void
+
+  onContextMenu: (e: MouseEvent) => void
 }
 
 export const Message = ({
   msgData,
   onRestore,
   prevSenderMessageId,
-  selectedMessageId,
+  isSelectedMessage,
 
-  // onReplyToMessage,
-  // onUpdate,
-  // onDelete,
   // isRead,
-  onPreviewImage
-}: IMessageProps) => {
+
+  onPreviewImage,
+  onContextMenu,
+  children
+}: PropsWithChildren<IMessageProps>) => {
   const currentUser = useCurrentUser()
   const isMine = currentUser.id === msgData.sender.id
 
@@ -48,7 +51,7 @@ export const Message = ({
   return (
     <div className={`w-full flex ${isMine && "justify-end"} break-all`}>
       <div
-        className={`max-w-[80%] flex flex-col space-y-2 ${msgData.status === "loading" && "opacity-70"} `}
+        className={`max-w-[80%] flex flex-col gap-2 ${msgData.status === "loading" && "opacity-70"} `}
       >
         {!isMine && msgData.sender.id !== prevSenderMessageId && (
           <MessageSender
@@ -58,15 +61,17 @@ export const Message = ({
         )}
 
         <div
-          className={`relative px-3 py-1 rounded-sm
+          onContextMenu={e => onContextMenu(e)}
+          className={`relative rounded-sm px-2
         ${
-          // id === selectedMessageId
-          false
+          isSelectedMessage
             ? "dark:bg-green-700 bg-green-400"
             : "dark:bg-zinc-700 bg-gray-200 "
-        }
-        `}
+        } transition-all
+         `}
         >
+          {children}
+
           {msgData.replyToMessage && (
             <div className="p-1 pl-2 text-sm border-l-2 border-black dark:bg-zinc-800 bg-gray-300 rounedd-xl">
               <p>{msgData.replyToMessage.sender.username}</p>

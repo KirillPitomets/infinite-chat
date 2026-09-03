@@ -8,11 +8,14 @@ import { useThrottle } from "@/shared/hooks/useThrottle"
 import type { Message as MessageType, User } from "@/shared/types/api.type"
 import { isReadMessage } from "@/shared/utils/isReadMessage"
 import { useMutation } from "@tanstack/react-query"
-import { useEffect, useRef } from "react"
+import { MouseEvent, useEffect, useRef, useState } from "react"
 import { useChatScroll } from "../../hooks/useChatScroll"
 import { useGetMessages } from "../../message/api/query/useGetMessages"
 import { MessageListSkeleton } from "./Skeleton"
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import toast from "react-hot-toast"
+import MessageContextMenu from "../Message/ContextMenu/ContextMenu"
+import { useMessageContextMenu } from "../Message/ContextMenu/useMessageContextMenu"
 
 type MessageListProps = {
   chatId: string
@@ -62,58 +65,44 @@ export const MessageList = ({
     }
   })
 
+  const {
+    contextMenu,
+    activeMessage,
+    getMenuItems,
+    handleCloseContextMenu,
+    handleContextMenu
+  } = useMessageContextMenu({
+    containerRef,
+    messages,
+    onDelete,
+    onReplyToMessage,
+    onUpdate
+  })
   const throttledHandleScroll = useThrottle(() => updateLastReadAt(), 1000)
   useChatScroll(containerRef, messages, () => throttledHandleScroll())
-
-  // const contextMenu = useMessageContextMenu({
-  //   closeContext: () => setIsVisibleContextMenu(false),
-  //   copyMessage: () => {
-  //     if (content) {
-  //       navigator.clipboard.writeText(content)
-  //       toast.success("Message copied :)")
-  //     } else {
-  //       toast.error("No content for copy")
-  //     }
-  //   },
-  //   deleteMessage() {
-  //     onDelete(id)
-  //   },
-  //   updateMessage() {
-  //     handleUpdate({
-  //       id,
-  //       initialValue: content,
-  //       initialAttachments: attachments
-  //     })
-  //   },
-  //   replyMessage() {
-  //     handleReplyToMessage({
-  //       id,
-  //       attachments,
-  //       content,
-  //       createdAt,
-  //       status,
-  //       isDeleted,
-  //       updatedAt,
-  //       sender
-  //     })
-  //   }
-  // })
 
   return (
     <div
       ref={containerRef}
-      className="relative flex-1 p-4 space-y-1 overflow-y-auto scrollbar-thin"
+      className={`relative flex-1 p-4 space-y-1
+         ${
+           contextMenu && activeMessage
+             ? "overflow-y-hidden"
+             : "overflow-y-auto"
+         } scrollbar-thumb-green-800`}
     >
-      {/* <MessageContextMenu
-          isMineMessage={isMine}
-          isVisible={isVisibleContextMenu}
-          buttons={contextMenu}
-        /> 
-      */}
+      {contextMenu && activeMessage && (
+        <MessageContextMenu
+          position={contextMenu.position}
+          items={getMenuItems(activeMessage)}
+          onClose={handleCloseContextMenu}
+        />
+      )}
+
       {messages.map((msg, indx) => (
         <Message
           key={msg.id}
-          selectedMessageId={selectedMessageId}
+          isSelectedMessage={msg.id === activeMessage?.id}
           prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
           onDelete={onDelete}
           onUpdate={onUpdate}
@@ -121,6 +110,7 @@ export const MessageList = ({
           onRestore={onRestore}
           msgData={msg}
           onPreviewImage={onPreviewImage}
+          onContextMenu={e => handleContextMenu(e.nativeEvent, msg)}
 
           // isRead={
           //   otherUserLastReadAt
