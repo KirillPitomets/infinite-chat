@@ -17,18 +17,15 @@ interface IMessageProps {
   onRestore: (messageId: string) => void
   onDelete: (id: string) => void
   onPreviewImage: (image: { alt: string; url: string }) => void
-
   onContextMenu: (e: MouseEvent) => void
 }
 
 export const Message = ({
   msgData,
-  onRestore,
   prevSenderMessageId,
   isSelectedMessage,
-
   // isRead,
-
+  onRestore,
   onPreviewImage,
   onContextMenu,
   children
@@ -39,6 +36,7 @@ export const Message = ({
   if (msgData.isDeleted || msgData.status === "deleted") {
     return (
       <DeletedMessage
+        onContextMenu={e => onContextMenu(e)}
         id={msgData.id}
         isMine={isMine}
         sender={msgData.sender}
@@ -62,12 +60,14 @@ export const Message = ({
 
         <div
           onContextMenu={e => onContextMenu(e)}
-          className={`relative rounded-sm px-2
+          className={`relative rounded-sm py-1 px-2
         ${
           isSelectedMessage
             ? "dark:bg-green-700 bg-green-400"
             : "dark:bg-zinc-700 bg-gray-200 "
-        } transition-all
+        }
+        
+        transition-all
          `}
         >
           {children}

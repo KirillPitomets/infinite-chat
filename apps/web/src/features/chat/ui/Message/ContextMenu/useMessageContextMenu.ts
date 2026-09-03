@@ -15,6 +15,7 @@ type useMessageContextMenuParams = {
   onReplyToMessage: (msg: ChatUIMessage) => void
   onUpdate: (msg: ChatUIMessage) => void
   onDelete: (messageId: string) => void
+  onRestore: (messageId: string) => void
 }
 
 export const useMessageContextMenu = ({
@@ -22,7 +23,8 @@ export const useMessageContextMenu = ({
   messages,
   onDelete,
   onReplyToMessage,
-  onUpdate
+  onUpdate,
+  onRestore
 }: useMessageContextMenuParams) => {
   const [contextMenu, setContextMenu] = useState<{
     messageId: string
@@ -64,9 +66,14 @@ export const useMessageContextMenu = ({
 
   const getMenuItems = (message: ChatUIMessage) => {
     const isMine = currentUser.id === message.sender.id
-    const items: ContextMenuItem[] = [
-      { label: "Reply", onClick: () => onReplyToMessage(message) }
-    ]
+    const items: ContextMenuItem[] = []
+
+    if (message.isDeleted) {
+      items.push({ label: "Restore", onClick: () => onRestore(message.id) })
+      return items
+    }
+
+    items.push({ label: "Reply", onClick: () => onReplyToMessage(message) })
 
     if (message.text) {
       items.push({

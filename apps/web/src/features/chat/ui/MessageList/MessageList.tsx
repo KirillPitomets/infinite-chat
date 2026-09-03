@@ -20,7 +20,7 @@ import { useMessageContextMenu } from "../Message/ContextMenu/useMessageContextM
 type MessageListProps = {
   chatId: string
   initialData: MessageType[]
-  selectedMessageId?: string
+  replyMessageId?: string
   // otherUserLastReadAt?: string
   onUpdate: (editingMessage: ChatUIMessage) => void
   onReplyToMessage: (message: ChatUIMessage) => void
@@ -32,7 +32,7 @@ type MessageListProps = {
 export const MessageList = ({
   chatId,
   initialData,
-  selectedMessageId,
+  replyMessageId,
   // otherUserLastReadAt,
   onUpdate,
   onReplyToMessage,
@@ -76,8 +76,10 @@ export const MessageList = ({
     messages,
     onDelete,
     onReplyToMessage,
-    onUpdate
+    onUpdate,
+    onRestore
   })
+
   const throttledHandleScroll = useThrottle(() => updateLastReadAt(), 1000)
   useChatScroll(containerRef, messages, () => throttledHandleScroll())
 
@@ -102,7 +104,9 @@ export const MessageList = ({
       {messages.map((msg, indx) => (
         <Message
           key={msg.id}
-          isSelectedMessage={msg.id === activeMessage?.id}
+          isSelectedMessage={
+            msg.id === activeMessage?.id || msg.id === replyMessageId
+          }
           prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
           onDelete={onDelete}
           onUpdate={onUpdate}

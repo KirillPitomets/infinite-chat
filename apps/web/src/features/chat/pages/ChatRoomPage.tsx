@@ -36,6 +36,31 @@ export const ChatRoomPage = ({
   chatRoomData,
   initialMessages
 }: ChatRoomPageProps) => {
+  const messageSocket = useMessagesSocket()
+
+  const {
+    replyMessage,
+    isReplyMessage,
+    clearReplyMessage,
+    handleReplyMessage
+  } = useReplyMessage()
+
+  const { handleSendMessage } = useSendMessage(chatId, messageSocket)
+
+  const {
+    handleUpdateMessage,
+    cancelUpdate,
+    editingMessage,
+    handleEditingMessage,
+    isEditingMessage
+  } = useUpdateMessage(chatId, messageSocket)
+
+  const { mutate: handleDeleteMessage } = useDeleteMessage(
+    chatId,
+    messageSocket
+  )
+  const { handleRestoreMessage } = useRestoreMessage(chatId, messageSocket)
+
   const { files, addFiles, clearFiles, removePreviewFile } = useFiles({
     maxFiles: 4
   })
@@ -70,30 +95,6 @@ export const ChatRoomPage = ({
     cancelUpdate()
     clearReplyMessage()
   }
-
-  const messageSocket = useMessagesSocket()
-  const {
-    replyMessage,
-    isReplyMessage,
-    clearReplyMessage,
-    handleReplyMessage
-  } = useReplyMessage()
-
-  const { handleSendMessage } = useSendMessage(chatId, messageSocket)
-
-  const {
-    handleUpdateMessage,
-    cancelUpdate,
-    editingMessage,
-    handleEditingMessage,
-    isEditingMessage
-  } = useUpdateMessage(chatId, messageSocket)
-
-  const { mutate: handleDeleteMessage } = useDeleteMessage(
-    chatId,
-    messageSocket
-  )
-  const { handleRestoreMessage } = useRestoreMessage(chatId, messageSocket)
 
   const handleMessageSubmit = (value: string) => {
     handleSendMessage({
@@ -160,7 +161,7 @@ export const ChatRoomPage = ({
           onDelete={handleDeleteMessage}
           onRestore={handleRestoreMessage}
           onPreviewImage={handleImagePreviewDialog}
-          selectedMessageId=""
+          replyMessageId={replyMessage?.id}
         />
 
         <div className="relative">

@@ -22,7 +22,7 @@ export const Attachment = ({ att, openDialog }: AttachmentsProps) => {
             height={200}
             src={att.url}
             alt={att.name}
-            className="w-full object-contain border-2 border-transparent cursor-pointer hover:border-green-400"
+            className="w-60 object-contain border-2 border-transparent cursor-pointer hover:border-green-400"
             onClick={() => openDialog(att.url, att.name)}
           />
         </div>
