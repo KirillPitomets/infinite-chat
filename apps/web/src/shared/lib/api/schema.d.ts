@@ -422,7 +422,7 @@ export interface components {
              * @description Date and time when the user last read messages in this room
              * @example 2026-07-30T10:15:00.000Z
              */
-            lastReadAt: string | null;
+            lastReadAt: string;
             /**
              * @description Role of the member within the room
              * @example MEMBER
@@ -769,6 +769,20 @@ export interface components {
              * @example 018f3b2c-8a1a-7b2c-8d3e-4f5a6b7c8d9e
              */
             messageId: string;
+        };
+        UpdateRoomMemberLastReadAtDto: {
+            /**
+             * Format: uuid
+             * @description Unique room identifier where the read status is updated (UUID v4)
+             * @example a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+             */
+            roomId: string;
+            /**
+             * Format: date-time
+             * @description Timestamp up to which all messages in the room are marked as read
+             * @example 2026-06-06T12:00:00.000Z
+             */
+            lastReadAt: string;
         };
     };
     responses: never;

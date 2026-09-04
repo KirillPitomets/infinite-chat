@@ -1,7 +1,11 @@
 import {
   ClientToServerMessageEvents,
   ServerToClientMessageEvents
-} from "@/shared/types/socket.events"
+} from "@/shared/types/socket/messageSocket.events"
+import {
+  ClientToServerRoomEvents,
+  ServerToClientRoomEvents
+} from "@/shared/types/socket/chatRoom.events"
 import { io, Socket } from "socket.io-client"
 
 export type MessageSocket = Socket<
@@ -9,7 +13,14 @@ export type MessageSocket = Socket<
   ClientToServerMessageEvents
 >
 
-const sockets: Record<string, MessageSocket> = {}
+export type ChatRoomSocket = Socket<
+  ServerToClientRoomEvents,
+  ClientToServerRoomEvents
+>
+
+type Sockets = MessageSocket & ChatRoomSocket
+
+const sockets: Record<string, Sockets> = {}
 
 export function getSocket(
   namespace: string,

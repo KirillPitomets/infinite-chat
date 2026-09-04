@@ -10,15 +10,17 @@ import {
   WsException,
 } from '@nestjs/websockets';
 import { instanceToPlain } from 'class-transformer';
+import { AppEventMap } from 'src/common/events/event-map';
 import { WsExceptionFilter } from 'src/common/filters';
 import { WsExceptionPipe } from 'src/common/pipes/ws-exception.pipe';
+import { BaseGateway } from 'src/utils';
 import { WsAuthGuard } from '../auth/guards';
 import { WsAuthService } from '../auth/ws-auth.service';
-import { RoomAuthService } from '../room-auth/room-auth.service';
+import { RoomService } from '../room/room.service';
 import {
   ClientMessageEvents,
-  MessageEvent,
   MessagePayload,
+  ServerMessageEvents,
 } from './contracts/messages.socket-contract';
 import { CreateMessageDto, UpdateMessageDto } from './dto';
 import { DeleteMessageDto } from './dto/delete-message.dto';
@@ -27,10 +29,6 @@ import { MessageEntity } from './entity/message.entity';
 import { SystemMessageCreatedEvent } from './events/SystemMessageCreated.event';
 import { MessagesService } from './messages.service';
 import type { MessageServer, MessageSocket } from './types/message-socket.type';
-import { RoomService } from '../room/room.service';
-import { AppEventMap } from 'src/common/events/event-map';
-import { BaseGateway } from 'src/utils';
-import { RoomMemberEntity } from '../room/entities/room-member.entity';
 
 @WebSocketGateway({
   namespace: 'messages',
@@ -61,8 +59,6 @@ export class MessagesGateway
       client.join(`user:${user.id}`);
 
       const roomIds = await this.roomService.findUserRoomIds(user.id);
-      console.log(`userId - ${user.id}`);
-      console.log(`roomId - ${roomIds}`);
       this.joinToAllClientRooms(client, roomIds);
     } catch (error) {
       this.disconnectedWithError(client, error);
@@ -205,7 +201,7 @@ export class MessagesGateway
   private broadcastEmitToRoom(
     client: MessageSocket,
     roomId: string,
-    event: MessageEvent,
+    event: ServerMessageEvents,
     payload: MessagePayload,
   ) {
     client.broadcast.to(`room:${roomId}`).emit(event, payload);
@@ -213,7 +209,7 @@ export class MessagesGateway
 
   private emitToRoom(
     roomId: string,
-    event: MessageEvent,
+    event: ServerMessageEvents,
     payload: MessagePayload,
   ) {
     this.server.to(`room:${roomId}`).emit(event, payload);

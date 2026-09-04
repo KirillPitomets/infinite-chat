@@ -6,12 +6,13 @@ import { formatDate } from "date-fns"
 import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
 import { MouseEvent, PropsWithChildren } from "react"
+import { MessageStatus } from "./Status"
 
 interface IMessageProps {
   msgData: ChatUIMessage
   prevSenderMessageId?: string
   isSelectedMessage: boolean
-  // isRead: boolean
+  isRead: boolean
   onUpdate: (message: ChatUIMessage) => void
   onReplyToMessage: (message: ChatUIMessage) => void
   onRestore: (messageId: string) => void
@@ -24,7 +25,7 @@ export const Message = ({
   msgData,
   prevSenderMessageId,
   isSelectedMessage,
-  // isRead,
+  isRead,
   onRestore,
   onPreviewImage,
   onContextMenu,
@@ -91,7 +92,9 @@ export const Message = ({
               <p className={`text-sm opacity-50 ${isMine && "text-end"}`}>
                 {formatDate(msgData.createdAt, "HH:mm")}
               </p>
-              {/* {isMine && <MessageStatus status={isRead ? "readed" : status} />} */}
+              {isMine && (
+                <MessageStatus status={isRead ? "readed" : msgData.status} />
+              )}
             </div>
           </div>
         </div>

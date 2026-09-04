@@ -5,20 +5,13 @@ import {
   RestoreMessageDto,
   UpdateMessageDto
 } from "@/shared/types/api.type"
+import { ExceptionEvents } from "./exception.events"
 
-export interface ExceptionPayload {
-  status: string
-  error: unknown
-  timestamp: string
-}
-
-export interface ServerToClientMessageEvents {
+export interface ServerToClientMessageEvents extends ExceptionEvents {
   "message.created": (message: Message) => void
   "message.updated": (message: Message) => void
   "message.deleted": (message: Message) => void
   "message.restored": (message: Message) => void
-
-  exception: (payload: ExceptionPayload) => void
 }
 
 export interface ClientToServerMessageEvents {
@@ -45,10 +38,6 @@ export const MessageEmits = {
   UPDATE: "message.update",
   DELETE: "message.delete",
   RESTORE: "message.restore"
-}
+} satisfies Record<string, keyof ClientToServerMessageEvents>
 
-export type MessageListenEvents =
-  | "message.created"
-  | "message.updated"
-  | "message.deleted"
-  | "message.restored"
+export type MessageListenEvents = keyof ServerToClientMessageEvents

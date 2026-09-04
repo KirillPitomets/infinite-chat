@@ -5,38 +5,45 @@ import { UploadIcon } from "@/shared/components/ui/icons"
 import ImagePreviewDialog from "@/shared/components/ui/ImagePreviewDialog/ImagePreviewDialog"
 import { useFiles } from "@/shared/hooks/useFiles"
 import { usePreviewImageDialog } from "@/shared/hooks/usePreviewImage"
-import { ChatRoom, Message } from "@/shared/types/api.type"
-import { useCallback, useEffect } from "react"
-import { useDropzone } from "react-dropzone"
-import toast from "react-hot-toast"
-import { useDeleteChat } from "../chat/api/useDeleteChat"
-import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
-import { useRestoreMessage } from "../message/api/mutate/useRestoreMessage"
-import { useSendMessage } from "../message/api/mutate/useSendMessage"
-import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
-import { useMessagesSocket } from "../message/providers/socketProvider"
-import { useRealtimeChat } from "../realtime/useRealtimeChat"
-import { ChatInputController } from "../ui/Input/InputController"
-import { MessageList } from "../ui/MessageList/MessageList"
-import { useReplyMessage } from "../message/api/hooks/useReplyMessage"
 import {
   ACCEPTED_FILE_TYPES,
   fileSizeValidator,
   MAX_FILES
 } from "@/shared/lib/dropzone/fileSizeValidator"
+import { ChatRoom, Message } from "@/shared/types/api.type"
+import { useCallback, useEffect } from "react"
+import { useDropzone } from "react-dropzone"
+import toast from "react-hot-toast"
+import { useDeleteChat } from "../chat/api/useDeleteChat"
+import { useReplyMessage } from "../message/api/hooks/useReplyMessage"
+import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
+import { useRestoreMessage } from "../message/api/mutate/useRestoreMessage"
+import { useSendMessage } from "../message/api/mutate/useSendMessage"
+import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
+import {
+  useChatRoomSocket,
+  useMessagesSocket
+} from "../message/providers/socketProvider"
+import { useRealtimeMessages } from "../realtime/useRealtimeMessages"
+import { ChatInputController } from "../ui/Input/InputController"
+import { MessageList } from "../ui/MessageList/MessageList"
+import { useChatRoomData } from "../chat/api/useChatRoomData"
+import { useRealtimeChatRoom } from "../realtime/useRealtimeRoomMember"
 
 type ChatRoomPageProps = {
   chatId: string
-  chatRoomData: ChatRoom
+  initialChatRoomData: ChatRoom
   initialMessages: Message[]
 }
 
 export const ChatRoomPage = ({
   chatId,
-  chatRoomData,
+  initialChatRoomData,
   initialMessages
 }: ChatRoomPageProps) => {
   const messageSocket = useMessagesSocket()
+  const chatRoomSocket = useChatRoomSocket()
+  const { data: chatRoomData } = useChatRoomData(chatId, initialChatRoomData)
 
   const {
     replyMessage,
@@ -89,7 +96,7 @@ export const ChatRoomPage = ({
       multiple: true
     })
 
-  const { mutate: deleteChat } = useDeleteChat(chatId)
+  const { mutate: handleDeleteChat } = useDeleteChat(chatId)
 
   const disenableAllInputStates = () => {
     cancelUpdate()
@@ -123,7 +130,8 @@ export const ChatRoomPage = ({
     })
   }, [fileRejections, fileRejections.length])
 
-  useRealtimeChat(chatId, messageSocket)
+  useRealtimeMessages(chatId, messageSocket)
+  useRealtimeChatRoom(chatId, chatRoomSocket)
 
   return (
     <div className="flex flex-col w-full h-full">
@@ -155,6 +163,7 @@ export const ChatRoomPage = ({
 
         <MessageList
           chatId={chatId}
+          memberships={chatRoomData.memberships}
           initialData={initialMessages}
           onUpdate={editingMsg => handleEditingMessage(editingMsg)}
           onReplyToMessage={msg => handleReplyMessage(msg)}

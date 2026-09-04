@@ -1,27 +1,27 @@
 "use client"
-import {
-  ChatUIMessage,
-  mapAPIMessageToUI
-} from "@/features/chat/message/model/message.types"
+import { ChatUIMessage } from "@/features/chat/message/model/message.types"
 import { Message } from "@/features/chat/ui/Message/Message"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 import { useThrottle } from "@/shared/hooks/useThrottle"
-import type { Message as MessageType, User } from "@/shared/types/api.type"
-import { isReadMessage } from "@/shared/utils/isReadMessage"
+import type {
+  ChatRoomMember,
+  Message as MessageType,
+  UpdateRoomMemberLastReadAtDto
+} from "@/shared/types/api.type"
 import { useMutation } from "@tanstack/react-query"
-import { MouseEvent, useEffect, useRef, useState } from "react"
+import { useRef } from "react"
 import { useChatScroll } from "../../hooks/useChatScroll"
 import { useGetMessages } from "../../message/api/query/useGetMessages"
-import { MessageListSkeleton } from "./Skeleton"
-import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
-import toast from "react-hot-toast"
+import { useChatRoomSocket } from "../../message/providers/socketProvider"
 import MessageContextMenu from "../Message/ContextMenu/ContextMenu"
 import { useMessageContextMenu } from "../Message/ContextMenu/useMessageContextMenu"
+import { useReadMessages } from "../../message/api/mutate/useReadMessage"
 
 type MessageListProps = {
   chatId: string
+  memberships: ChatRoomMember[]
   initialData: MessageType[]
   replyMessageId?: string
-  // otherUserLastReadAt?: string
   onUpdate: (editingMessage: ChatUIMessage) => void
   onReplyToMessage: (message: ChatUIMessage) => void
   onRestore: (messageId: string) => void
@@ -32,38 +32,20 @@ type MessageListProps = {
 export const MessageList = ({
   chatId,
   initialData,
+  memberships,
   replyMessageId,
-  // otherUserLastReadAt,
   onUpdate,
   onReplyToMessage,
   onDelete,
   onRestore,
   onPreviewImage
 }: MessageListProps) => {
-  const currentUser = useCurrentUser()
   const containerRef = useRef<HTMLDivElement>(null)
 
+  const roomSocket = useChatRoomSocket()
+
   const { data: messages } = useGetMessages(chatId, initialData)
-
-  const { mutate: updateLastReadAt } = useMutation({
-    mutationFn: async () => {
-      const lastIncommingMessage = [...messages]
-        .slice()
-        .reverse()
-        .find(msg => msg.sender.id !== currentUser.id)
-
-      if (
-        !lastIncommingMessage ||
-        lastIncommingMessage.sender.id === currentUser.id
-      ) {
-        return
-      }
-      // == TODO ==
-      // await edenClient.chat({ chatId }).read.put({
-      //   lastReadAt: lastIncommingMessage.createdAt
-      // })
-    }
-  })
+  const { readMessages } = useReadMessages(chatId, roomSocket, messages)
 
   const {
     contextMenu,
@@ -80,7 +62,7 @@ export const MessageList = ({
     onRestore
   })
 
-  const throttledHandleScroll = useThrottle(() => updateLastReadAt(), 1000)
+  const throttledHandleScroll = useThrottle(() => readMessages(), 1000)
   useChatScroll(containerRef, messages, () => throttledHandleScroll())
 
   return (
@@ -115,12 +97,7 @@ export const MessageList = ({
           msgData={msg}
           onPreviewImage={onPreviewImage}
           onContextMenu={e => handleContextMenu(e.nativeEvent, msg)}
-
-          // isRead={
-          //   otherUserLastReadAt
-          //     ? isReadMessage(msg.createdAt, otherUserLastReadAt)
-          //     : false
-          // }
+          isRead={!!memberships.find(m => m.lastReadAt >= msg.createdAt)}
         />
       ))}
     </div>

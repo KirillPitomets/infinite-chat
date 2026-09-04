@@ -12,6 +12,7 @@ import {
   FindOrCreateDirectRoomDto,
   UpdateGroupAvatarDto,
   UpdateGroupNameDto,
+  UpdateRoomMemberLastReadAtDto,
 } from './dto';
 import { RoomEntity } from './entities';
 import { RoomRepository } from './repositories/room.repository';
@@ -311,6 +312,28 @@ export class RoomService {
     });
 
     return rooms.map(({ roomId }) => roomId);
+  }
+
+  async updateLastReadAt(userId: string, dto: UpdateRoomMemberLastReadAtDto) {
+    const { roomId, lastReadAt } = dto;
+    const roomMember = await this.roomMemberRepo.getRoomMember(userId, roomId);
+
+    const incoming = new Date(lastReadAt).getTime();
+    const current = new Date(roomMember.lastReadAt).getTime();
+
+    if (incoming <= current) {
+      throw new BadRequestException(
+        'The incoming lastReadAt timestamp must be newer than the current one.',
+      );
+    }
+    const safeIncoming = new Date(Math.min(incoming, Date.now()));
+
+    const updatedRoomMember = await this.roomMemberRepo.updateLastReadAt(
+      roomMember.id,
+      safeIncoming,
+    );
+
+    return new RoomMemberEntity(updatedRoomMember);
   }
 
   private getMemberUserIds(memberships: RoomMember[]): string[] {

@@ -52,4 +52,4 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
 }
 
 export const useMessagesSocket = () => useContext(SocketContext).messages
-export const useRoomsSocket = () => useContext(SocketContext).rooms
+export const useChatRoomSocket = () => useContext(SocketContext).rooms

@@ -1,3 +1,4 @@
+import { UpdateRoomMemberLastReadAtDto } from '../dto';
 import { RoomEntity } from '../entities';
 import { RoomMemberEntity } from '../entities/room-member.entity';
 
@@ -12,28 +13,25 @@ export type RoomPayload = Omit<RoomEntity, 'memberships'> & {
 
 export interface ServerToClientRoomEvents {
   'room.created': (room: RoomPayload) => void;
-  'room.deleted': ({ roomId }: { roomId: string }) => void;
-  'room.member-left': ({
-    roomId,
-    userId,
-  }: {
-    roomId: string;
-    userId: string;
-  }) => void;
+  'room.deleted': () => void;
+  'room.member-left': (userId: string) => void;
   'room.member-kicked': ({
     actorId,
     kickedMemberId,
-    roomId,
   }: {
     actorId: string;
     kickedMemberId: string;
-    roomId: string;
   }) => void;
-  'room.member-joined': ({
-    roomId,
-    roomMember,
-  }: {
-    roomId: string;
-    roomMember: RoomMemberPayload;
-  }) => void;
+  'room.member-joined': (roomMember: RoomMemberPayload) => void;
+  'room.updated-member-read-at': (roomMember: RoomMemberPayload) => void;
 }
+
+export interface ClientToServerRoomEvents {
+  'room.update-member-read-at': (dto: UpdateRoomMemberLastReadAtDto) => void;
+}
+
+export const ClientRoomEvents = {
+  updateReadAt: 'room.update-member-read-at',
+} satisfies Record<string, keyof ClientToServerRoomEvents>;
+
+export type ServerRoomEvents = keyof ServerToClientRoomEvents;

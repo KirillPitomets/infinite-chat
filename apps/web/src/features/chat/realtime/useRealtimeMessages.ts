@@ -10,7 +10,7 @@ import { replaceMessageInCache } from "@/shared/utils/replaceMessageInCache"
 import { useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 
-export function useRealtimeChat(
+export function useRealtimeMessages(
   chatId: string,
   messageSocket: MessageSocket | null
 ) {

@@ -35,10 +35,6 @@ export const ClientMessageEvents = {
   UPDATE: 'message.update',
   DELETE: 'message.delete',
   RESTORE: 'message.restore',
-};
+} satisfies Record<string, keyof ClientToServerMessageEvents>;
 
-export type MessageEvent =
-  | 'message.created'
-  | 'message.updated'
-  | 'message.deleted'
-  | 'message.restored';
+export type ServerMessageEvents = keyof ServerToClientMessageEvents;

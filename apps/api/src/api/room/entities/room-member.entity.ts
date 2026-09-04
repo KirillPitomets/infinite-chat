@@ -19,7 +19,6 @@ export class RoomMemberEntity implements RoomMember {
     description: 'Date and time when the user last read messages in this room',
     type: Date,
     example: '2026-07-30T10:15:00.000Z',
-    nullable: true,
   })
   lastReadAt: Date;
 
