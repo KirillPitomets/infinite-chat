@@ -91,6 +91,7 @@ async function uploadToCloudinary(file: File, slot: PresignedSlot) {
   form.append('signature', slot.signature);
   form.append('public_id', slot.publicId);
   form.append('folder', slot.folder);
+  form.append('overwrite', 'false');
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${slot.cloudName}/auto/upload`,
