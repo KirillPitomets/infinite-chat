@@ -1,8 +1,6 @@
-import { isReadMessage } from "@/shared/utils/isReadMessage"
+import { ChatRoom } from "@/shared/types/api.type"
 import { ChatInboxItem } from "./InboxItem/InboxItem"
 import { ChatInboxListSkeleton } from "./InboxListSkeleton"
-import { ChatRoom } from "@/shared/types/api.type"
-import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 
 type InboxMessageListProps = {
   chats: ChatRoom[]
@@ -10,7 +8,7 @@ type InboxMessageListProps = {
 }
 
 export function ChatInboxList({
-  chats = [],
+  chats,
   isLoadingSkeleton
 }: InboxMessageListProps) {
   if (isLoadingSkeleton) {
@@ -22,7 +20,7 @@ export function ChatInboxList({
       {chats.map(chat => (
         <li key={chat.id}>
           <ChatInboxItem
-            chatId={chat.id}
+            inboxChatId={chat.id}
             avatarUrl={chat.avatarUrl}
             name={chat.name}
             type={chat.type}

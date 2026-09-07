@@ -16,6 +16,7 @@ import { useChatRoomSocket } from "../../message/providers/socketProvider"
 import MessageContextMenu from "../Message/ContextMenu/ContextMenu"
 import { useMessageContextMenu } from "../Message/ContextMenu/useMessageContextMenu"
 import { useReadMessages } from "../../message/api/mutate/useReadMessage"
+import { SystemMessage } from "../SystemMessage/SystemMessage"
 
 type MessageListProps = {
   chatId: string
@@ -83,23 +84,27 @@ export const MessageList = ({
         />
       )}
 
-      {messages.map((msg, indx) => (
-        <Message
-          key={msg.id}
-          isSelectedMessage={
-            msg.id === activeMessage?.id || msg.id === replyMessageId
-          }
-          prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
-          onDelete={onDelete}
-          onUpdate={onUpdate}
-          onReplyToMessage={onReplyToMessage}
-          onRestore={onRestore}
-          msgData={msg}
-          onPreviewImage={onPreviewImage}
-          onContextMenu={e => handleContextMenu(e.nativeEvent, msg)}
-          isRead={!!memberships.find(m => m.lastReadAt >= msg.createdAt)}
-        />
-      ))}
+      {messages.map((msg, indx) =>
+        msg.type === "USER" ? (
+          <Message
+            key={msg.id}
+            isSelectedMessage={
+              msg.id === activeMessage?.id || msg.id === replyMessageId
+            }
+            prevSenderMessageId={indx > 0 ? messages[indx - 1].sender.id : ""}
+            onDelete={onDelete}
+            onUpdate={onUpdate}
+            onReplyToMessage={onReplyToMessage}
+            onRestore={onRestore}
+            msgData={msg}
+            onPreviewImage={onPreviewImage}
+            onContextMenu={e => handleContextMenu(e.nativeEvent, msg)}
+            isRead={!!memberships.find(m => m.lastReadAt >= msg.createdAt)}
+          />
+        ) : (
+          <SystemMessage key={msg.id} msgData={msg} />
+        )
+      )}
     </div>
   )
 }
