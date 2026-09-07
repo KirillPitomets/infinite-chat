@@ -1,15 +1,17 @@
 import { ChatRoomSocket } from "@/shared/lib/socket/socketFactory"
 import { UpdateRoomMemberLastReadAtDto } from "@/shared/types/api.type"
 import { currentUser } from "@clerk/nextjs/server"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { ChatUIMessage } from "../../model/message.types"
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import { messageKeys } from "../../model/message.keys"
 
 export const useReadMessages = (
   roomChatId: string,
   chatRoomSocket: ChatRoomSocket | null,
   messages: ChatUIMessage[]
 ) => {
+  const queryClient = useQueryClient()
   const sender = useCurrentUser()
 
   const { mutate } = useMutation({
@@ -30,6 +32,12 @@ export const useReadMessages = (
         roomId: roomChatId,
         lastReadAt: lastIncomingMessage.createdAt
       } as UpdateRoomMemberLastReadAtDto)
+    },
+    onSuccess() {
+      queryClient.setQueryData<number>(
+        messageKeys.unreadCountMessages(roomChatId),
+        old => 0
+      )
     }
   })
 

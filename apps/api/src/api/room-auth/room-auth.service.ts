@@ -17,6 +17,6 @@ export class RoomAuthService {
       throw new ForbiddenException('User are not room member');
     }
 
-    return true;
+    return roomMember;
   }
 }

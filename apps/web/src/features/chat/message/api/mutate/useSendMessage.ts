@@ -17,6 +17,7 @@ import toast from "react-hot-toast"
 import { buildOptimisticMessage } from "../../utils/buildOptimisticMessage"
 import { useReplyMessage } from "../hooks/useReplyMessage"
 import { useAttachmentUpload } from "../hooks/useAttachmentUpload"
+import { messageKeys } from "../../model/message.keys"
 
 type SendMessageVariables = Omit<
   CreateMessageDto,
@@ -106,6 +107,12 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
                 }
               : msg
           ) ?? []
+      )
+      // TODO
+      queryClient.setQueryData<ChatUIMessage>(
+        messageKeys.latestMessage(chatId),
+        old =>
+          data.roomId === chatId ? mapAPIMessageToUI(data, "sent", false) : old
       )
     },
     onError: (error, _, context) => {

@@ -23,7 +23,6 @@ export function useRealtimeMessages(
     const handleCreated = (message: Message) => {
       queryClient.setQueryData<ChatUIMessage[]>(
         chatKeys.messages(chatId),
-
         old => [...(old ?? []), mapAPIMessageToUI(message, "sent", false)]
       )
     }

@@ -326,6 +326,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/message/unread-count/{roomId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get unread message count
+         * @description Returns the number of unread messages in a specific room for the current user.
+         */
+        get: operations["MessagesController_getUnreadCount_v1"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/message/attachments/presign/{roomId}": {
         parameters: {
             query?: never;
@@ -665,6 +685,13 @@ export interface components {
              * @example 2026-03-30T12:00:00.000Z
              */
             updatedAt: string;
+        };
+        UnreadCountResponseDto: {
+            /**
+             * @description Number of unread messages in the specified room
+             * @example 12
+             */
+            unreadCount: number;
         };
         CreateMessageAttachmentDto: {
             /**
@@ -1454,6 +1481,50 @@ export interface operations {
                 content?: never;
             };
             /** @description User profile with the specified Clerk ID was not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    MessagesController_getUnreadCount_v1: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description Unique room identifier (uuid) */
+                roomId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successfully retrieved unread message count */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadCountResponseDto"];
+                };
+            };
+            /** @description User is not authenticated (missing or invalid Clerk token) */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description User is not a member of the specified room */
+            403: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Room or user profile was not found */
             404: {
                 headers: {
                     [name: string]: unknown;

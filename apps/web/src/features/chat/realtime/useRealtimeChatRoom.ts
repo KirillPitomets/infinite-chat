@@ -18,7 +18,6 @@ export function useRealtimeChatRoom(
     const handleDeleted = (chatRoom: ChatRoom) => {}
 
     const handleUpdateRoomMemberReadAt = (chatRoomMember: ChatRoomMember) => {
-      console.log("echo handle update room member read at")
       queryClient.setQueryData<ChatRoom>(chatKeys.data(chatId), old =>
         old
           ? {

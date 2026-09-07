@@ -1,13 +1,13 @@
+import { getAllChatRooms } from "@/features/chat/chat/api/getAllChatRooms.server"
 import { ChatInbox } from "@/features/chat/ui/Inbox/ChatInbox"
-import { getCurrentUserServer } from "@/features/user/api/getCurrentUser.server"
 import type { PropsWithChildren } from "react"
 
-export default function Layout({ children }: PropsWithChildren<unknown>) {
-  getCurrentUserServer()
+export default async function Layout({ children }: PropsWithChildren<unknown>) {
+  const rooms = await getAllChatRooms()
 
   return (
     <div className="flex w-full">
-      <ChatInbox />
+      <ChatInbox initialChatRooms={rooms} />
       {children}
     </div>
   )

@@ -15,11 +15,12 @@ export class MessageRepository {
     private readonly attachmentsService: AttachmentsService,
   ) {}
 
-  async getHistory(roomId: string, limit: number, page: number) {
+  async getHistory(roomId: string, limit = 0, page = 0) {
     return await this.prisma.message.findMany({
       where: {
         roomId,
       },
+      orderBy: { createdAt: 'desc' },
       include: baseMessageIncludes,
       take: limit,
       skip: page * limit,

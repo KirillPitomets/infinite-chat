@@ -1,20 +1,19 @@
 "use client"
 
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
 import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
-import { DirectInfo } from "./DirectInfo"
-import { GroupInfo } from "./GroupInfo"
-import { HeaderSkeleton } from "./HeaderSkeleton"
 import {
   ArrowIcon,
   CameraIcon,
   InformationIcon,
   TrashIcon
 } from "@/shared/components/ui/icons"
-import Link from "next/link"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { ChatRoom } from "@/shared/types/api.type"
-import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
-import { currentUser } from "@clerk/nextjs/server"
+import { getDirectChatPartner } from "@/shared/utils/getDirectChatPartner"
+import Link from "next/link"
+import { DirectInfo } from "./DirectInfo"
+import { GroupInfo } from "./GroupInfo"
 
 /*
   group room've 
@@ -25,7 +24,7 @@ import { currentUser } from "@clerk/nextjs/server"
 
 type ChatHeaderProps = {
   chatId: string
-  type: "DIRECT" | "GROUP"
+  type: ChatRoom["type"]
   memberships: ChatRoom["memberships"]
   chatName: string
   avatarUrl: string
@@ -39,9 +38,9 @@ export function ChatHeader({
   type
 }: ChatHeaderProps) {
   const currentUser = useCurrentUser()
-  const secondUser = memberships.find(
-    member => member.user.id !== currentUser.id
-  )
+
+  const directChatPartner = getDirectChatPartner(memberships, currentUser.id)
+
   return (
     <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
       <div className="flex items-center gap-2">
@@ -52,8 +51,8 @@ export function ChatHeader({
           <ArrowIcon className="w-8 h-8 text-green-600" />
         </Link>
 
-        {type === "DIRECT" && secondUser && (
-          <DirectInfo chatId={chatId} member={secondUser.user} />
+        {type === "DIRECT" && directChatPartner && (
+          <DirectInfo chatId={chatId} member={directChatPartner} />
         )}
 
         {type === "GROUP" && (

@@ -28,7 +28,7 @@ import { useRealtimeMessages } from "../realtime/useRealtimeMessages"
 import { ChatInputController } from "../ui/Input/InputController"
 import { MessageList } from "../ui/MessageList/MessageList"
 import { useChatRoomData } from "../chat/api/useChatRoomData"
-import { useRealtimeChatRoom } from "../realtime/useRealtimeRoomMember"
+import { useRealtimeChatRoom } from "../realtime/useRealtimeChatRoom"
 
 type ChatRoomPageProps = {
   chatId: string

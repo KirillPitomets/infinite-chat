@@ -1,13 +1,86 @@
-import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
-import { ChatMessage } from "@/shared/schemes/message.schema"
+import { messageKeys } from "@/features/chat/message/model/message.keys"
+import {
+  ChatUIMessage,
+  mapAPIMessageToUI
+} from "@/features/chat/message/model/message.types"
+import {
+  ChatRoomSocket,
+  MessageSocket
+} from "@/shared/lib/socket/socketFactory"
+import { ChatRoom, ChatRoomMember, Message } from "@/shared/types/api.type"
 import { useQueryClient } from "@tanstack/react-query"
-import { useParams } from "next/navigation"
+import { useEffect } from "react"
 import { chatKeys } from "../chat/model/chat.keys"
-import { messageKeys } from "../message/model/message.keys"
 
-export const useRealtimeInbox = (chats: UserChatPreview[]) => {
+export const useRealtimeInbox = (
+  messageSocket: MessageSocket | null,
+  chatRoomSocket: ChatRoomSocket | null
+) => {
   const queryClient = useQueryClient()
-  const params = useParams<{ chatId: string }>()
+
+  useEffect(() => {
+    if (!messageSocket || !chatRoomSocket) return
+
+    const handleMessageCreated = (message: Message) => {
+      queryClient.setQueryData<ChatUIMessage>(
+        messageKeys.latestMessage(message.roomId),
+        () => mapAPIMessageToUI(message, "sent", false)
+      )
+
+      queryClient.setQueryData<number>(
+        messageKeys.unreadCountMessages(message.roomId),
+        prevUnreadCount => (prevUnreadCount ? prevUnreadCount + 1 : 1)
+      )
+    }
+
+    const handleRoomCreated = (room: ChatRoom) => {
+      queryClient.setQueryData<ChatRoom[]>(chatKeys.inbox(), old =>
+        old ? [...old, room] : old
+      )
+    }
+    const handleRoomDelete = () => {}
+
+    const handleUpdateRoomMemberReadAt = (chatRoomMember: ChatRoomMember) => {
+      queryClient.setQueryData<ChatRoom[]>(chatKeys.inbox(), old =>
+        old
+          ? old.map(room =>
+              room.memberships.find(member => member.id === chatRoomMember.id)
+                ? {
+                    ...room,
+                    memberships: [
+                      ...room.memberships.filter(
+                        member => member.id !== chatRoomMember.id
+                      ),
+                      chatRoomMember
+                    ]
+                  }
+                : room
+            )
+          : old
+      )
+    }
+
+    chatRoomSocket.on("room.created", handleRoomCreated)
+    chatRoomSocket.on("room.deleted", () => {})
+    chatRoomSocket.on(
+      "room.updated-member-read-at",
+      handleUpdateRoomMemberReadAt
+    )
+
+    messageSocket.on("message.created", handleMessageCreated)
+    return () => {
+      messageSocket.off("message.created", handleMessageCreated)
+      chatRoomSocket.off("room.created", handleRoomCreated)
+      chatRoomSocket.off("room.deleted", () => {})
+      chatRoomSocket.off(
+        "room.updated-member-read-at",
+        handleUpdateRoomMemberReadAt
+      )
+    }
+  }, [messageSocket, queryClient])
+}
+
+/*
   // const user = useCurrentUser()
 
   // return useRealtime({
@@ -101,5 +174,4 @@ export const useRealtimeInbox = (chats: UserChatPreview[]) => {
   //       }
   //     }
   //   }
-  // })
-}
+*/

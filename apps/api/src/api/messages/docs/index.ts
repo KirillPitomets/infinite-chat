@@ -1,2 +1,3 @@
-export * from './ApiGetMessageHistory.doc';
-export * from './ApiPresignAttachments.doc';
+export * from './api-get-history-messages.doc';
+export * from './api-presign-attachments.doc';
+export * from './api-unread-count-messages.doc';

@@ -14,6 +14,7 @@ import { UserService } from '../user/user.service';
 import { CreateMessageDto, UpdateMessageDto } from './dto';
 import { MessageEntity } from './entity';
 import { MessageRepository } from './repositories/message.repository';
+import { UnreadCountResponseDto } from './dto/unread-count-response.dto';
 
 @Injectable()
 export class MessagesService {
@@ -36,8 +37,27 @@ export class MessagesService {
     const { limit, page } = query;
 
     const messages = await this.messageRepo.getHistory(roomId, limit, page);
+    // used reverse because in messageRepo I used orderBy: { createdAt: desc }
+    return messages.reverse().map((msg) => new MessageEntity(msg));
+  }
 
-    return messages.map((msg) => new MessageEntity(msg));
+  async getUnreadCount(
+    userId: string,
+    roomId: string,
+  ): Promise<UnreadCountResponseDto> {
+    const roomMember = await this.roomAuthService.assertUserInRoom(
+      userId,
+      roomId,
+    );
+    const unreadCount = await this.prismaService.message.count({
+      where: {
+        roomId,
+        senderId: { not: userId },
+        createdAt: { gt: roomMember.lastReadAt },
+      },
+    });
+
+    return { unreadCount };
   }
 
   async create(
@@ -56,7 +76,6 @@ export class MessagesService {
     if (attachments && attachments.length) {
       await this.attachmentsService.ensureAttachmentKeysAreUnique(
         attachments.map((att) => {
-          console.log(att);
           return att.key;
         }),
       );
