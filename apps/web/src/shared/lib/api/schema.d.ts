@@ -449,6 +449,12 @@ export interface components {
              * @enum {string}
              */
             role: "OWNER" | "ADMIN" | "MEMBER";
+            /**
+             * Format: date-time
+             * @description Date and time when the member was joined
+             * @example 2026-07-30T07:04:18.000Z
+             */
+            createdAt: string;
             /** @description Detailed profile information of the member user */
             user: components["schemas"]["UserEntity"];
         };

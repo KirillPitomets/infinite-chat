@@ -40,4 +40,8 @@ export const MessageEmits = {
   RESTORE: "message.restore"
 } satisfies Record<string, keyof ClientToServerMessageEvents>
 
-export type MessageListenEvents = keyof ServerToClientMessageEvents
+export type MessageEventMap = {
+  [K in keyof ServerToClientMessageEvents]: Parameters<
+    ServerToClientMessageEvents[K]
+  >[0]
+}

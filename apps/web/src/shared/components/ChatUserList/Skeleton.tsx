@@ -1,5 +1,3 @@
-import { IconButtonBase } from "../ui/IconButtonBase"
-
 export const ChatUserListSkeleton = () => {
   return (
     <ul className="w-full max-w-[400px]">
@@ -14,9 +12,7 @@ export const ChatUserListSkeleton = () => {
           </div>
           <span className="w-20 h-5 bg-zinc-400 rounded-sm animate-pulse"></span>
 
-          <IconButtonBase>
-            <button className="w-20 h-5 bg-zinc-400 rounded-sm animate-pulse" />
-          </IconButtonBase>
+          <button className="w-20 h-5 bg-zinc-400 rounded-sm animate-pulse" />
         </li>
       ))}
     </ul>

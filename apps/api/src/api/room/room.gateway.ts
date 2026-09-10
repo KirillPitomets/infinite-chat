@@ -18,11 +18,13 @@ import { WsAuthService } from '../auth/ws-auth.service';
 import {
   ClientRoomEvents,
   RoomMemberPayload,
+  RoomPayload,
 } from './contracts/room.socket-contracts';
 import { UpdateRoomMemberLastReadAtDto } from './dto';
 import { RoomService } from './room.service';
 import type { RoomServer, RoomSocket } from './types/room-socket.type';
 import { RoomMemberEntity } from './entities/room-member.entity';
+import { RoomEntity } from './entities';
 
 @WebSocketGateway({
   namespace: 'rooms',
@@ -69,6 +71,33 @@ export class RoomGateway extends BaseGateway implements OnGatewayConnection {
       .emit('room.updated-member-read-at', roomMemberPayload);
   }
 
+  @OnEvent('room:created')
+  async handleRoomCreated(payload: AppEventMap['room:created']) {
+    const { entity, recipientIds } = payload;
+
+    const roomPayload = this.instanceRoomToPlain(entity);
+
+    await Promise.all(
+      recipientIds.map(async (userId) => {
+        this.joinRoomForUser(this.server, userId, entity.id);
+        this.server.to(`user:${userId}`).emit('room.created', roomPayload);
+      }),
+    );
+  }
+
+  @OnEvent('room:deleted')
+  async handleRoomDeleted(payload: AppEventMap['room:deleted']) {
+    const { actorId, roomId, recipientIds } = payload;
+
+    await this.server.to(`room:${roomId}`).emit('room.deleted', roomId);
+
+    await Promise.all(
+      recipientIds.map(
+        async (id) => await this.leaveRoomForUser(this.server, id, roomId),
+      ),
+    );
+  }
+
   @OnEvent('room:member-left')
   async handleRoomMemberLeft(payload: AppEventMap['room:member-left']) {
     const { actorId, roomId } = payload;
@@ -92,9 +121,7 @@ export class RoomGateway extends BaseGateway implements OnGatewayConnection {
   async handleRoomMemberJoined(payload: AppEventMap['room:member-joined']) {
     const { roomMember, roomId } = payload;
 
-    const roomMemberPayload = instanceToPlain(
-      payload.roomMember,
-    ) as RoomMemberPayload;
+    const roomMemberPayload = instanceToPlain(payload.roomMember);
 
     this.server.to(`room:${roomId}`).emit('room.member-joined', roomMember);
 
@@ -105,5 +132,9 @@ export class RoomGateway extends BaseGateway implements OnGatewayConnection {
     roomMember: RoomMemberEntity,
   ): RoomMemberPayload {
     return instanceToPlain(roomMember) as RoomMemberPayload;
+  }
+
+  private instanceRoomToPlain(room: RoomEntity): RoomPayload {
+    return instanceToPlain(room) as RoomPayload;
   }
 }

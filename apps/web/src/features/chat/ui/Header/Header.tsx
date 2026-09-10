@@ -1,7 +1,6 @@
 "use client"
 
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import {
   ArrowIcon,
   CameraIcon,
@@ -14,13 +13,10 @@ import { getDirectChatPartner } from "@/shared/utils/getDirectChatPartner"
 import Link from "next/link"
 import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
-
-/*
-  group room've 
-    - room name 
-    - memberships count > 2 
-    - type group 
-*/
+import { Camera, Info, Trash } from "lucide-react"
+import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
+import { ConfirmDialog } from "@/shared/components/ConfirmDialog/ConfirmDialog"
+import { useConfirm } from "../../providers/ConfirmDialogProvider"
 
 type ChatHeaderProps = {
   chatId: string
@@ -28,6 +24,11 @@ type ChatHeaderProps = {
   memberships: ChatRoom["memberships"]
   chatName: string
   avatarUrl: string
+
+  isActiveInfoButton?: boolean
+
+  handleInfoButton: () => void
+  handleDeleteRoom: () => void
 }
 
 export function ChatHeader({
@@ -35,11 +36,24 @@ export function ChatHeader({
   avatarUrl,
   chatName,
   memberships,
-  type
+  type,
+
+  isActiveInfoButton,
+
+  handleInfoButton,
+  handleDeleteRoom
 }: ChatHeaderProps) {
   const currentUser = useCurrentUser()
-
   const directChatPartner = getDirectChatPartner(memberships, currentUser.id)
+  const confirm = useConfirm()
+
+  async function handleDelete() {
+    const ok = await confirm({
+      title: "⚠️ Delete chat permanently?",
+      des: "Chat and all message will be deleted for all users"
+    })
+    if (ok) handleDeleteRoom()
+  }
 
   return (
     <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
@@ -64,18 +78,22 @@ export function ChatHeader({
         )}
       </div>
       <div className="flex space-x-1">
-        <IconButtonBase size={4}>
-          <CameraIcon />
-        </IconButtonBase>
+        <button className={getButtonStyleClass("primary")}>
+          <Camera size={20} />
+        </button>
 
-        <IconButtonBase tone="muted" size={4}>
-          <InformationIcon />
-        </IconButtonBase>
+        <button
+          onClick={handleInfoButton}
+          className={getButtonStyleClass("muted", isActiveInfoButton)}
+        >
+          <Info size={20} />
+        </button>
 
-        <button onClick={() => console.log("TODO IT - DELETE CHAT")}>
-          <IconButtonBase size={4}>
-            <TrashIcon />
-          </IconButtonBase>
+        <button
+          onClick={handleDelete}
+          className={getButtonStyleClass("danger")}
+        >
+          <Trash size={20} />
         </button>
       </div>
     </header>

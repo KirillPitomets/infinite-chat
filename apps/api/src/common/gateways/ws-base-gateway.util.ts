@@ -19,6 +19,15 @@ export class BaseGateway {
     sockets.forEach((socket) => socket.leave(`room:${roomId}`));
   }
 
+  protected async joinRoomForUser<S extends Server>(
+    server: S,
+    userId: string,
+    roomId: string,
+  ) {
+    const sockets = await server.in(`user:${userId}`).fetchSockets();
+    sockets.forEach((socket) => socket.join(`room:${roomId}`));
+  }
+
   protected async addRoomForUser<S extends Server>(
     server: S,
     userId: string,

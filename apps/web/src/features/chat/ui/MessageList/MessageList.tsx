@@ -12,11 +12,11 @@ import { useMutation } from "@tanstack/react-query"
 import { useRef } from "react"
 import { useChatScroll } from "../../hooks/useChatScroll"
 import { useGetMessages } from "../../message/api/query/useGetMessages"
-import { useChatRoomSocket } from "../../message/providers/socketProvider"
 import MessageContextMenu from "../Message/ContextMenu/ContextMenu"
 import { useMessageContextMenu } from "../Message/ContextMenu/useMessageContextMenu"
 import { useReadMessages } from "../../message/api/mutate/useReadMessage"
 import { SystemMessage } from "../SystemMessage/SystemMessage"
+import { useChatRoomSocket } from "../../providers/socketProvider"
 
 type MessageListProps = {
   chatId: string

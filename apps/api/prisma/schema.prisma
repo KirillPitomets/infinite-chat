@@ -44,6 +44,8 @@ model RoomMember {
 
   role       RoomMemberRole                      @default(MEMBER)
 
+  createdAt  DateTime       @map("created_at")   @default(now())
+
   @@unique([userId, roomId])
   @@map("room_member")
 }

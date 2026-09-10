@@ -1,9 +1,10 @@
 "use client"
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
 import { SendIcon } from "@/shared/components/ui/icons"
 import { PreviewFiles } from "@/shared/components/ui/PreviewFiles/PreviewFiles"
 import { UploadButton } from "@/shared/components/UploadButton"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
+import { Send } from "lucide-react"
 import {
   ChangeEvent,
   useEffect,
@@ -179,10 +180,9 @@ export function ChatInputUI({
         <button
           onClick={onSubmitMessage}
           disabled={!value.trim() && !previewFiles.length}
+          className={getButtonStyleClass("primary")}
         >
-          <IconButtonBase>
-            <SendIcon />
-          </IconButtonBase>
+          <Send />
         </button>
       </div>
     </div>

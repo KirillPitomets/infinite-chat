@@ -1,15 +1,17 @@
 "use client"
-import React, { useEffect } from "react"
+import React, { PropsWithChildren, useEffect } from "react"
 import { createPortal } from "react-dom"
-
 
 type DialogProps = {
   isOpen: boolean
   onClose: () => void
-  children: React.ReactNode
 }
 
-export const Dialog = ({ isOpen, onClose, children }: DialogProps) => {
+export const Dialog = ({
+  isOpen,
+  onClose,
+  children
+}: PropsWithChildren<DialogProps>) => {
   useEffect(() => {
     if (!isOpen) return
 
@@ -35,9 +37,7 @@ export const Dialog = ({ isOpen, onClose, children }: DialogProps) => {
         onClick={onClose}
       />
 
-      <div className={`relative z-10`}>
-        {children}
-      </div>
+      <div className={`relative z-10`}>{children}</div>
     </div>,
     document.body
   )

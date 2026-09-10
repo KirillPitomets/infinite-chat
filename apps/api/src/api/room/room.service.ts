@@ -267,7 +267,7 @@ export class RoomService {
     }
 
     this.typedEventEmitterService.emit('room:member-left', {
-      actorId: userId,
+      actorId: roomMember.id,
       roomId,
     });
 

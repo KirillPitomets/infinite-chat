@@ -1,4 +1,5 @@
-import { SocketProvider } from "@/features/chat/message/providers/socketProvider"
+import { ConfirmDialogProvider } from "@/features/chat/providers/ConfirmDialogProvider"
+import { SocketProvider } from "@/features/chat/providers/socketProvider"
 import { getCurrentUserServer } from "@/features/user/api/getCurrentUser.server"
 import Sidebar from "@/shared/components/Sidebar/Sidebar"
 import { NotificationManager } from "@/shared/context/NotificationManager"
@@ -36,11 +37,13 @@ export default async function AccountLayout({
     <HydrationBoundary state={dehydrate(queryClient)}>
       <SocketProvider>
         <UserPresenceProvider>
-          <main className="flex max-h-screen overflow-hidden">
-            <NotificationManager />
-            <Sidebar />
-            {children}
-          </main>
+          <ConfirmDialogProvider>
+            <main className="flex max-h-screen overflow-hidden">
+              <NotificationManager />
+              <Sidebar />
+              {children}
+            </main>
+          </ConfirmDialogProvider>
         </UserPresenceProvider>
       </SocketProvider>
     </HydrationBoundary>

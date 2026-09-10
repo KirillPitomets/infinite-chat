@@ -4,10 +4,11 @@ import Link from "next/link"
 
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 
+import { LogoutIcon } from "@/shared/components/ui/icons"
 import { useClerk, UserButton } from "@clerk/nextjs"
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
-import { LogoutIcon, SettingsIcon } from "@/shared/components/ui/icons"
+import { Settings } from "lucide-react"
 import NavMenu from "../Navmenu/NavMenu"
+import { getButtonStyleClass } from "../ui/IconButtonBase"
 
 export default function Sidebar() {
   const { signOut } = useClerk()
@@ -33,14 +34,15 @@ export default function Sidebar() {
       <NavMenu />
 
       <div className="flex flex-col ">
-        <IconButtonBase tone="muted">
-          <SettingsIcon />
-        </IconButtonBase>
+        <button className={getButtonStyleClass("primary")}>
+          <Settings />
+        </button>
 
-        <button onClick={() => signOut({ redirectUrl: ACCOUNT_PAGES.HOME })}>
-          <IconButtonBase tone="muted">
-            <LogoutIcon />
-          </IconButtonBase>
+        <button
+          className={getButtonStyleClass("muted")}
+          onClick={() => signOut({ redirectUrl: ACCOUNT_PAGES.HOME })}
+        >
+          <LogoutIcon />
         </button>
       </div>
     </aside>

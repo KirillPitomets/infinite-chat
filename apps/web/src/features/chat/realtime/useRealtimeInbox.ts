@@ -11,6 +11,8 @@ import { ChatRoom, ChatRoomMember, Message } from "@/shared/types/api.type"
 import { useQueryClient } from "@tanstack/react-query"
 import { useEffect } from "react"
 import { chatKeys } from "../chat/model/chat.keys"
+import { RoomEventMap } from "@/shared/types/socket/chatRoom.events"
+import { MessageEventMap } from "@/shared/types/socket/messageSocket.events"
 
 export const useRealtimeInbox = (
   messageSocket: MessageSocket | null,
@@ -21,7 +23,10 @@ export const useRealtimeInbox = (
   useEffect(() => {
     if (!messageSocket || !chatRoomSocket) return
 
-    const handleMessageCreated = (message: Message) => {
+    const handleMessageCreated = (
+      message: MessageEventMap["message.created"]
+    ) => {
+      console.log("echo message created")
       queryClient.setQueryData<ChatUIMessage>(
         messageKeys.latestMessage(message.roomId),
         () => mapAPIMessageToUI(message, "sent", false)
@@ -33,14 +38,22 @@ export const useRealtimeInbox = (
       )
     }
 
-    const handleRoomCreated = (room: ChatRoom) => {
+    const handleRoomCreated = (room: RoomEventMap["room.created"]) => {
       queryClient.setQueryData<ChatRoom[]>(chatKeys.inbox(), old =>
         old ? [...old, room] : old
       )
     }
-    const handleRoomDelete = () => {}
+    const handleRoomDelete = (chatRoomId: RoomEventMap["room.deleted"]) => {
+      console.log("echo room deleted")
+      queryClient.setQueryData<ChatRoom[]>(chatKeys.inbox(), old =>
+        old ? old.filter(room => room.id !== chatRoomId) : old
+      )
+    }
 
-    const handleUpdateRoomMemberReadAt = (chatRoomMember: ChatRoomMember) => {
+    const handleUpdateRoomMemberReadAt = (
+      chatRoomMember: RoomEventMap["room.updated-member-read-at"]
+    ) => {
+      console.log("echo update room member read at")
       queryClient.setQueryData<ChatRoom[]>(chatKeys.inbox(), old =>
         old
           ? old.map(room =>
@@ -60,24 +73,31 @@ export const useRealtimeInbox = (
       )
     }
 
+    const handleException = (exception: any) => {
+      console.log("exception ", exception)
+    }
+
     chatRoomSocket.on("room.created", handleRoomCreated)
-    chatRoomSocket.on("room.deleted", () => {})
+    chatRoomSocket.on("room.deleted", handleRoomDelete)
     chatRoomSocket.on(
       "room.updated-member-read-at",
       handleUpdateRoomMemberReadAt
     )
-
     messageSocket.on("message.created", handleMessageCreated)
+    chatRoomSocket.on("exception", handleException)
+    messageSocket.on("exception", handleException)
     return () => {
+      chatRoomSocket.off("exception", handleException)
+      messageSocket.off("exception", handleException)
       messageSocket.off("message.created", handleMessageCreated)
       chatRoomSocket.off("room.created", handleRoomCreated)
-      chatRoomSocket.off("room.deleted", () => {})
+      chatRoomSocket.off("room.deleted", handleRoomDelete)
       chatRoomSocket.off(
         "room.updated-member-read-at",
         handleUpdateRoomMemberReadAt
       )
     }
-  }, [messageSocket, queryClient])
+  }, [messageSocket, chatRoomSocket, queryClient])
 }
 
 /*

@@ -172,6 +172,28 @@ export class MessagesGateway
     return messageEntity;
   }
 
+  @OnEvent('room:created')
+  async handleRoomCreated(payload: AppEventMap['room:created']) {
+    const { actorId, entity, recipientIds } = payload;
+
+    await Promise.all(
+      recipientIds.map((userId) => {
+        this.joinRoomForUser(this.server, userId, entity.id);
+      }),
+    );
+  }
+
+  @OnEvent('room:deleted')
+  async handleRoomDeleted(payload: AppEventMap['room:deleted']) {
+    const { actorId, recipientIds, roomId } = payload;
+
+    await Promise.all(
+      recipientIds.map(async (userId) => {
+        this.leaveRoomForUser(this.server, actorId, roomId);
+      }),
+    );
+  }
+
   @OnEvent('message:created')
   async createSystemMessage(payload: SystemMessageCreatedEvent) {
     const { message, roomId } = payload;

@@ -7,11 +7,12 @@ import { ChatRoom } from "@/shared/types/api.type"
 import { useParams, usePathname } from "next/navigation"
 import { useMemo, useState } from "react"
 import { useInboxChats } from "../../chat/api/useInboxChats"
+
+import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
 import {
   useChatRoomSocket,
   useMessagesSocket
-} from "../../message/providers/socketProvider"
-import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
+} from "../../providers/socketProvider"
 
 type ChatInboxProps = {
   initialChatRooms: ChatRoom[]

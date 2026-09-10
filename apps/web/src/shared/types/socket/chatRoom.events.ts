@@ -7,7 +7,7 @@ import { ExceptionEvents } from "./exception.events"
 
 export interface ServerToClientRoomEvents extends ExceptionEvents {
   "room.created": (room: ChatRoom) => void
-  "room.deleted": () => void
+  "room.deleted": (roomId: string) => void
   "room.member-left": (userId: string) => void
   "room.member-kicked": ({
     actorId,
@@ -24,8 +24,8 @@ export interface ClientToServerRoomEvents {
   "room.update-member-read-at": (dto: UpdateRoomMemberLastReadAtDto) => void
 }
 
-export const ClientRoomEvents = {
-  updateReadAt: "room.update-member-read-at"
-} satisfies Record<string, keyof ClientToServerRoomEvents>
-
-export type ServerRoomEvents = keyof ServerToClientRoomEvents
+export type RoomEventMap = {
+  [K in keyof ServerToClientRoomEvents]: Parameters<
+    ServerToClientRoomEvents[K]
+  >[0]
+}

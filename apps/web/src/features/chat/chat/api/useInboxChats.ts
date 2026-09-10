@@ -12,27 +12,7 @@ export function useInboxChats(initialData: ChatRoom[]) {
     queryFn: async () => {
       return await unwrap(api.GET("/api/v1/room"))
     },
-    initialData
+    initialData,
+    initialDataUpdatedAt: Date.now()
   })
 }
-
-/*
-  // const { data: chats, isLoading } = useQuery<ChatRoom[]>({
-  //   queryKey: chatKeys.inbox(),
-  //   // == TODO ==
-  //   queryFn: async () => {
-  //     const rooms = await unwrap()
-  //     //   const res = await edenClient.chat.preview.get()
-
-  //   //   return res.data ?? []
-  //   },
-  //   select: chats =>
-  //     [...chats].sort(
-  //       (a, b) =>
-  //         new Date(b.latestMessage?.createdAt ?? 0).getTime() -
-  //         new Date(a.latestMessage?.createdAt ?? 0).getTime()
-  //     ),
-  //   initialData: initialChatRooms
-  // })
-
-*/

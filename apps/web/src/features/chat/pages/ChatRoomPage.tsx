@@ -11,7 +11,7 @@ import {
   MAX_FILES
 } from "@/shared/lib/dropzone/fileSizeValidator"
 import { ChatRoom, Message } from "@/shared/types/api.type"
-import { useCallback, useEffect } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
 import { useDeleteChat } from "../chat/api/useDeleteChat"
@@ -20,15 +20,18 @@ import { useDeleteMessage } from "../message/api/mutate/useDeleteMessage"
 import { useRestoreMessage } from "../message/api/mutate/useRestoreMessage"
 import { useSendMessage } from "../message/api/mutate/useSendMessage"
 import { useUpdateMessage } from "../message/api/mutate/useUpdateMessage"
-import {
-  useChatRoomSocket,
-  useMessagesSocket
-} from "../message/providers/socketProvider"
+
 import { useRealtimeMessages } from "../realtime/useRealtimeMessages"
 import { ChatInputController } from "../ui/Input/InputController"
 import { MessageList } from "../ui/MessageList/MessageList"
 import { useChatRoomData } from "../chat/api/useChatRoomData"
 import { useRealtimeChatRoom } from "../realtime/useRealtimeChatRoom"
+import { format } from "date-fns"
+import { MemberList } from "../ui/MemberList/MemberList"
+import {
+  useChatRoomSocket,
+  useMessagesSocket
+} from "../providers/socketProvider"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -41,6 +44,11 @@ export const ChatRoomPage = ({
   initialChatRoomData,
   initialMessages
 }: ChatRoomPageProps) => {
+  const [isOpenMemberList, setIsOpenMemberList] = useState(false)
+  const handleMemberList = () => {
+    setIsOpenMemberList(prev => !prev)
+  }
+
   const messageSocket = useMessagesSocket()
   const chatRoomSocket = useChatRoomSocket()
   const { data: chatRoomData } = useChatRoomData(chatId, initialChatRoomData)
@@ -134,7 +142,7 @@ export const ChatRoomPage = ({
   useRealtimeChatRoom(chatId, chatRoomSocket)
 
   return (
-    <div className="flex flex-col w-full h-full">
+    <div className="relative flex flex-col w-full h-full">
       <ImagePreviewDialog
         isOpen={isOpenImagePreview}
         image={previewImage}
@@ -147,11 +155,14 @@ export const ChatRoomPage = ({
         avatarUrl={chatRoomData.avatarUrl}
         type={chatRoomData.type}
         memberships={chatRoomData.memberships}
+        handleDeleteRoom={handleDeleteChat}
+        handleInfoButton={handleMemberList}
+        isActiveInfoButton={isOpenMemberList}
       />
 
       <div
         {...getRootProps()}
-        className="relative flex flex-col flex-1 min-h-0"
+        className="relative flex flex-col flex-1 min-h-0 "
       >
         {isDragActive && (
           <div className="absolute inset-0 flex items-center justify-center w-full h-full bg-black/50 z-1001">
@@ -161,17 +172,25 @@ export const ChatRoomPage = ({
           </div>
         )}
 
-        <MessageList
-          chatId={chatId}
-          memberships={chatRoomData.memberships}
-          initialData={initialMessages}
-          onUpdate={editingMsg => handleEditingMessage(editingMsg)}
-          onReplyToMessage={msg => handleReplyMessage(msg)}
-          onDelete={handleDeleteMessage}
-          onRestore={handleRestoreMessage}
-          onPreviewImage={handleImagePreviewDialog}
-          replyMessageId={replyMessage?.id}
-        />
+        <div className="flex flex-1 overflow-y-hidden ">
+          <MessageList
+            chatId={chatId}
+            memberships={chatRoomData.memberships}
+            initialData={initialMessages}
+            onUpdate={editingMsg => handleEditingMessage(editingMsg)}
+            onReplyToMessage={msg => handleReplyMessage(msg)}
+            onDelete={handleDeleteMessage}
+            onRestore={handleRestoreMessage}
+            onPreviewImage={handleImagePreviewDialog}
+            replyMessageId={replyMessage?.id}
+          />
+          {isOpenMemberList && (
+            <MemberList
+              chatId={chatId}
+              memberships={chatRoomData.memberships}
+            />
+          )}
+        </div>
 
         <div className="relative">
           <ChatInputController

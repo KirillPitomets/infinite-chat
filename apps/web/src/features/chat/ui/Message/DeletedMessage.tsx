@@ -1,4 +1,3 @@
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
 import { ReloadIcon } from "@/shared/components/ui/icons"
 import Image from "next/image"
 import { useChangeMessageStatus } from "../../message/api/useChangeMessageStatus"

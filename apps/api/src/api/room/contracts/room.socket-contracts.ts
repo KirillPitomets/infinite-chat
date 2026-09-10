@@ -13,7 +13,7 @@ export type RoomPayload = Omit<RoomEntity, 'memberships'> & {
 
 export interface ServerToClientRoomEvents {
   'room.created': (room: RoomPayload) => void;
-  'room.deleted': () => void;
+  'room.deleted': (roomId: string) => void;
   'room.member-left': (userId: string) => void;
   'room.member-kicked': ({
     actorId,

@@ -1,8 +1,6 @@
 "use client"
 
 import { chatKeys } from "@/features/chat/chat/model/chat.keys"
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
-import { UserChatPreview } from "@/shared/schemes/chatPreview.schema"
 import { matchRoute } from "@/shared/utils/matchRoute"
 import { useQuery } from "@tanstack/react-query"
 import Link from "next/link"
@@ -10,6 +8,7 @@ import { usePathname } from "next/navigation"
 import { useMemo } from "react"
 import { navItems } from "./navItems.data"
 import { useRealtimeNav } from "./useRealtimeNav"
+import { getButtonStyleClass } from "../ui/IconButtonBase"
 
 export default function NavMenu() {
   const pathname = usePathname()
@@ -39,9 +38,14 @@ export default function NavMenu() {
             </div>
           )}
 
-          <IconButtonBase isActive={matchRoute(pathname, item.href)}>
+          <button
+            className={getButtonStyleClass(
+              "primary",
+              matchRoute(pathname, item.href)
+            )}
+          >
             <item.icon />
-          </IconButtonBase>
+          </button>
         </Link>
       ))}
     </div>

@@ -10,7 +10,11 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --breakpoint-mid: 850px;
 }
+
+@custom-variant mid-max (&:where(@media (max-width: 850px)));
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -72,7 +76,9 @@ input {
 }
 
 @keyframes shake {
-  0%, 90%, 100% {
+  0%,
+  90%,
+  100% {
     transform: translateX(0);
   }
 

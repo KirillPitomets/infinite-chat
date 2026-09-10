@@ -32,6 +32,13 @@ export class RoomMemberEntity implements RoomMember {
   })
   role: RoomMemberRole;
 
+  @ApiProperty({
+    description: 'Date and time when the member was joined',
+    type: Date,
+    example: '2026-07-30T07:04:18.000Z',
+  })
+  createdAt: Date;
+
   @Exclude()
   roomId: string;
 

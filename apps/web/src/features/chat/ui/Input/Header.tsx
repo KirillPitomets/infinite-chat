@@ -1,5 +1,6 @@
-import { IconButtonBase } from "@/shared/components/ui/IconButtonBase"
+import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
 import { CrossIcon, FileAccepted } from "@/shared/components/ui/icons"
+import { Cross } from "lucide-react"
 
 type InputHeaderProps = {
   title: string
@@ -32,10 +33,8 @@ export const InputHeader = ({
           </p>
         )}
       </div>
-      <button onClick={onCancel}>
-        <IconButtonBase>
-          <CrossIcon />
-        </IconButtonBase>
+      <button onClick={onCancel} className={getButtonStyleClass("primary")}>
+        <Cross />
       </button>
     </div>
   )
