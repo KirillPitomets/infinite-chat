@@ -3,8 +3,7 @@ import { ChatRoomMember } from "@/shared/types/api.type"
 import { format } from "date-fns"
 import { Calendar, Mail, Send } from "lucide-react"
 import { useCreateOrFindDirectChat } from "../../chat/api/mutate/useCreateOrFindDirectChat"
-import { Loader } from "@/shared/components/ui/Loader"
-import { Button } from "../../../../shared/components/ui/Button"
+import { Button } from "@/shared/components/ui/Button"
 
 type MemberDetailedInfoProps = {
   member: ChatRoomMember

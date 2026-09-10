@@ -11,7 +11,7 @@ import {
   MAX_FILES
 } from "@/shared/lib/dropzone/fileSizeValidator"
 import { ChatRoom, Message } from "@/shared/types/api.type"
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
 import { useDeleteChat } from "../chat/api/useDeleteChat"
@@ -32,6 +32,7 @@ import {
   useChatRoomSocket,
   useMessagesSocket
 } from "../providers/socketProvider"
+import { useOnClickOutside } from "@/shared/hooks/useOnClickOutside"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -138,6 +139,13 @@ export const ChatRoomPage = ({
     })
   }, [fileRejections, fileRejections.length])
 
+  const memberListRef = useRef<HTMLUListElement>(null)
+  const headerRef = useRef<HTMLDivElement>(null)
+
+  // useOnClickOutside([memberListRef, headerRef], isOpenMemberList, () =>
+  //   setIsOpenMemberList(false)
+  // )
+
   useRealtimeMessages(chatId, messageSocket)
   useRealtimeChatRoom(chatId, chatRoomSocket)
 
@@ -151,6 +159,7 @@ export const ChatRoomPage = ({
 
       <ChatHeader
         chatId={chatId}
+        ref={headerRef}
         chatName={chatRoomData.name}
         avatarUrl={chatRoomData.avatarUrl}
         type={chatRoomData.type}
@@ -184,15 +193,20 @@ export const ChatRoomPage = ({
             onPreviewImage={handleImagePreviewDialog}
             replyMessageId={replyMessage?.id}
           />
-          {isOpenMemberList && (
-            <MemberList
-              chatId={chatId}
-              memberships={chatRoomData.memberships}
-            />
-          )}
+          <MemberList
+            isActive={isOpenMemberList}
+            ref={memberListRef}
+            chatId={chatId}
+            chatType={chatRoomData.type}
+            memberships={chatRoomData.memberships}
+            onClose={() => setIsOpenMemberList(false)}
+          />
         </div>
 
-        <div className="relative">
+        <div
+          style={{ backgroundColor: "var(--background)" }}
+          className="relative z-2"
+        >
           <ChatInputController
             chatId={chatId}
             replyMessage={replyMessage}

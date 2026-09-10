@@ -215,10 +215,17 @@ export class RoomService {
         id: memberId,
         roomId,
       },
+      include: { room: true },
     });
 
     if (!roomMember || roomMember.leftAt !== null) {
       throw new NotFoundException('Member are not in the room');
+    }
+
+    if (roomMember.room.type === 'DIRECT') {
+      throw new BadRequestException(
+        "Member can't be removed from a direct chat",
+      );
     }
 
     if (userId === roomMember.userId) {

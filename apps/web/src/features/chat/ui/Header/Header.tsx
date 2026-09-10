@@ -17,6 +17,7 @@ import { Camera, Info, Trash } from "lucide-react"
 import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
 import { ConfirmDialog } from "@/shared/components/ConfirmDialog/ConfirmDialog"
 import { useConfirm } from "../../providers/ConfirmDialogProvider"
+import { Ref } from "react"
 
 type ChatHeaderProps = {
   chatId: string
@@ -29,6 +30,8 @@ type ChatHeaderProps = {
 
   handleInfoButton: () => void
   handleDeleteRoom: () => void
+
+  ref: Ref<HTMLDivElement>
 }
 
 export function ChatHeader({
@@ -41,7 +44,9 @@ export function ChatHeader({
   isActiveInfoButton,
 
   handleInfoButton,
-  handleDeleteRoom
+  handleDeleteRoom,
+
+  ref
 }: ChatHeaderProps) {
   const currentUser = useCurrentUser()
   const directChatPartner = getDirectChatPartner(memberships, currentUser.id)
@@ -56,7 +61,10 @@ export function ChatHeader({
   }
 
   return (
-    <header className="flex items-center justify-between p-2.5 border-b border-zinc-300">
+    <header
+      ref={ref}
+      className="flex items-center justify-between p-2.5 border-b border-zinc-300"
+    >
       <div className="flex items-center gap-2">
         <Link
           href={ACCOUNT_PAGES.CHAT}

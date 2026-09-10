@@ -16,7 +16,7 @@ function makeQueryClient() {
           if (error instanceof ApiError && error.status === 401) return false
           return count < 2
         },
-        staleTime: 60 * 10
+        staleTime: 1000 * 60 * 10
       }
     },
     queryCache: new QueryCache({

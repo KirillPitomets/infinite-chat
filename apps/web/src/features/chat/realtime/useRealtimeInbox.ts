@@ -23,10 +23,13 @@ export const useRealtimeInbox = (
   useEffect(() => {
     if (!messageSocket || !chatRoomSocket) return
 
+    messageSocket.onAny((event, ...any) => {
+      console.log("[MESSAGE SOCKET]", event, any)
+    })
+
     const handleMessageCreated = (
       message: MessageEventMap["message.created"]
     ) => {
-      console.log("echo message created")
       queryClient.setQueryData<ChatUIMessage>(
         messageKeys.latestMessage(message.roomId),
         () => mapAPIMessageToUI(message, "sent", false)
@@ -44,7 +47,6 @@ export const useRealtimeInbox = (
       )
     }
     const handleRoomDelete = (chatRoomId: RoomEventMap["room.deleted"]) => {
-      console.log("echo room deleted")
       queryClient.setQueryData<ChatRoom[]>(chatKeys.inbox(), old =>
         old ? old.filter(room => room.id !== chatRoomId) : old
       )

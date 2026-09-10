@@ -3,6 +3,7 @@ import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
 import { SendIcon } from "@/shared/components/ui/icons"
 import { PreviewFiles } from "@/shared/components/ui/PreviewFiles/PreviewFiles"
 import { UploadButton } from "@/shared/components/UploadButton"
+import { useOnClickOutside } from "@/shared/hooks/useOnClickOutside"
 import EmojiPicker, { EmojiClickData } from "emoji-picker-react"
 import { Send } from "lucide-react"
 import {
@@ -95,28 +96,9 @@ export function ChatInputUI({
     setValue(initialValue)
   }, [initialValue])
 
-  useEffect(() => {
-    if (!isOpenEmojiPicker) return
-
-    const handleClickOutside = (e: MouseEvent) => {
-      if (emojiRef.current && !emojiRef.current.contains(e.target as Node)) {
-        setIsOpenEmojiPicker(false)
-      }
-    }
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        setIsOpenEmojiPicker(false)
-      }
-    }
-
-    document.addEventListener("keydown", handleKeyDown)
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown)
-      document.addEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpenEmojiPicker])
+  useOnClickOutside([emojiRef], isOpenEmojiPicker, () =>
+    setIsOpenEmojiPicker(false)
+  )
 
   return (
     <div>
@@ -162,17 +144,6 @@ export function ChatInputUI({
                 open={isOpenEmojiPicker}
                 onEmojiClick={handleEmojiClick}
               />
-              {/* {createPortal(
-                <>
-                  {isOpenEmojiPicker && (
-                    <div
-                      onClick={toggleEmojiPicker}
-                      className="absolute bottom-0 left-0 w-screen h-screen bg-black/10 z-100"
-                    />
-                  )}
-                </>,
-                document.body
-              )} */}
             </div>
           </div>
         </div>

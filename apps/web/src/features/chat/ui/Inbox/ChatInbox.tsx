@@ -5,7 +5,7 @@ import SearchInput from "@/shared/components/ui/SearchInput/SearchInput"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { ChatRoom } from "@/shared/types/api.type"
 import { useParams, usePathname } from "next/navigation"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useInboxChats } from "../../chat/api/useInboxChats"
 
 import { useRealtimeInbox } from "../../realtime/useRealtimeInbox"
@@ -13,6 +13,8 @@ import {
   useChatRoomSocket,
   useMessagesSocket
 } from "../../providers/socketProvider"
+import { useQueryClient } from "@tanstack/react-query"
+import { chatKeys } from "../../chat/model/chat.keys"
 
 type ChatInboxProps = {
   initialChatRooms: ChatRoom[]
