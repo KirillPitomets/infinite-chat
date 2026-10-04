@@ -1,9 +1,9 @@
-import { usePresenceUserStatus } from "@/shared/hooks/useUserPresence"
 import Image from "next/image"
 import { useRealtimeTyping } from "../../realtime/useRealtimeTyping"
 import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
 import { User } from "@/shared/types/api.type"
 import { UserAvatar } from "@/shared/components/ui/UserAvatar/UserAvatar"
+import { useIsOnline } from "@/shared/hooks/useIsOnline"
 
 type DirectInfoProps = {
   chatId: string
@@ -11,8 +11,9 @@ type DirectInfoProps = {
 }
 
 export const DirectInfo = ({ chatId, member }: DirectInfoProps) => {
-  // const { isOnline } = usePresenceUserStatus(member.id)
   // const { isMemberTyping } = useRealtimeTyping(chatId)
+
+  const isOnline = useIsOnline(member.id)
 
   return (
     <>
@@ -22,13 +23,13 @@ export const DirectInfo = ({ chatId, member }: DirectInfoProps) => {
 
         {
           /*isMemberTyping */
-          true ? (
+          false ? (
             <TypingIndicator />
           ) : (
             <span
-              className={`${/*isOnline*/ true ? "text-green-600" : "text-zinc-400"}`}
+              className={`${isOnline ? "text-green-600" : "text-zinc-400"}`}
             >
-              {/*isOnline*/ true ? "online" : "offline"}
+              {isOnline ? "online" : "offline"}
             </span>
           )
         }

@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { NotificationModule } from './notification/notification.module';
 import { RoomAuthModule } from './room-auth/room-auth.module';
+import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { RoomAuthModule } from './room-auth/room-auth.module';
     AttachmentsModule,
     NotificationModule,
     RoomAuthModule,
+    PresenceModule,
   ],
   exports: [DevModule],
 })

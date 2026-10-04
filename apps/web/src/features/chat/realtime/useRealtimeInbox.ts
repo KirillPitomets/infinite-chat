@@ -75,10 +75,6 @@ export const useRealtimeInbox = (
       )
     }
 
-    const handleException = (exception: any) => {
-      console.log("exception ", exception)
-    }
-
     chatRoomSocket.on("room.created", handleRoomCreated)
     chatRoomSocket.on("room.deleted", handleRoomDelete)
     chatRoomSocket.on(
@@ -86,11 +82,8 @@ export const useRealtimeInbox = (
       handleUpdateRoomMemberReadAt
     )
     messageSocket.on("message.created", handleMessageCreated)
-    chatRoomSocket.on("exception", handleException)
-    messageSocket.on("exception", handleException)
+
     return () => {
-      chatRoomSocket.off("exception", handleException)
-      messageSocket.off("exception", handleException)
       messageSocket.off("message.created", handleMessageCreated)
       chatRoomSocket.off("room.created", handleRoomCreated)
       chatRoomSocket.off("room.deleted", handleRoomDelete)

@@ -11,7 +11,7 @@ import {
   MAX_FILES
 } from "@/shared/lib/dropzone/fileSizeValidator"
 import { ChatRoom, Message } from "@/shared/types/api.type"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useEffectEvent, useRef, useState } from "react"
 import { useDropzone } from "react-dropzone"
 import toast from "react-hot-toast"
 import { useDeleteChat } from "../chat/api/useDeleteChat"
@@ -30,9 +30,13 @@ import { format } from "date-fns"
 import { MemberList } from "../ui/MemberList/MemberList"
 import {
   useChatRoomSocket,
-  useMessagesSocket
+  useMessagesSocket,
+  usePresenceSocket
 } from "../providers/socketProvider"
 import { useOnClickOutside } from "@/shared/hooks/useOnClickOutside"
+import { useQuery, useQueryClient } from "@tanstack/react-query"
+import { presenceKeys } from "@/shared/lib/query/presence.keys"
+import { useRealtimeTypingIndicator } from "../realtime/useRealtimeTypingIndicator"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -52,6 +56,7 @@ export const ChatRoomPage = ({
 
   const messageSocket = useMessagesSocket()
   const chatRoomSocket = useChatRoomSocket()
+  const presenceSocket = usePresenceSocket()
   const { data: chatRoomData } = useChatRoomData(chatId, initialChatRoomData)
 
   const {
@@ -142,12 +147,12 @@ export const ChatRoomPage = ({
   const memberListRef = useRef<HTMLUListElement>(null)
   const headerRef = useRef<HTMLDivElement>(null)
 
-  // useOnClickOutside([memberListRef, headerRef], isOpenMemberList, () =>
-  //   setIsOpenMemberList(false)
-  // )
-
   useRealtimeMessages(chatId, messageSocket)
   useRealtimeChatRoom(chatId, chatRoomSocket)
+  const { typingUserIds, removeTyping } = useRealtimeTypingIndicator(
+    chatId,
+    presenceSocket
+  )
 
   return (
     <div className="relative flex flex-col w-full h-full">
@@ -181,7 +186,7 @@ export const ChatRoomPage = ({
           </div>
         )}
 
-        <div className="flex flex-1 overflow-y-hidden ">
+        <div className="flex flex-1 overflow-hidden ">
           <MessageList
             chatId={chatId}
             memberships={chatRoomData.memberships}
@@ -207,6 +212,18 @@ export const ChatRoomPage = ({
           style={{ backgroundColor: "var(--background)" }}
           className="relative z-2"
         >
+          {typingUserIds.length > 0 && (
+            <p>
+              {chatRoomData.memberships
+                .filter(m =>
+                  typingUserIds.find(typingUserId => typingUserId === m.user.id)
+                )
+                .map(user => user.user.username)
+                .join(", ")}{" "}
+              is typing...
+            </p>
+          )}
+
           <ChatInputController
             chatId={chatId}
             replyMessage={replyMessage}

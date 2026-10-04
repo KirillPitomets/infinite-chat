@@ -1,3 +1,4 @@
+import { ExceptionEvents } from '../../../types/socket/ws-exception.type';
 import { CreateMessageDto, UpdateMessageDto } from '../dto';
 import { DeleteMessageDto } from '../dto/delete-message.dto';
 import { RestoreMessageDto } from '../dto/restore-message.dto';
@@ -8,19 +9,11 @@ export type MessagePayload = Omit<
   'senderId' | 'roomId' | 'replyToMessageId'
 >;
 
-export interface ExceptionPayload {
-  status: string;
-  error: unknown;
-  timestamp: string;
-}
-
-export interface ServerToClientMessageEvents {
+export interface ServerToClientMessageEvents extends ExceptionEvents {
   'message.created': (message: MessagePayload) => void;
   'message.updated': (message: MessagePayload) => void;
   'message.deleted': (message: MessagePayload) => void;
   'message.restored': (message: MessagePayload) => void;
-
-  exception: (payload: ExceptionPayload) => void;
 }
 
 export interface ClientToServerMessageEvents {

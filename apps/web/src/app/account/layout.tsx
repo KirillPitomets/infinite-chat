@@ -3,7 +3,7 @@ import { SocketProvider } from "@/features/chat/providers/socketProvider"
 import { getCurrentUserServer } from "@/features/user/api/getCurrentUser.server"
 import Sidebar from "@/shared/components/Sidebar/Sidebar"
 import { NotificationManager } from "@/shared/context/NotificationManager"
-import { UserPresenceProvider } from "@/shared/context/UserPresenceContext"
+import { HeartbeatPresence } from "@/shared/context/HeartbeatPresence"
 import { ApiError } from "@/shared/lib/api/unwrap"
 import {
   dehydrate,
@@ -11,6 +11,7 @@ import {
   QueryClient
 } from "@tanstack/react-query"
 import { notFound } from "next/navigation"
+import { PresenceListener } from "@/shared/context/PresenceListener"
 
 export default async function AccountLayout({
   children
@@ -36,15 +37,15 @@ export default async function AccountLayout({
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
       <SocketProvider>
-        <UserPresenceProvider>
-          <ConfirmDialogProvider>
-            <main className="flex max-h-screen overflow-hidden">
-              <NotificationManager />
-              <Sidebar />
-              {children}
-            </main>
-          </ConfirmDialogProvider>
-        </UserPresenceProvider>
+        <HeartbeatPresence />
+        <PresenceListener />
+        <ConfirmDialogProvider>
+          <main className="flex max-h-screen overflow-hidden">
+            <NotificationManager />
+            <Sidebar />
+            {children}
+          </main>
+        </ConfirmDialogProvider>
       </SocketProvider>
     </HydrationBoundary>
   )

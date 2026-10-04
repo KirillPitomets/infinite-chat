@@ -817,6 +817,14 @@ export interface components {
              */
             lastReadAt: string;
         };
+        TypingDto: {
+            /**
+             * Format: uuid
+             * @description Unique room identifier where the user is typing (UUID v4)
+             * @example a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11
+             */
+            roomId: string;
+        };
     };
     responses: never;
     parameters: never;

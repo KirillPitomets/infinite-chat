@@ -17,6 +17,8 @@ export type DeleteMessageDto = components["schemas"]["DeleteMessageDto"]
 export type UpdateMessageDto = components["schemas"]["UpdateMessageDto"]
 export type RestoreMessageDto = components["schemas"]["RestoreMessageDto"]
 
+export type TypingDto = components["schemas"]["TypingDto"]
+
 export type UpdateRoomMemberLastReadAtDto =
   components["schemas"]["UpdateRoomMemberLastReadAtDto"]
 

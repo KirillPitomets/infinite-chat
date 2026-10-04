@@ -7,6 +7,8 @@ import { useTypingIndicator } from "../../hooks/useTypingIndicator"
 import { ChatUIMessage } from "../../message/model/message.types"
 import { EditMessageInput } from "./EditMessageInput"
 import { ReplyMessageInput } from "./ReplyMessageInput"
+import { usePresenceSocket } from "../../providers/socketProvider"
+import { useRef } from "react"
 
 type ChatInputControllerProps = {
   chatId: string
@@ -35,16 +37,27 @@ export const ChatInputController = ({
   onRemovePreviewFile,
   onSubmit
 }: ChatInputControllerProps) => {
+  const socket = usePresenceSocket()
+
   const { mutate } = useMutation({
     mutationFn: async (isTyping: boolean) => {
-      // == TODO ==
-      // await edenClient.presence.chats({ chatId }).typing.post({ isTyping })
+      if (!socket) return
+      socket.emit("presence.typing", { roomId: chatId })
     }
   })
 
-  const handleTypingIndicator = useTypingIndicator(isTyping => {
-    mutate(isTyping)
-  }, 1000)
+  // const handleTypingIndicator = useTypingIndicator(isTyping => {
+  //   mutate(isTyping)
+  // }, 1000)
+
+  const lastEmit = useRef(0)
+  const onInputChange = () => {
+    const now = Date.now()
+    if (now - lastEmit.current < 2_000) return
+    lastEmit.current = now
+    // presenceSocket?.emit("presence.typing", { roomId: chatId })
+    mutate(true)
+  }
 
   if (mode === "edit" && editingMessage) {
     return (
@@ -73,7 +86,7 @@ export const ChatInputController = ({
 
   return (
     <ChatInputUI
-      handleTypingIndicator={handleTypingIndicator}
+      handleTypingIndicator={onInputChange}
       previewFiles={previewFiles}
       removePreviewFile={onRemovePreviewFile}
       onSubmit={onSubmit}

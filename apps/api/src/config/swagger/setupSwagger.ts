@@ -6,6 +6,7 @@ import { DeleteMessageDto } from 'src/api/messages/dto/delete-message.dto';
 import { RestoreMessageDto } from 'src/api/messages/dto/restore-message.dto';
 import { CreateMessageAttachmentDto } from 'src/api/attachments/dto';
 import { UpdateRoomMemberLastReadAtDto } from 'src/api/room/dto';
+import { TypingDto } from 'src/api/presence/dto/typing.dto';
 
 export const setupSwagger = (app: INestApplication) => {
   const config = getSwaggerConfig();
@@ -18,6 +19,7 @@ export const setupSwagger = (app: INestApplication) => {
       DeleteMessageDto,
       RestoreMessageDto,
       UpdateRoomMemberLastReadAtDto,
+      TypingDto,
     ],
   });
 
