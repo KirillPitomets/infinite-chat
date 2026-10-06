@@ -1,23 +1,19 @@
 import { useGetLatestMessage } from "@/features/chat/message/api/query/useGetLatestMessage"
-import { messageKeys } from "@/features/chat/message/model/message.keys"
+import { useUnreadCountMessages } from "@/features/chat/message/api/query/useUnreadCountMessages"
+import { usePresenceSocket } from "@/features/chat/providers/socketProvider"
+import { useRealtimeTypingIndicator } from "@/features/chat/realtime/useRealtimeTypingIndicator"
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import { TypingUsersIndicator } from "@/shared/components/TypingUsersIndicator/TypingUsersIndicator"
 import { UserAvatar } from "@/shared/components/ui/UserAvatar/UserAvatar"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
-import { unwrap } from "@/shared/lib/api/unwrap"
-import { useApiClient } from "@/shared/lib/api/useApiClient"
+import { useIsOnline } from "@/shared/hooks/useIsOnline"
 import { ChatRoom, Message } from "@/shared/types/api.type"
 import { getDirectChatPartner } from "@/shared/utils/getDirectChatPartner"
-import { useQuery } from "@tanstack/react-query"
 import { format } from "date-fns"
 import Link from "next/link"
 import { useParams } from "next/navigation"
 import { MessageStatus } from "../../../Message/Status"
 import LatestMessage from "./LatestMessage"
-import { useIsOnline } from "@/shared/hooks/useIsOnline"
-import { useRealtimeTypingIndicator } from "@/features/chat/realtime/useRealtimeTypingIndicator"
-import { usePresenceSocket } from "@/features/chat/providers/socketProvider"
-import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
-import { TypingUsersIndicator } from "@/shared/components/TypingUsersIndicator/TypingUsersIndicator"
 
 export interface InboxLatestMessage extends Message {
   isRead: boolean
@@ -30,9 +26,6 @@ type ChatInboxItemProps = {
   memberships: ChatRoom["memberships"]
   name: string
   avatarUrl: string
-
-  // memberId: string
-  // unreadConut: number
 }
 
 export const ChatInboxItem = ({
@@ -41,8 +34,6 @@ export const ChatInboxItem = ({
   name,
   memberships,
   type
-
-  // unreadConut = 0
 }: ChatInboxItemProps) => {
   const currentUser = useCurrentUser()
   const presenceSocket = usePresenceSocket()
@@ -50,31 +41,12 @@ export const ChatInboxItem = ({
   const { chatId: openedChatId } = useParams()
   const directChatPartner = getDirectChatPartner(memberships, currentUser.id)
   const isOnline = useIsOnline(directChatPartner ? directChatPartner.id : "")
-  const me = memberships.find(member => member.user.id === currentUser.id)
-
   const { latestMessage } = useGetLatestMessage(inboxChatId)
-
-  const api = useApiClient()
-
-  const { data: unreadCount } = useQuery({
-    queryKey: messageKeys.unreadCountMessages(inboxChatId),
-    queryFn: async () => {
-      const res = await unwrap(
-        api.GET("/api/v1/message/unread-count/{roomId}", {
-          params: { path: { roomId: inboxChatId } }
-        })
-      )
-
-      return res.unreadCount
-    },
-    initialData: 0
-  })
-
+  const { unreadCount } = useUnreadCountMessages(inboxChatId)
   const { typingUserIds } = useRealtimeTypingIndicator(
     inboxChatId,
     presenceSocket
   )
-
   return (
     <Link
       href={ACCOUNT_PAGES.CHAT_ID(inboxChatId)}
