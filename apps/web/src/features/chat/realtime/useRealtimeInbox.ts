@@ -23,10 +23,6 @@ export const useRealtimeInbox = (
   useEffect(() => {
     if (!messageSocket || !chatRoomSocket) return
 
-    messageSocket.onAny((event, ...any) => {
-      console.log("[MESSAGE SOCKET]", event, any)
-    })
-
     const handleMessageCreated = (
       message: MessageEventMap["message.created"]
     ) => {

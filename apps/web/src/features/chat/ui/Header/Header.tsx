@@ -74,7 +74,7 @@ export function ChatHeader({
         </Link>
 
         {type === "DIRECT" && directChatPartner && (
-          <DirectInfo chatId={chatId} member={directChatPartner} />
+          <DirectInfo member={directChatPartner} />
         )}
 
         {type === "GROUP" && (

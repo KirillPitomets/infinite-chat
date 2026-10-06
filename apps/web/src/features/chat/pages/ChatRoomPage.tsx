@@ -37,6 +37,8 @@ import { useOnClickOutside } from "@/shared/hooks/useOnClickOutside"
 import { useQuery, useQueryClient } from "@tanstack/react-query"
 import { presenceKeys } from "@/shared/lib/query/presence.keys"
 import { useRealtimeTypingIndicator } from "../realtime/useRealtimeTypingIndicator"
+import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
+import { TypingUsersIndicator } from "@/shared/components/TypingUsersIndicator/TypingUsersIndicator"
 
 type ChatRoomPageProps = {
   chatId: string
@@ -149,10 +151,7 @@ export const ChatRoomPage = ({
 
   useRealtimeMessages(chatId, messageSocket)
   useRealtimeChatRoom(chatId, chatRoomSocket)
-  const { typingUserIds, removeTyping } = useRealtimeTypingIndicator(
-    chatId,
-    presenceSocket
-  )
+  const { typingUserIds } = useRealtimeTypingIndicator(chatId, presenceSocket)
 
   return (
     <div className="relative flex flex-col w-full h-full">
@@ -213,15 +212,10 @@ export const ChatRoomPage = ({
           className="relative z-2"
         >
           {typingUserIds.length > 0 && (
-            <p>
-              {chatRoomData.memberships
-                .filter(m =>
-                  typingUserIds.find(typingUserId => typingUserId === m.user.id)
-                )
-                .map(user => user.user.username)
-                .join(", ")}{" "}
-              is typing...
-            </p>
+            <TypingUsersIndicator
+              typingUserIds={typingUserIds}
+              memberships={chatRoomData.memberships}
+            />
           )}
 
           <ChatInputController

@@ -6,13 +6,10 @@ import { UserAvatar } from "@/shared/components/ui/UserAvatar/UserAvatar"
 import { useIsOnline } from "@/shared/hooks/useIsOnline"
 
 type DirectInfoProps = {
-  chatId: string
   member: User
 }
 
-export const DirectInfo = ({ chatId, member }: DirectInfoProps) => {
-  // const { isMemberTyping } = useRealtimeTyping(chatId)
-
+export const DirectInfo = ({ member }: DirectInfoProps) => {
   const isOnline = useIsOnline(member.id)
 
   return (
@@ -21,18 +18,9 @@ export const DirectInfo = ({ chatId, member }: DirectInfoProps) => {
       <div>
         <p className="font-semibold">{member.username}</p>
 
-        {
-          /*isMemberTyping */
-          false ? (
-            <TypingIndicator />
-          ) : (
-            <span
-              className={`${isOnline ? "text-green-600" : "text-zinc-400"}`}
-            >
-              {isOnline ? "online" : "offline"}
-            </span>
-          )
-        }
+        <span className={`${isOnline ? "text-green-600" : "text-zinc-400"}`}>
+          {isOnline ? "online" : "offline"}
+        </span>
       </div>
     </>
   )

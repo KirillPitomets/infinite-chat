@@ -13,6 +13,11 @@ import Link from "next/link"
 import { useParams } from "next/navigation"
 import { MessageStatus } from "../../../Message/Status"
 import LatestMessage from "./LatestMessage"
+import { useIsOnline } from "@/shared/hooks/useIsOnline"
+import { useRealtimeTypingIndicator } from "@/features/chat/realtime/useRealtimeTypingIndicator"
+import { usePresenceSocket } from "@/features/chat/providers/socketProvider"
+import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
+import { TypingUsersIndicator } from "@/shared/components/TypingUsersIndicator/TypingUsersIndicator"
 
 export interface InboxLatestMessage extends Message {
   isRead: boolean
@@ -37,15 +42,14 @@ export const ChatInboxItem = ({
   memberships,
   type
 
-  // memberId,
   // unreadConut = 0
 }: ChatInboxItemProps) => {
   const currentUser = useCurrentUser()
-  // const { isOnline } = usePresenceUserStatus(memberId)
-  // const { isMemberTyping, member } = useRealtimeTyping(chatId)
+  const presenceSocket = usePresenceSocket()
 
   const { chatId: openedChatId } = useParams()
   const directChatPartner = getDirectChatPartner(memberships, currentUser.id)
+  const isOnline = useIsOnline(directChatPartner ? directChatPartner.id : "")
   const me = memberships.find(member => member.user.id === currentUser.id)
 
   const { latestMessage } = useGetLatestMessage(inboxChatId)
@@ -66,6 +70,11 @@ export const ChatInboxItem = ({
     initialData: 0
   })
 
+  const { typingUserIds } = useRealtimeTypingIndicator(
+    inboxChatId,
+    presenceSocket
+  )
+
   return (
     <Link
       href={ACCOUNT_PAGES.CHAT_ID(inboxChatId)}
@@ -82,27 +91,27 @@ export const ChatInboxItem = ({
           }
         />
 
-        {type === "DIRECT" && true /*isOnline*/ && (
+        {type === "DIRECT" && isOnline && (
           <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full" />
         )}
       </div>
       <div className="flex justify-between w-full">
         <div>
           <p className="font-semibold  first-letter:uppercase">
-            {type === "DIRECT" &&
-              directChatPartner &&
-              directChatPartner.username}
+            {type === "DIRECT" && directChatPartner
+              ? directChatPartner.username
+              : "Cannot find this user :("}
             {type === "GROUP" && name}
           </p>
 
-          {/* 
-          {isMemberTyping && member.id === memberId ? (
-            <TypingIndicator />
+          {typingUserIds.length > 0 ? (
+            <TypingUsersIndicator
+              typingUserIds={typingUserIds}
+              memberships={memberships}
+            />
           ) : (
-            )} 
-          */}
-
-          <LatestMessage latestMessage={latestMessage} />
+            <LatestMessage latestMessage={latestMessage} />
+          )}
         </div>
 
         <div className="flex flex-col justify-between items-end">
