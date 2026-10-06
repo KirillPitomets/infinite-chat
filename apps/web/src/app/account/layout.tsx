@@ -12,6 +12,7 @@ import {
 } from "@tanstack/react-query"
 import { notFound } from "next/navigation"
 import { PresenceListener } from "@/shared/context/PresenceListener"
+import { userKeys } from "@/features/user/user.keys"
 
 export default async function AccountLayout({
   children
@@ -20,13 +21,11 @@ export default async function AccountLayout({
 }) {
   const queryClient = new QueryClient()
 
-  await queryClient.prefetchQuery({
-    queryKey: ["currentUser"],
-    queryFn: getCurrentUserServer
-  })
-
   try {
-    await getCurrentUserServer()
+    await queryClient.query({
+      queryKey: userKeys.currentUser(),
+      queryFn: getCurrentUserServer
+    })
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) {
       notFound()

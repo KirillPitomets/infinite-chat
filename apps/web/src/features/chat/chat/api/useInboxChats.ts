@@ -12,7 +12,6 @@ export function useInboxChats(initialData: ChatRoom[]) {
     queryFn: async () => {
       return await unwrap(api.GET("/api/v1/room"))
     },
-    initialData,
-    initialDataUpdatedAt: Date.now()
+    initialData
   })
 }
