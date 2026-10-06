@@ -34,7 +34,10 @@ export default function Sidebar() {
       <NavMenu />
 
       <div className="flex flex-col ">
-        <button className={getButtonStyleClass("primary")}>
+        <button
+          className={getButtonStyleClass("primary", false, true)}
+          style={{ pointerEvents: "none" }}
+        >
           <Settings />
         </button>
 

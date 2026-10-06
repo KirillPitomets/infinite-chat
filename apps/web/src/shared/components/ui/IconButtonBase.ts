@@ -8,11 +8,13 @@ const toneStyles = {
 
 export function getButtonStyleClass(
   tone: keyof typeof toneStyles,
-  isActive?: boolean
+  isActive?: boolean,
+  isDisabled?: boolean
 ) {
   return cn(
     "cursor-pointer p-3 rounded-sm transition-colors hover:bg-green-600 hover:text-white",
     toneStyles[tone],
-    isActive && "bg-green-600 text-white dark:text-white"
+    isActive && "bg-green-600 text-white dark:text-white",
+    isDisabled && "disabled:pointer-events-none opacity-20"
   )
 }

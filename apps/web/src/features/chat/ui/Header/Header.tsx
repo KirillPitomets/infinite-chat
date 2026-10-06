@@ -1,23 +1,17 @@
 "use client"
 
 import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
-import {
-  ArrowIcon,
-  CameraIcon,
-  InformationIcon,
-  TrashIcon
-} from "@/shared/components/ui/icons"
+import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
+import { ArrowIcon } from "@/shared/components/ui/icons"
 import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
 import { ChatRoom } from "@/shared/types/api.type"
 import { getDirectChatPartner } from "@/shared/utils/getDirectChatPartner"
+import { Camera, Info, Trash } from "lucide-react"
 import Link from "next/link"
+import { Ref } from "react"
+import { useConfirm } from "../../providers/ConfirmDialogProvider"
 import { DirectInfo } from "./DirectInfo"
 import { GroupInfo } from "./GroupInfo"
-import { Camera, Info, Trash } from "lucide-react"
-import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
-import { ConfirmDialog } from "@/shared/components/ConfirmDialog/ConfirmDialog"
-import { useConfirm } from "../../providers/ConfirmDialogProvider"
-import { Ref } from "react"
 
 type ChatHeaderProps = {
   chatId: string
@@ -86,7 +80,10 @@ export function ChatHeader({
         )}
       </div>
       <div className="flex space-x-1">
-        <button className={getButtonStyleClass("primary")}>
+        <button
+          className={getButtonStyleClass("primary", false, true)}
+          style={{ pointerEvents: "none" }}
+        >
           <Camera size={20} />
         </button>
 

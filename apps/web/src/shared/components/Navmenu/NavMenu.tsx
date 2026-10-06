@@ -12,12 +12,19 @@ export default function NavMenu() {
   return (
     <div className="space-y-2">
       {navItems.map(item => (
-        <Link className="relative block" key={item.href} href={item.href}>
+        <Link
+          className="relative block"
+          key={item.href}
+          href={item.href}
+          style={item.isDisabled ? { pointerEvents: "none" } : undefined}
+        >
           <button
             className={getButtonStyleClass(
               "primary",
-              matchRoute(pathname, item.href)
+              matchRoute(pathname, item.href),
+              item.isDisabled
             )}
+            disabled={item.isDisabled}
           >
             <item.icon />
           </button>
