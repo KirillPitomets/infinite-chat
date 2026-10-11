@@ -22,7 +22,7 @@ export default async function AccountLayout({
   const queryClient = new QueryClient()
 
   try {
-    await queryClient.query({
+    await queryClient.prefetchQuery({
       queryKey: userKeys.currentUser(),
       queryFn: getCurrentUserServer
     })
