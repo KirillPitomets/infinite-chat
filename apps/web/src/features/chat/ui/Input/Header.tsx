@@ -1,6 +1,6 @@
 import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
-import { CrossIcon, FileAccepted } from "@/shared/components/ui/icons"
-import { Cross } from "lucide-react"
+import { FileAccepted } from "@/shared/components/ui/icons"
+import { File, X } from "lucide-react"
 
 type InputHeaderProps = {
   title: string
@@ -28,13 +28,13 @@ export const InputHeader = ({
         )}
         {!content && countAttachments && (
           <p className="flex gap-1 truncate max-w-175 pl-2 font-semibold uppercase opacity-60">
-            <FileAccepted />
+            <File />
             {countAttachments} Files
           </p>
         )}
       </div>
       <button onClick={onCancel} className={getButtonStyleClass("primary")}>
-        <Cross />
+        <X />
       </button>
     </div>
   )

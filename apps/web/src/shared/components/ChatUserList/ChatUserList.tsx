@@ -1,11 +1,14 @@
 "use client"
+import { useCreateGroupChat } from "@/features/chat/chat/api/mutate/useCreateGroupChat"
+import { Button } from "@/shared/components/ui/Button"
+import { useInput } from "@/shared/hooks/useInput"
 import { unwrap } from "@/shared/lib/api/unwrap"
 import { useApiClient } from "@/shared/lib/api/useApiClient"
 import { User } from "@/shared/types/api.type"
-import { UserAvatar } from "../ui/UserAvatar/UserAvatar"
-import { useCreateOrFindDirectChat } from "@/features/chat/chat/api/mutate/useCreateOrFindDirectChat"
 import { useQuery } from "@tanstack/react-query"
-import { Button } from "@/shared/components/ui/Button"
+import { useState } from "react"
+import { Loader } from "../ui/Loader"
+import { ChatUserListItem } from "./ChatUserListItem"
 
 type ChatUserListProps = {
   initialData: User[]
@@ -13,39 +16,84 @@ type ChatUserListProps = {
 
 export const ChatUserList = ({ initialData }: ChatUserListProps) => {
   const api = useApiClient()
+  const { value: groupName, onChange } = useInput("")
+  const [membershipsIds, setMembershipsIds] = useState<string[]>([])
+  const [chatTypeForCreate, setChatTypeForCreate] = useState<
+    "GROUP" | "DIRECT"
+  >("DIRECT")
 
-  const { data: users, refetch } = useQuery({
+  const { data: users } = useQuery({
     queryKey: ["users"],
     queryFn: async () => await unwrap(api.GET("/api/v1/user")),
     initialData
   })
 
-  const { isPending, createChat } = useCreateOrFindDirectChat()
+  const { createGroupChat, isPending } = useCreateGroupChat()
 
-  return users.length ? (
-    <ul className="w-full max-w-150 max-h-140 overflow-scroll pr-2">
-      {users.map(user => (
-        <li
-          key={user.id}
-          className="flex items-center justify-between p-2 border-b border-zinc-400"
-        >
-          <div className="flex gap-2 items-center">
-            <UserAvatar url={user.imageUrl} alt={user.username} size={10} />
+  const handleCreateGroupChat = () => {
+    createGroupChat({ groupName, membershipsIds })
+  }
 
-            <span className="font-semibold">{user.firstName} </span>
-            <span className="font-semibold">{user.lastName} </span>
-          </div>
-          <span className="font-semibold">{user.username}</span>
+  const handleUserOfGroup = (userId: string) => {
+    setMembershipsIds(prev =>
+      prev.includes(userId)
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    )
+  }
 
-          <Button onClick={() => createChat(user.id)} isPending={isPending}>
-            Create chat
+  const toggleChatTypeForCreate = () => {
+    setChatTypeForCreate(prev => {
+      if (prev === "DIRECT") return "GROUP"
+      return "DIRECT"
+    })
+  }
+
+  if (!users.length) {
+    return <p className="text-xl">No users to start chatting with 🥲</p>
+  }
+
+  return (
+    <div className="w-full flex items-center flex-col gap-1">
+      <ul className="w-full max-w-150 max-h-140 overflow-scroll pr-2">
+        {users.map(user => (
+          <ChatUserListItem
+            key={user.id}
+            user={user}
+            chatTypeForCreate={chatTypeForCreate}
+            onToggleUserOfGroup={userId => handleUserOfGroup(userId)}
+            isSelected={membershipsIds.includes(user.id)}
+          />
+        ))}
+      </ul>
+
+      {chatTypeForCreate == "GROUP" ? (
+        <div className="flex items-center gap-1">
+          {isPending && <Loader />}
+          <input
+            className="border border-green-400 p-1"
+            placeholder="Enter group name"
+            value={groupName}
+            onChange={onChange}
+            disabled={isPending}
+          />
+          <Button onClick={handleCreateGroupChat} disabled={isPending}>
+            Create
           </Button>
-        </li>
-      ))}
-    </ul>
-  ) : (
-    <>
-      <p className="text-xl">No users to start chatting with 🥲</p>
-    </>
+          <Button
+            onClick={toggleChatTypeForCreate}
+            tone="danger"
+            disabled={isPending}
+          >
+            Cancel
+          </Button>
+        </div>
+      ) : (
+        <div className="flex items-center gap-1">
+          <p className="italic">Or you wanna make a group?</p>
+          <Button onClick={toggleChatTypeForCreate}> Make group </Button>
+        </div>
+      )}
+    </div>
   )
 }

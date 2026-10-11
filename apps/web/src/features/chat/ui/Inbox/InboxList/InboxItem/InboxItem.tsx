@@ -70,10 +70,11 @@ export const ChatInboxItem = ({
       <div className="flex justify-between w-full">
         <div>
           <p className="font-semibold  first-letter:uppercase">
-            {type === "DIRECT" && directChatPartner
-              ? directChatPartner.username
-              : "Cannot find this user :("}
-            {type === "GROUP" && name}
+            {type === "DIRECT"
+              ? directChatPartner
+                ? directChatPartner.username
+                : "Cannot find this user :("
+              : type === "GROUP" && name}
           </p>
 
           {typingUserIds.length > 0 ? (

@@ -14,7 +14,6 @@ export default async function AccountPage() {
     if (err instanceof ApiError && err.status === 404) {
       notFound()
     }
-
     throw err
   }
 

@@ -12,12 +12,14 @@ export const fillMissingAttachment = (
     const tempAttachments: UIAttachment[] = Array.from(
       { length: countMissingAttachments },
       () => ({
+        id: `temp-${Date.now()}-missingAttachment`,
         key: `temp-${Date.now()}-missingAttachment`,
         name: "",
         size: 0,
         type: "VIDEO",
         url: "",
-        isError: true
+        isError: true,
+        createdAt: Date.now().toLocaleString()
       })
     )
     return [...attachments, ...tempAttachments]

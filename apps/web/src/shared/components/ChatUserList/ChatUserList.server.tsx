@@ -3,6 +3,7 @@ import { ChatUserList } from "./ChatUserList"
 import { User } from "@/shared/types/api.type"
 import toast from "react-hot-toast"
 import { ApiError } from "@/shared/lib/api/unwrap"
+import { notFound } from "next/navigation"
 
 export async function ChatUserListServer() {
   let users: User[] = []
@@ -10,11 +11,10 @@ export async function ChatUserListServer() {
   try {
     users = await getUserListServer()
   } catch (err) {
-    if (err instanceof ApiError) {
-      toast.error(err.message)
-    } else {
-      toast.error((err as Error).message)
+    if (err instanceof ApiError && err.status === 404) {
+      notFound()
     }
+    throw err
   }
 
   return <ChatUserList initialData={users} />

@@ -1,9 +1,6 @@
-import Image from "next/image"
-import { useRealtimeTyping } from "../../realtime/useRealtimeTyping"
-import { TypingIndicator } from "@/shared/components/ui/TypingIndicator/TypingIndicator"
-import { User } from "@/shared/types/api.type"
 import { UserAvatar } from "@/shared/components/ui/UserAvatar/UserAvatar"
 import { useIsOnline } from "@/shared/hooks/useIsOnline"
+import { User } from "@/shared/types/api.type"
 
 type DirectInfoProps = {
   member: User

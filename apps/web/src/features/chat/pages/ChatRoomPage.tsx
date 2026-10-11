@@ -68,7 +68,7 @@ export const ChatRoomPage = ({
     handleReplyMessage
   } = useReplyMessage()
 
-  const { handleSendMessage } = useSendMessage(chatId, messageSocket)
+  const { mutate: handleSendMessage } = useSendMessage(chatId, messageSocket)
 
   const {
     handleUpdateMessage,

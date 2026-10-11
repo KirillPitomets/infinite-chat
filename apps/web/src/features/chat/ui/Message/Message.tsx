@@ -7,6 +7,7 @@ import { MessageContent } from "./Content"
 import { MessageSender } from "./Sender"
 import { MouseEvent, PropsWithChildren } from "react"
 import { MessageStatus } from "./Status"
+import { cn } from "@/shared/utils/cn"
 
 interface IMessageProps {
   msgData: ChatUIMessage
@@ -80,7 +81,11 @@ export const Message = ({
             </div>
           )}
 
-          <div className="flex flex-wrap items-end justify-between gap-3">
+          <div
+            className={cn("flex flex-wrap items-end justify-between gap-3", {
+              "opacity-50": msgData.status === "error"
+            })}
+          >
             <MessageContent
               attachments={msgData.attachments}
               onPreviewImage={onPreviewImage}

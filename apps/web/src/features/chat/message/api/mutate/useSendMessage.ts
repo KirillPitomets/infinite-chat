@@ -33,7 +33,7 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
   const sender = useCurrentUser()
   const [uploadAllFiles] = useAttachmentUpload(chatId)
 
-  const { mutate: handleSendMessage } = useMutation<
+  return useMutation<
     ChatUIMessage,
     Error,
     SendMessageVariables,
@@ -108,7 +108,7 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
               : msg
           ) ?? []
       )
-      // TODO
+
       queryClient.setQueryData<ChatUIMessage>(
         messageKeys.latestMessage(chatId),
         old =>
@@ -129,8 +129,4 @@ export function useSendMessage(chatId: string, socket: MessageSocket | null) {
       console.log(error)
     }
   })
-
-  return {
-    handleSendMessage
-  }
 }

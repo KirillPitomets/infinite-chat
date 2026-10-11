@@ -1,16 +1,13 @@
-import { ReloadIcon } from "@/shared/components/ui/icons"
-import Image from "next/image"
-import { useChangeMessageStatus } from "../../message/api/useChangeMessageStatus"
-import { Message, User } from "@/shared/types/api.type"
+import { User } from "@/shared/types/api.type"
+import { CircleX } from "lucide-react"
 import { MessageSender } from "./Sender"
-import { CircleX, DeleteIcon } from "lucide-react"
 
 type DeletedMessageProps = {
   id: string
   isMine: boolean
   sender: User
   onRestore: (messageId: string) => void
-  onContextMenu: (e: MouseEvent) => void
+  onContextMenu: (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => void
   prevSenderMessageId?: string
 }
 

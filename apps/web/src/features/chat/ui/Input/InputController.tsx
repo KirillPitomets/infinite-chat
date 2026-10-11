@@ -9,6 +9,7 @@ import { EditMessageInput } from "./EditMessageInput"
 import { ReplyMessageInput } from "./ReplyMessageInput"
 import { usePresenceSocket } from "../../providers/socketProvider"
 import { useRef } from "react"
+import { usePresenceTyping } from "../../realtime/usePresenceTyping"
 
 type ChatInputControllerProps = {
   chatId: string
@@ -39,25 +40,7 @@ export const ChatInputController = ({
 }: ChatInputControllerProps) => {
   const socket = usePresenceSocket()
 
-  const { mutate } = useMutation({
-    mutationFn: async (isTyping: boolean) => {
-      if (!socket) return
-      socket.emit("presence.typing", { roomId: chatId })
-    }
-  })
-
-  // const handleTypingIndicator = useTypingIndicator(isTyping => {
-  //   mutate(isTyping)
-  // }, 1000)
-
-  const lastEmit = useRef(0)
-  const onInputChange = () => {
-    const now = Date.now()
-    if (now - lastEmit.current < 2_000) return
-    lastEmit.current = now
-    // presenceSocket?.emit("presence.typing", { roomId: chatId })
-    mutate(true)
-  }
+  const { onInputChange } = usePresenceTyping(chatId, socket)
 
   if (mode === "edit" && editingMessage) {
     return (
