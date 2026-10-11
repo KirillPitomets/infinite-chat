@@ -31,6 +31,7 @@ async function bootstrap() {
 
   setupSwagger(app);
   app.use(cookieParser());
+  app.enableShutdownHooks();
 
   await app.listen(process.env.PORT ?? 3001);
 }
