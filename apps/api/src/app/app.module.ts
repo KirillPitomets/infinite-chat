@@ -1,0 +1,27 @@
+import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
+
+import { ApiModule } from 'src/api/api.module';
+import { InfraModule } from '../infra/infra.module';
+import { AppController } from './app.controller';
+import { AppService } from './app.service';
+import { ClerkAuthGuard } from 'src/api/auth/guards';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ListenerModule } from 'src/listeners/listener.module';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      expandVariables: true,
+    }),
+    ApiModule,
+    InfraModule,
+    ListenerModule,
+    EventEmitterModule.forRoot(),
+  ],
+  controllers: [AppController],
+  providers: [AppService, { provide: APP_GUARD, useClass: ClerkAuthGuard }],
+})
+export class AppModule {}

@@ -1,0 +1,119 @@
+import { useGetLatestMessage } from "@/features/chat/message/api/query/useGetLatestMessage"
+import { useUnreadCountMessages } from "@/features/chat/message/api/query/useUnreadCountMessages"
+import { usePresenceSocket } from "@/features/chat/providers/socketProvider"
+import { useRealtimeTypingIndicator } from "@/features/chat/realtime/useRealtimeTypingIndicator"
+import { useCurrentUser } from "@/features/user/hooks/useCurrentUser"
+import { TypingUsersIndicator } from "@/shared/components/TypingUsersIndicator/TypingUsersIndicator"
+import { UserAvatar } from "@/shared/components/ui/UserAvatar/UserAvatar"
+import { ACCOUNT_PAGES } from "@/shared/config/accountPages.config"
+import { useIsOnline } from "@/shared/hooks/useIsOnline"
+import { ChatRoom, Message } from "@/shared/types/api.type"
+import { getDirectChatPartner } from "@/shared/utils/getDirectChatPartner"
+import { format } from "date-fns"
+import Link from "next/link"
+import { useParams } from "next/navigation"
+import { MessageStatus } from "../../../Message/Status"
+import LatestMessage from "./LatestMessage"
+
+export interface InboxLatestMessage extends Message {
+  isRead: boolean
+}
+
+type ChatInboxItemProps = {
+  inboxChatId: string
+
+  type: ChatRoom["type"]
+  memberships: ChatRoom["memberships"]
+  name: string
+  avatarUrl: string
+}
+
+export const ChatInboxItem = ({
+  inboxChatId,
+  avatarUrl,
+  name,
+  memberships,
+  type
+}: ChatInboxItemProps) => {
+  const currentUser = useCurrentUser()
+  const presenceSocket = usePresenceSocket()
+
+  const { chatId: openedChatId } = useParams()
+  const directChatPartner = getDirectChatPartner(memberships, currentUser.id)
+  const isOnline = useIsOnline(directChatPartner ? directChatPartner.id : "")
+  const { latestMessage } = useGetLatestMessage(inboxChatId)
+  const { unreadCount } = useUnreadCountMessages(inboxChatId)
+  const { typingUserIds } = useRealtimeTypingIndicator(
+    inboxChatId,
+    presenceSocket
+  )
+  return (
+    <Link
+      href={ACCOUNT_PAGES.CHAT_ID(inboxChatId)}
+      className={`flex items-center gap-2 px-5 py-1 transition-colors dark:hover:bg-zinc-800 hover:bg-zinc-300 ${openedChatId === inboxChatId && " dark:bg-zinc-800 bg-zinc-300 "}`}
+    >
+      <div className="relative flex items-center justify-center rounded-full">
+        <UserAvatar
+          size={7}
+          alt={name}
+          url={
+            type === "DIRECT" && directChatPartner
+              ? directChatPartner.imageUrl
+              : avatarUrl
+          }
+        />
+
+        {type === "DIRECT" && isOnline && (
+          <div className="absolute bottom-0 right-0 w-2 h-2 bg-green-500 rounded-full" />
+        )}
+      </div>
+      <div className="flex justify-between w-full">
+        <div>
+          <p className="font-semibold  first-letter:uppercase">
+            {type === "DIRECT"
+              ? directChatPartner
+                ? directChatPartner.username
+                : "Cannot find this user :("
+              : type === "GROUP" && name}
+          </p>
+
+          {typingUserIds.length > 0 ? (
+            <TypingUsersIndicator
+              typingUserIds={typingUserIds}
+              memberships={memberships}
+            />
+          ) : (
+            <LatestMessage latestMessage={latestMessage} />
+          )}
+        </div>
+
+        <div className="flex flex-col justify-between items-end">
+          {latestMessage && (
+            <>
+              <p className="opacity-60">
+                {format(latestMessage.createdAt, "HH:mm")}
+              </p>
+              {currentUser.id === latestMessage.sender.id && (
+                <MessageStatus
+                  status={
+                    !!memberships.find(
+                      m => m.lastReadAt >= latestMessage.createdAt
+                    )
+                      ? "readed"
+                      : "sent"
+                  }
+                />
+              )}
+            </>
+          )}
+
+          {unreadCount > 0 && (
+            <div className="flex items-center justify-center px-1 min-w-5 h-5 text-sm bg-green-500 rounded-full text-white ">
+              {unreadCount}
+            </div>
+          )}
+        </div>
+      </div>
+    </Link>
+  )
+}

@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --breakpoint-mid: 850px;
+}
+
+@custom-variant mid-max (&:where(@media (max-width: 850px)));
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #151515;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mono);
+}
+
+input {
+  outline: none;
+}
+
+/* Делаем скроллбар тонким и округлым */
+::-webkit-scrollbar {
+  width: 6px; /* Ширина вертикального скролла */
+}
+
+::-webkit-scrollbar-track {
+  background: transparent; /* Фон дорожки (лучше оставить прозрачным) */
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--foreground); /* Цвет ползунка (zinc-700) */
+  border-radius: 10px; /* Скругление */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--foreground); /* Цвет ползунка (zinc-700) */
+}
+
+@keyframes lightPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.4;
+  }
+
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes shake {
+  0%,
+  90%,
+  100% {
+    transform: translateX(0);
+  }
+
+  92% {
+    transform: translateX(-2px);
+  }
+
+  94% {
+    transform: translateX(2px);
+  }
+
+  96% {
+    transform: translateX(-2px);
+  }
+
+  98% {
+    transform: translateX(2px);
+  }
+}
+
+@layer utilities {
+  .animate-light-pulse {
+    animation: lightPulse 600ms ease-in-out 4;
+  }
+
+  .animate-shake {
+    animation: shake 4s ease-in-out infinite;
+  }
+}

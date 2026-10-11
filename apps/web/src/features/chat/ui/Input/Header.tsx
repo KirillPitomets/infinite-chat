@@ -1,0 +1,41 @@
+import { getButtonStyleClass } from "@/shared/components/ui/IconButtonBase"
+import { FileAccepted } from "@/shared/components/ui/icons"
+import { File, X } from "lucide-react"
+
+type InputHeaderProps = {
+  title: string
+  content?: string | null | undefined
+  countAttachments?: number | null | undefined
+  onCancel: () => void
+}
+
+export const InputHeader = ({
+  title,
+  content,
+  countAttachments = 2,
+  onCancel
+}: InputHeaderProps) => {
+  return (
+    <div className="flex justify-between items-end w-full p-4 border border-zinc-300">
+      <div className="w-full space-y-2">
+        <p className="font-semibold">{title}: </p>
+        {content && (
+          <p
+            className={`w-11/12 dark:bg-zinc-800 bg-zinc-300 truncate max-w-175 px-2 py-1 ml-1 `}
+          >
+            {content}
+          </p>
+        )}
+        {!content && countAttachments && (
+          <p className="flex gap-1 truncate max-w-175 pl-2 font-semibold uppercase opacity-60">
+            <File />
+            {countAttachments} Files
+          </p>
+        )}
+      </div>
+      <button onClick={onCancel} className={getButtonStyleClass("primary")}>
+        <X />
+      </button>
+    </div>
+  )
+}

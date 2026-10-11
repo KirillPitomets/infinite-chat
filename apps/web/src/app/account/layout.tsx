@@ -1,0 +1,51 @@
+import { ConfirmDialogProvider } from "@/features/chat/providers/ConfirmDialogProvider"
+import { SocketProvider } from "@/features/chat/providers/socketProvider"
+import { getCurrentUserServer } from "@/features/user/api/getCurrentUser.server"
+import Sidebar from "@/shared/components/Sidebar/Sidebar"
+import { NotificationManager } from "@/shared/context/NotificationManager"
+import { HeartbeatPresence } from "@/shared/context/HeartbeatPresence"
+import { ApiError } from "@/shared/lib/api/unwrap"
+import {
+  dehydrate,
+  HydrationBoundary,
+  QueryClient
+} from "@tanstack/react-query"
+import { notFound } from "next/navigation"
+import { PresenceListener } from "@/shared/context/PresenceListener"
+import { userKeys } from "@/features/user/user.keys"
+
+export default async function AccountLayout({
+  children
+}: {
+  children: React.ReactNode
+}) {
+  const queryClient = new QueryClient()
+
+  try {
+    await queryClient.query({
+      queryKey: userKeys.currentUser(),
+      queryFn: getCurrentUserServer
+    })
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) {
+      notFound()
+    }
+    throw err
+  }
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <SocketProvider>
+        <HeartbeatPresence />
+        <PresenceListener />
+        <ConfirmDialogProvider>
+          <main className="flex max-h-screen overflow-hidden">
+            <NotificationManager />
+            <Sidebar />
+            {children}
+          </main>
+        </ConfirmDialogProvider>
+      </SocketProvider>
+    </HydrationBoundary>
+  )
+}
