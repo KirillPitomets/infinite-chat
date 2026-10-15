@@ -12,7 +12,7 @@ import { PresenceModule } from './presence/presence.module';
 
 @Module({
   imports: [
-    DevModule,
+    // DevModule,
     UserModule,
     ClerkWebhookModule,
     RoomModule,
@@ -23,6 +23,6 @@ import { PresenceModule } from './presence/presence.module';
     RoomAuthModule,
     PresenceModule,
   ],
-  exports: [DevModule],
+  // exports: [DevModule],
 })
 export class ApiModule {}
