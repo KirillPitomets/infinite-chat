@@ -1,98 +1,162 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Infinite Chat — API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS backend for Infinite Chat: REST + Socket.io, Prisma, PostgreSQL, Clerk auth, Cloudinary uploads.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+Project overview and architecture: [root README](../../README.md).
 
-## Description
+- **Production API:** https://infinite-chat-gf7b.onrender.com
+- **Swagger UI:** https://infinite-chat-gf7b.onrender.com/api/docs
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Tech stack
 
-## Project setup
+NestJS 11 · Socket.io · Prisma 7 (`@prisma/adapter-pg`) · PostgreSQL 16 · Clerk · Cloudinary · Swagger · class-validator
+
+## Getting started
+
+### Requirements
+
+- Node.js 20+
+- Docker (for PostgreSQL)
+- A Clerk application
+- A Cloudinary account
+- A public tunnel for local webhooks (ngrok, Cloudflare Tunnel or similar)
+
+### 1. Environment
 
 ```bash
-$ npm install
+cd apps/api
+cp .env.example .env
 ```
 
-## Compile and run the project
+Fill in `.env`, see [Environment variables](#environment-variables).
+
+### 2. Database
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+docker compose up -d
 ```
 
-## Run tests
+PostgreSQL starts on `localhost:5433` with the user and password from `.env`.
+
+### 3. Install and migrate
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm install
+npx prisma generate
+npx prisma migrate deploy
 ```
 
-## Deployment
+`prisma generate` is required: the Prisma client is generated into `src/generated/prisma` and is not committed.
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### 4. Run
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm run start:dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+The API runs on http://localhost:3001. Swagger is at http://localhost:3001/api/docs.
 
-## Resources
+### 5. Clerk webhook
 
-Check out a few resources that may come in handy when working with NestJS:
+The API creates users in its own database from Clerk webhooks. Without this step you can sign in, but the API will not know the user.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+1. Start a tunnel to port `3001`.
+2. In the Clerk dashboard add an endpoint: `https://<your-tunnel>/api/v1/webhooks/clerk`.
+3. Subscribe to `user.created` and `user.updated`.
+4. Put the signing secret into `CLERK_WEBHOOK_SIGNING_SECRET`.
 
-## Support
+## Environment variables
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+| Variable | Description |
+|---|---|
+| `NODE_ENV` | `development` or `production` |
+| `PORT` | Optional. API port, default `3001` |
+| `FRONTEND_URL` | Optional. Allowed CORS origin, default `http://localhost:3000` |
+| `DATABASE_URL` | PostgreSQL connection string. Variable expansion is enabled, so it can reference the `POSTGRES_*` values |
+| `POSTGRES_USER`, `POSTGRES_PASSWORD` | Used by `docker-compose.yml` |
+| `POSTGRES_HOST`, `POSTGRES_PORT`, `POSTGRES_DATABASE` | Used to build `DATABASE_URL` |
+| `CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY` | Clerk API keys |
+| `CLERK_WEBHOOK_SIGNING_SECRET` | Clerk webhook signing secret |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Cloudinary credentials |
+| `FIREBASE_PROJECT_ID`, `FIREBASE_PRIVATE_KEY`, `FIREBASE_CLIENT_EMAIL` | Firebase Admin credentials. Required at startup, no feature uses them yet |
 
-## Stay in touch
+Example `DATABASE_URL` for the local Docker database:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+```env
+POSTGRES_USER="postgres"
+POSTGRES_PASSWORD="postgres"
+POSTGRES_HOST="localhost"
+POSTGRES_PORT="5433"
+POSTGRES_DATABASE="postgres"
+DATABASE_URL="postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DATABASE}"
+```
 
-## License
+## Scripts
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run start:dev    # watch mode
+npm run build        # compile to dist/
+npm run start:prod   # run compiled build
+```
+
+## Project structure
+
+```
+prisma/                  schema and migrations
+docs/                    WebSocket and upload guides
+src/
+├── api/                 feature modules: room, messages, user, attachments,
+│                        presence, notification, auth, webhooks
+├── common/              decorators, DTOs, events, filters, gateways, pipes
+├── infra/               Prisma, Clerk, Cloudinary providers
+├── listeners/           domain event listeners
+├── config/              Swagger setup
+└── main.ts
+```
+
+## REST API
+
+All routes are prefixed with `/api/v1`. The full list with request and response schemas is in Swagger (`/api/docs`). The OpenAPI schema is available as JSON at `/api/docs/json`.
+
+| Area | Routes |
+|---|---|
+| Health | `GET /health` |
+| User | `GET /user/me`, `GET /user/:id`, `GET /user` |
+| Room | `POST /room/direct`, `GET /room`, `GET /room/:roomId`, `DELETE /room/:roomId` |
+| Group room | `POST /room/group`, `PATCH /room/group/:roomId/name`, `POST /room/group/:roomId/add/:memberId`, `DELETE /room/group/:roomId/kick/:memberId`, `DELETE /room/group/leave/:roomId`, avatar presign and update |
+| Messages | `GET /message/history/:roomId`, `GET /message/unread-count/:roomId`, `POST /message/attachments/presign/:roomId` |
+| Webhooks | `POST /webhooks/clerk` |
+
+Group management routes are restricted by role (`OWNER` / `ADMIN`).
+
+## WebSocket API
+
+Socket.io, authenticated with the Clerk JWT in the handshake (`auth.token`).
+
+| Namespace | Purpose |
+|---|---|
+| `messages` | send, edit, delete and restore messages |
+| `rooms` | room created / deleted, read status updates |
+| `presence` | online / offline status, typing indicator, heartbeat |
+| `notifications` | notifications for the current user |
+
+Event reference and guides:
+
+- [WebSocket events: messages](docs/ws/messages.md)
+- [WebSocket API guide](docs/guides/websocket-api.md)
+- [Sending messages with attachments](docs/guides/sending-messages-with-attachments.md)
+- [Avatar upload](docs/guides/avatar-upload-integration.md)
+
+## Data model
+
+Models: `User`, `Room` (`DIRECT` / `GROUP`), `RoomMember` (role, last read time), `Message` (`USER` / `SYSTEM`, replies, soft delete), `MessageAttachment` (`IMAGE`, `VIDEO`, `AUDIO`, `FILE`), `Notification`.
+
+Full schema: [prisma/schema.prisma](prisma/schema.prisma)
+
+## File uploads
+
+Files are not uploaded through the API. The flow is:
+
+1. The client asks the API for signed upload slots.
+2. The client uploads each file directly to Cloudinary.
+3. The client sends the message with the file metadata over WebSocket.
